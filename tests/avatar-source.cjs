@@ -8,4 +8,5 @@ assert.equal(api({}),'/characters/saved.png');
 st.savedRecord.avatar='/stale.png';assert.equal(api({}),'/characters/saved.png');
 st.savedRecord=null;assert.equal(api({}),'/characters/other.png');
 assert.equal(api({postypeAvatarMode:'custom',postypeAvatarImg:'/custom.png'}),'/custom.png');
+context.characters.push({name:'收藏角色',avatar:'duplicate.png'});st.savedRecord={roleName:'收藏角色',avatar:''};assert.equal(api({}),'');st.savedRecord.avatar='/characters/duplicate.png';assert.equal(api({}),'/characters/duplicate.png');
 console.log('Passed saved-character card lookup without chat, stale URL recovery, live role switching and custom priority');

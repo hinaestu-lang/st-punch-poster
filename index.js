@@ -2404,12 +2404,15 @@ function postypeAvatarSrc(p) {
   };
   if(side==='char' && st.savedRecord){
     const role=snippetRoleOf(st.savedRecord);
-    const actor=(c.characters||[]).find?.(item=>item?.name===role.name);
-    // Resolve the saved identity against installed cards even with no chat open.
+    const candidates=(c.characters||[]).filter(item=>item?.name===role.name);
+    const saved=resolve(st.savedRecord.avatar||'');
+    const exact=candidates.find(item=>[item.avatar,item.avatar_url].some(raw=>raw&&resolve(raw)===saved));
+    const actor=exact||(candidates.length===1?candidates[0]:null);
+    // Ambiguous names never select an arbitrary character card.
     const card=actor?.avatar||actor?.avatar_url;
     if(card)return resolve(card);
-    const saved=resolve(st.savedRecord.avatar||'');
     if(saved)return saved;
+    if(candidates.length>1)return '';
     // Only use a live message avatar when its speaker is the saved character.
     const messages=document.querySelectorAll('#chat .mes');
     for(const mes of messages){
