@@ -677,3 +677,9 @@ body:has(#pk-snip-overlay) #pk-snip-tap-handle,body:has(#pk-overlay.show) #pk-sn
 #pk-overlay .pk-pair-rail button span{color:var(--pk-pair-ink);font:600 23px/1.1 Georgia,"Songti SC",serif}
 #pk-overlay .pk-pair-custom{justify-content:flex-start;gap:18px}
 
+
+/* 收藏列表只展示摘要，详情与导出仍使用完整原文。 */
+#pk-snip-overlay .pk-snip-filters{flex-wrap:wrap}
+#pk-snip-overlay .pk-snip-filters input{flex:1 0 100%}
+#pk-snip-overlay .pk-snip-filters select{flex:1;max-width:calc(50% - 4px);min-width:0}
+#pk-snip-overlay .pk-snip-card-quote{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;white-space:normal}

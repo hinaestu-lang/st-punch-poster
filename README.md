@@ -32,7 +32,8 @@ SillyTavern 第三方扩展：从聊天中划线、点句、收藏文字，制�
 ```sh
 node tests/paragraphs.cjs
 node tests/dom-paragraphs.cjs
-node tests/avatars.cjs
+node tests/tags.cjs
+node tests/upload.cjs
 node tests/state.cjs
 ```
 

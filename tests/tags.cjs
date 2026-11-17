@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const source=fs.readFileSync(require('node:path').join(__dirname,'../index.js'),'utf8');
+const a=source.indexOf('function snippetTags('),b=source.indexOf('let snippetTapFromFloating',a);
+const items=[{id:'1',text:'正文甲',tags:['甜','甜'],roleKey:'a'},{id:'2',text:'正文乙',tags:['虐'],roleKey:'a'},{id:'3',text:'正文丙',tags:['甜'],roleKey:'b'}];
+const ctx={snippetStore:()=>items,snippetRoleOf:x=>({key:x.roleKey,name:x.roleKey}),snippetFilter:'all',snippetSearch:'',snippetTagFilter:'甜'};
+const api=vm.runInNewContext(source.slice(a,b)+';({snippetTags,snippetFilteredItems})',ctx);
+assert.equal(api.snippetTags('甜，虐,甜').join(','),'甜,虐');
+assert.equal(api.snippetFilteredItems().map(x=>x.id).join(','),'1,3');
+ctx.snippetFilter='a';assert.equal(api.snippetFilteredItems().map(x=>x.id).join(','),'1');
+ctx.snippetTagFilter='';ctx.snippetSearch='虐';assert.equal(api.snippetFilteredItems().map(x=>x.id).join(','),'2');
+assert(!source.includes('function cssExportAvatar('));
+assert(source.includes('pictures.push({image,visual,clipBox,radius,fit,posX,posY})'));
+console.log('Passed tag normalization, intersected filters, tag search and unified image export path checks');
