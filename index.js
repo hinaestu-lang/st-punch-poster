@@ -1701,6 +1701,14 @@ function cssFillTemplate(root, spec){
   // dragging the cover image sliders must not recreate the avatar IMG: iOS
   // otherwise repeatedly reloads it and temporarily shows the first initial.
   const avatarSrc=postypeAvatarSrc(p),avatarInitial=Array.from(author)[0]||'?';
+  // Only templates with one visual slot share the cover-upload interaction.
+  const visualSlots=root.querySelectorAll('[data-pk="avatar"],[data-pk="image"],[data-pk="threads-reply-avatar"],[data-pk="im-avatar"],[data-pk="im-image"]');
+  const singleVisual=visualSlots.length===1;
+  if(singleVisual && visualSlots[0].dataset.pk==='avatar'){
+    visualSlots[0].dataset.pkUpload='postypeAvatarImg';
+    visualSlots[0].title='点击上传 / 替换图片';
+    visualSlots[0].style.cursor='pointer';
+  }
   root.querySelectorAll('[data-pk="avatar"]').forEach(el=>{
     const current=Array.from(el.children).find(child=>child.tagName==='IMG' && child.classList.contains('pk-avatar-photo'));
     if(!avatarSrc){
@@ -1731,7 +1739,7 @@ function cssFillTemplate(root, spec){
   root.querySelectorAll('[data-pk="image"]').forEach(el=>{
      // The picture is cropped inside its own CSS slot. Never resize or move
      // the whole poster: the 3 sliders adjust this image only.
-     const src=String(p.skinImg||'');
+     const src=String(p.skinImg||(singleVisual?avatarSrc:'')||'');
      el.dataset.pkUpload='skinImg';
      el.title='点击上传 / 替换图片';
      el.style.cursor='pointer';
