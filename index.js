@@ -863,7 +863,10 @@ function spacedText(g, text, x, y, sp, align) {
 
 function names() {
   const c = ctx();
-  return { user: st.savedRecord ? (st.savedRecord.userName || '') : (c.name1 || ''), char: st.savedRecord?snippetRoleOf(st.savedRecord).name:((!st.isUser && st.speaker) || c.name2 || '') };
+  const saved=st.savedRecord;
+  const currentChat=String(c.chatId??c.chatName??'');
+  const sameSource=!!saved?.sourceChat&&saved.sourceChat===currentChat;
+  return { user: saved ? (saved.userName || (sameSource?c.name1:'') || '') : (c.name1 || ''), char: st.savedRecord?snippetRoleOf(st.savedRecord).name:((!st.isUser && st.speaker) || c.name2 || '') };
 }
 
 // 本地繁简字形对应表（ICU Traditional-Simplified 单字映射），不联网。
@@ -933,7 +936,7 @@ function sharedCopy(p) {
   const n = names(), d = new Date().toLocaleDateString('zh-CN');
   const expand = t => String(t ?? '').replace(/{{char}}/gi, n.char).replace(/{{user}}/gi, n.user).replace(/{{date}}/gi, d).trim();
   return {
-    title: expand(p.pubTitle) || n.user || '未命名作品',
+    title: expand(p.pubTitle) || n.user || '',
     subtitle: expand(p.pubKicker),
     author: expand(p.pubAuthor) || n.char || '作者',
     note: expand(p.pubNote),
@@ -1943,6 +1946,7 @@ function cssFillTemplate(root, spec){
     if(contact) {
       contact.textContent=String(m.note||author||'联系人').trim();
       contact.style.setProperty('color','#f8f8f9','important');
+      contact.style.setProperty('-webkit-text-fill-color','#f8f8f9','important');
       contact.style.setProperty('font-family','-apple-system,BlinkMacSystemFont,\"PingFang SC\",sans-serif','important');
     }
     const rawDate=String(date||'').trim();
@@ -1963,6 +1967,7 @@ function cssFillTemplate(root, spec){
     const makeBubble=(value,side,tail=false)=>{
       const row=document.createElement('div');row.className='im-row im-'+side+(tail?' im-tail':'');
       const bubble=document.createElement('span');bubble.className='im-bubble';bubble.textContent=value;
+      for(const key of ['color','-webkit-text-fill-color'])bubble.style.setProperty(key,'#ffffff','important');
       row.appendChild(bubble);return row;
     };
     const appendRows=(target,values,side)=>values.forEach((t,i)=>target.appendChild(makeBubble(t,side,i===values.length-1)));
