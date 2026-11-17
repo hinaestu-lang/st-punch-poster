@@ -863,7 +863,7 @@ function spacedText(g, text, x, y, sp, align) {
 
 function names() {
   const c = ctx();
-  return { user: st.savedRecord?.userName || c.name1 || '', char: st.savedRecord?snippetRoleOf(st.savedRecord).name:((!st.isUser && st.speaker) || c.name2 || '') };
+  return { user: st.savedRecord ? (st.savedRecord.userName || '') : (c.name1 || ''), char: st.savedRecord?snippetRoleOf(st.savedRecord).name:((!st.isUser && st.speaker) || c.name2 || '') };
 }
 
 // 本地繁简字形对应表（ICU Traditional-Simplified 单字映射），不联网。
@@ -5058,7 +5058,7 @@ function snippetOpenMergeEditor(plan){
       if(remaining.length+1>SNIPPET_MAX_ITEMS){
         snippetToast('收藏已满 5000 句，请先清理后再合并','error');return;
       }
-      const survivor={...first,text:value,savedAt:Math.min(...plan.records.map(x=>Number(x.savedAt)||Date.now()))};
+      const survivor={...first,tags:snippetTags(plan.records.flatMap(item=>snippetTags(item.tags))),text:value,savedAt:Math.min(...plan.records.map(x=>Number(x.savedAt)||Date.now()))};
       for(const key of ['ranges','body','start','end','newlyAdded'])delete survivor[key];
       delete survivor.canvasSoftBreaks; // Drop obsolete hints from older favorites.
       const sameMessage=first.messageId!=null && plan.records.every(x=>x.messageId===first.messageId&&x.sourceChat===first.sourceChat);
