@@ -1,10 +1,11 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const s=fs.readFileSync(require('node:path').join(__dirname,'../index.js'),'utf8');
-const records=[{id:'a',text:'完整第一段\n\n第二段'},{id:'b',text:'另一条'}];
-let opened,closed=0,plans=0;
-const chosen=new Set();
-const api=vm.runInNewContext(s.slice(s.indexOf('function snippetBeautifyChosen('),s.indexOf('function snippetRenderLibrary('))+';snippetBeautifyChosen',{snippetStore:()=>records,snippetChosen:chosen,snippetMergePlan:r=>{plans++;return {records:r,proposal:r.map(x=>x.text).join('\n\n')};},snippetDraftMessageId:()=>1,normalizeParagraphs:x=>x,closeSnippetBox:()=>closed++,openById:(id,text)=>opened={id,text},snippetToast(){}});
-api();assert.equal(closed,0);
-chosen.add('a');api();assert.equal(opened.text,records[0].text);assert.equal(plans,0);
-chosen.add('b');api();assert.equal(plans,1);assert.equal(records.length,2);assert(opened.text.endsWith('另一条'));
-console.log('Passed empty, single and multiple selection beautification with full text and preserved favorites');
+const rec={id:'saved',text:'一段\n\n二段',roleName:'收藏角色',avatar:'/characters/saved.png'};
+let opened;const chosen=new Set(['saved']);
+const api=vm.runInNewContext(s.slice(s.indexOf('function snippetBeautifyChosen('),s.indexOf('function snippetRenderLibrary('))+';snippetBeautifyChosen',{
+snippetStore:()=>[rec],snippetChosen:chosen,normalizeParagraphs:x=>x,closeSnippetBox(){},openById:(...args)=>opened=args
+});
+api();assert.equal(opened[0],null);assert.equal(opened[1],rec.text);assert.equal(opened[2],rec);
+const begin=s.slice(s.indexOf('function openById('),s.indexOf('// 句子拾取匣'));
+assert(begin.includes("st.savedRecord=savedRecord"));assert(begin.includes("else if (!loadMessage"));
+console.log('Passed saved favorite entry without chat lookup, full text and identity forwarding');

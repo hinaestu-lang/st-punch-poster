@@ -863,7 +863,7 @@ function spacedText(g, text, x, y, sp, align) {
 
 function names() {
   const c = ctx();
-  return { user: c.name1 || '', char: (!st.isUser && st.speaker) || c.name2 || '' };
+  return { user: st.savedRecord?.userName || c.name1 || '', char: st.savedRecord?snippetRoleOf(st.savedRecord).name:((!st.isUser && st.speaker) || c.name2 || '') };
 }
 
 // 本地繁简字形对应表（ICU Traditional-Simplified 单字映射），不联网。
@@ -2387,6 +2387,7 @@ function postypeAvatarSrc(p) {
     const dir=side==='user'?'User Avatars':'characters';
     return '/'+dir+'/'+clean.split('/').map(encodeURIComponent).join('/');
   };
+  if(side==='char' && st.savedRecord)return resolve(st.savedRecord.avatar||'');
   if(side==='char') {
     const chars=c.characters||[];
     const idx=c.characterId??c.characterIndex;
@@ -4095,12 +4096,16 @@ function wholeMessageText(id, mes) {
   const raw=String(message.mes||'');
   return normalizeParagraphs(raw.replace(/<[^>]*>/g,''));
 }
-function openById(id, selText) {
+function openById(id, selText, savedRecord=null) {
   const picked = normalizeParagraphs(selText || wholeMessageText(id));
   if (!picked) { toast('info', '当前消息没有可用文字'); return; }
-  beginMessageDraft(id);
+  beginMessageDraft(savedRecord?'saved:'+savedRecord.id:id);
+  st.savedRecord=savedRecord;
   if (!st.ov) { st.ov = buildOverlay(); fillTpl(); fillSigTpl(); fillCssList(); }
-  if (!loadMessage(id, picked)) { toast('info', '没有可用的消息'); return; }
+  if(savedRecord){
+    st.isUser=false;st.speaker=snippetRoleOf(savedRecord).name;st.base=picked;
+    st.custom=null;st.customIsRendered=false;st.raw='\u0000';buildText();
+  }else if (!loadMessage(id, picked)) { toast('info', '没有可用的消息'); return; }
   keyboardDismiss();
   if (!st.chars.length) { toast('info', '选中的内容没有文字'); return; }
   st.seed = 0; st.holes = []; st.off = {}; st.free = []; st.fid = 0;
@@ -4305,7 +4310,7 @@ function addPickedSentence(text,sourceId,roleHint,span=null,quiet=false){
   const id=snippetNewId();
   const rec={id,text:value,messageId:Number.isInteger(sourceId)?sourceId:null,
     sourceChat:String(ctx().chatId??ctx().chatName??''),roleKey:role.roleKey,roleName:role.roleName,
-    avatar:role.avatar,savedAt:Date.now(),
+    avatar:role.avatar,userName:ctx().name1||'',savedAt:Date.now(),
     ...(span&&span.sourceOffsetMode==='message'&&Number.isInteger(span.start)&&Number.isInteger(span.end)
       ?{sourceStart:span.start,sourceEnd:span.end,sourceOffsetMode:'message'}:{})};
   // Save paragraph indices as a fallback when the original chat DOM later
@@ -5096,10 +5101,8 @@ function snippetBeautifyChosen(){
   if(!records.length)return;
   const plan=records.length>1?snippetMergePlan(records,false):{records,proposal:records[0].text};
   if(!plan)return;
-  const id=snippetDraftMessageId(plan.records[0]);
-  if(id===null){snippetToast('当前聊天找不到可用的来源消息，请切换聊天或复制文字','error');return;}
   const text=normalizeParagraphs(plan.proposal||'');
-  closeSnippetBox();openById(id,text);
+  closeSnippetBox();openById(null,text,plan.records[0]);
 }
 
 function snippetRenderLibrary(area){
@@ -5222,10 +5225,8 @@ function snippetRenderDetail(area){
   area.appendChild(snippetField('标签／分类（逗号分隔，可清空）',tagInput));
   const actions=snippetMake('div','pk-snip-detail-actions');
   actions.appendChild(snippetButton('repo 美化',()=>{
-    const id=snippetDraftMessageId(item);
-    if(id===null){snippetToast('当前聊天找不到可用的来源消息，请切换聊天或复制文字','error');return;}
     const text=normalizeParagraphs(item.text||'');
-    closeSnippetBox();openById(id,text);
+    closeSnippetBox();openById(null,text,item);
   },'pk-snip-primary'));
   actions.appendChild(snippetButton('复制文字',async()=>{
     try{
