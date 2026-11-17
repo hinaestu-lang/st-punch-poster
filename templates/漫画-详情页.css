@@ -1,0 +1,21 @@
+/* @pk-template
+{"id":"comic_detail","name":"漫画-详情页","width":390,"html":"<article class=\"mc-page\"><header class=\"mc-nav\"><span class=\"mc-back\">‹</span><span class=\"mc-favorite\">✓ 已加入最愛</span><span class=\"mc-info-icon\">i</span><span class=\"mc-more\">⋮</span></header><div class=\"mc-cover\" data-pk=\"avatar\" data-pk-upload=\"postypeAvatarImg\" title=\"点击上传封面\"></div><section class=\"mc-content\"><div class=\"mc-category\" data-pk=\"subtitle\"></div><h1 data-pk=\"title\"></h1><p class=\"mc-author\" data-pk=\"author\"></p><main class=\"mc-body\" data-pk=\"body\"></main><div class=\"mc-note\" data-pk=\"note\"></div></section></article>"}
+@end-pk-template */
+.pk-css-page{padding:0!important;background:var(--pk-shared-paper,#fff)!important;color:var(--pk-shared-ink,#171717)!important;font-family:var(--pk-shared-font,sans-serif)!important}
+.mc-page{width:100%;box-sizing:border-box}
+.mc-page *{box-sizing:border-box}
+.mc-nav{display:flex;align-items:center;gap:19px;padding:7px 17px 10px;height:42px;font-family:sans-serif}
+.mc-back{font-size:35px;font-weight:300;line-height:1;margin-right:auto}
+.mc-favorite{background:rgba(128,128,128,.1);border-radius:20px;padding:5px 9px;font-size:12px;opacity:.7}
+.mc-info-icon{border:1px solid #ddd;border-radius:50%;width:24px;height:24px;line-height:23px;text-align:center;font-size:18px}
+.mc-more{font-size:25px;line-height:1}
+.mc-cover{width:208px;height:270px;max-width:70%;margin:0 auto 20px;overflow:hidden;border-radius:4px;background:rgba(128,128,128,.12);display:flex;align-items:center;justify-content:center;font-size:50px;cursor:pointer}
+.mc-cover>img.pk-avatar-photo{width:100%!important;height:100%!important;object-fit:cover!important;border-radius:inherit}
+.mc-content{padding:0 16px 16px}
+.mc-category{display:table;max-width:100%;font-size:12px;line-height:1.6;font-weight:700;box-shadow:inset 0 -.4em rgba(87,211,164,.22);overflow-wrap:anywhere}
+.mc-category:empty,.mc-note:empty{display:none}
+.mc-content h1{font-size:21px;line-height:1.3;margin:4px 0;font-weight:800;overflow-wrap:anywhere}
+.mc-author{font-size:14px;line-height:1.5;margin:0 0 10px;opacity:.8}
+.mc-body{display:flex;flex-direction:column;gap:.6em;font-size:14px;line-height:1.7;overflow-wrap:anywhere}
+.mc-body>.pk-css-blank{display:none!important}
+.mc-note{display:table;max-width:100%;margin-top:20px;padding:4px 7px;border-radius:3px;background:rgba(128,128,128,.08);font-size:12px;line-height:1.6;opacity:.75;white-space:pre-wrap;overflow-wrap:anywhere}
