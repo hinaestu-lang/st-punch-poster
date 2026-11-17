@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const s=fs.readFileSync(require('node:path').join(__dirname,'../index.js'),'utf8');
+const records=[{id:'a',text:'完整第一段\n\n第二段'},{id:'b',text:'另一条'}];
+let opened,closed=0,plans=0;
+const chosen=new Set();
+const api=vm.runInNewContext(s.slice(s.indexOf('function snippetBeautifyChosen('),s.indexOf('function snippetRenderLibrary('))+';snippetBeautifyChosen',{snippetStore:()=>records,snippetChosen:chosen,snippetMergePlan:r=>{plans++;return {records:r,proposal:r.map(x=>x.text).join('\n\n')};},snippetDraftMessageId:()=>1,normalizeParagraphs:x=>x,closeSnippetBox:()=>closed++,openById:(id,text)=>opened={id,text},snippetToast(){}});
+api();assert.equal(closed,0);
+chosen.add('a');api();assert.equal(opened.text,records[0].text);assert.equal(plans,0);
+chosen.add('b');api();assert.equal(plans,1);assert.equal(records.length,2);assert(opened.text.endsWith('另一条'));
+console.log('Passed empty, single and multiple selection beautification with full text and preserved favorites');

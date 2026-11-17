@@ -5062,6 +5062,17 @@ function snippetMergeFromLibrary(){
   if(plan)snippetOpenMergeEditor(plan);
 }
 
+function snippetBeautifyChosen(){
+  const records=snippetStore().filter(item=>snippetChosen.has(item.id));
+  if(!records.length)return;
+  const plan=records.length>1?snippetMergePlan(records,false):{records,proposal:records[0].text};
+  if(!plan)return;
+  const id=snippetDraftMessageId(plan.records[0]);
+  if(id===null){snippetToast('当前聊天找不到可用的来源消息，请切换聊天或复制文字','error');return;}
+  const text=normalizeParagraphs(plan.proposal||'');
+  closeSnippetBox();openById(id,text);
+}
+
 function snippetRenderLibrary(area){
   // Search is at the top of the page, before any collecting controls.
   const filters=snippetMake('div','pk-snip-filters');
@@ -5105,7 +5116,8 @@ function snippetRenderLibrary(area){
     store().pickedSentences=snippetStore().filter(x=>!snippetChosen.has(x.id));
     snippetChosen.clear();persist();snippetRenderList(list);
   },'pk-snip-danger');
-  actions.append(merge,del);footer.appendChild(actions);area.appendChild(footer);
+  const beautify=snippetButton('美化',snippetBeautifyChosen,'pk-snip-primary pk-snip-beautify');
+  actions.append(beautify,merge,del);footer.appendChild(actions);area.appendChild(footer);
   snippetRenderList(list);
 }
 function snippetRenderList(list){
@@ -5166,6 +5178,7 @@ function snippetUpdateSelectionFooter(){
   if(count)count.textContent=snippetChosen.size?'已选 '+snippetChosen.size+' 句':'共收藏 '+snippetStore().length+' 句';
   const del=snippetBox.querySelector('.pk-snip-danger');if(del)del.hidden=!snippetChosen.size;
   const merge=snippetBox.querySelector('.pk-snip-merge');if(merge)merge.hidden=snippetChosen.size<2;
+  const beautify=snippetBox.querySelector('.pk-snip-beautify');if(beautify)beautify.hidden=!snippetChosen.size;
 }
 function snippetRenderDetail(area){
   const item=snippetStore().find(x=>x.id===snippetDetailId);
