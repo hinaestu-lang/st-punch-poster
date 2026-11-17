@@ -316,6 +316,8 @@ function store() {
       s.cur.pageSkin='punch'; s.cur.layoutMode='single'; s.cur.singleScraps=false;
     }
     if (legacy==='css:blank' && !s.cssTpl.blank) s.cur.pageSkin='punch';
+    if(s.cur.pageSkin==='css:xhs_comments')s.cur.pageSkin='css:xhs_note';
+    delete s.cssTpl.xhs_comments;
     delete s.cur.longPoster; delete s.cur.ratio;
   }
   return s;
@@ -343,6 +345,9 @@ function beginMessageDraft(messageId) {
   for(const key of FRESH_POST_FIELDS){
     const value=BASE[key];
     p[key]=value&&typeof value==='object'?clone(value):(value??'');
+  }
+  for(const key of ['postypeAvatarMode','threadsReplyAvatarMode','imessageAvatarMode']){
+    if(p[key]==='custom')p[key]=BASE[key];
   }
   st.lastOpenedChat=chat;
   st.lastOpenedMessageId=messageId;
@@ -1174,7 +1179,7 @@ for (const source of BUNDLED_TEMPLATE_CSS) {
 
 
 function cssActive() { return String(cur().pageSkin||'').startsWith('css:'); }
-function cssEntries() { const entries=store().cssTpl;delete entries.xhs_comments;return entries; }
+function cssEntries() { return store().cssTpl; }
 // Display names and exported CSS filenames use stable, annotation-free template names.
 // Keep template IDs unchanged so importing a new CSS still replaces the old one.
 function cssTemplateName(id, name) {
@@ -5103,7 +5108,7 @@ function snippetRenderLibrary(area){
   const input=document.createElement('input');input.type='search';
   input.placeholder='搜索句子、角色';input.setAttribute('aria-label','搜索句子或角色');
   input.value=snippetSearch;
-  input.oninput=()=>{snippetSearch=input.value;snippetVisibleCounts.clear();snippetRenderList(area.querySelector('.pk-snip-list'));};
+  input.oninput=()=>{snippetSearch=input.value;snippetChosen.clear();snippetVisibleCounts.clear();snippetRenderList(area.querySelector('.pk-snip-list'));};
   const choose=document.createElement('select');choose.setAttribute('aria-label','按角色筛选');
   const known=new Map();
   for(const item of snippetStore().filter(item=>item&&typeof item.text==='string')){const role=snippetRoleOf(item);known.set(role.key,role.name);}
@@ -5112,7 +5117,7 @@ function snippetRenderLibrary(area){
   }
   if(![...choose.options].some(o=>o.value===snippetFilter))snippetFilter='all';
   choose.value=snippetFilter;
-  choose.onchange=()=>{snippetFilter=choose.value;snippetVisibleCounts.clear();snippetRenderList(area.querySelector('.pk-snip-list'));};
+  choose.onchange=()=>{snippetFilter=choose.value;snippetChosen.clear();snippetVisibleCounts.clear();snippetRenderList(area.querySelector('.pk-snip-list'));};
   const tags=document.createElement('select');tags.setAttribute('aria-label','按标签筛选');
   for(const tag of ['',...new Set(snippetStore().flatMap(item=>snippetTags(item.tags)))]){
     const option=document.createElement('option');option.value=tag;option.textContent=tag||'全部标签';tags.appendChild(option);

@@ -30,13 +30,9 @@ SillyTavern 第三方扩展：从聊天中划线、点句、收藏文字，制�
 使用 Node.js 运行以下检查，无需安装额外依赖：
 
 ```sh
-node tests/paragraphs.cjs
-node tests/dom-paragraphs.cjs
-node tests/tags.cjs
-node tests/upload.cjs
-node tests/state.cjs
+for test in tests/*.cjs; do node "$test" || exit; done
 ```
 
-覆盖段落提取、跨段选区、头像导出序列化、规则开关持久化、配色撤销及输入法状态。
+覆盖段落提取、跨段选区、标签筛选、直接美化、双语排版、占位框裁切、头像来源切换、新消息重置、规则开关持久化、配色撤销及输入法状态。
 这些是逻辑回归检查；iOS 键盘、滚动和最终 PNG 的显示仍需在实际设备验证。
 
