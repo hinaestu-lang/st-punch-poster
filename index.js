@@ -1641,7 +1641,7 @@ function cssFillTemplate(root, spec){
   root.style.setProperty('--pk-shared-paper',p.paperColor||'#fbfaf6');
   cssApplyPaperColor(root,p);
   cssBindSharedTypography(root,p,sharedFont,templateId);
-  const values={title,subtitle,author,note:m.note,user:n.user||'用户',channel:String(p.postypeChannel||'').trim()||author,
+  const values={title,subtitle,author,note:m.note,user:title,channel:String(p.postypeChannel||'').trim()||author,
     date};
   Object.entries(values).forEach(([key,val])=>root.querySelectorAll(`[data-pk="${key}"]`).forEach(el=>{
     // During inline editing keep the existing essay heading cells intact.
@@ -1932,7 +1932,7 @@ function cssFillTemplate(root, spec){
     const incoming=root.querySelector('[data-pk="body"]');
     const contact=root.querySelector('[data-pk="note"]');
     if(contact) {
-      contact.textContent=String(m.note||n.char||'联系人').trim();
+      contact.textContent=String(m.note||author||'联系人').trim();
       contact.style.setProperty('color','#f8f8f9','important');
       contact.style.setProperty('font-family','-apple-system,BlinkMacSystemFont,\"PingFang SC\",sans-serif','important');
     }

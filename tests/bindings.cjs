@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const s=fs.readFileSync(require('node:path').join(__dirname,'../index.js'),'utf8');
+const start=s.indexOf('function sharedCopy('),end=s.indexOf('function sigLines(',start);
+const copy=vm.runInNewContext(s.slice(start,end)+';sharedCopy',{names:()=>({user:'酒馆用户名',char:'酒馆角色名'}),Date});
+const m=copy({pubTitle:'编辑栏姓名',pubAuthor:'编辑栏作者'});
+const valuesCode=s.match(/const values=({title,subtitle,author,note:m.note,[\s\S]*?date});/)[1];
+const values=vm.runInNewContext('('+valuesCode+')',{m,...m,p:{},date:'今天'});
+assert.equal(values.user,'编辑栏姓名');assert.equal(values.author,'编辑栏作者');
+assert.notEqual(values.user,'酒馆用户名');
+console.log('Passed shared legacy user-slot binding to editable title and author fields');
