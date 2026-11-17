@@ -1,0 +1,65 @@
+/* @pk-template
+{
+  "id": "imessage_dark",
+  "name": "iMessage",
+  "width": 390,
+  "html": "<div class=\"im-app\">\n  <header class=\"im-nav\">\n    <span class=\"im-back\" aria-hidden=\"true\"></span>\n    <div class=\"im-contact\">\n      <div class=\"im-avatar\" data-pk=\"im-avatar\"><i class=\"im-head\"></i><i class=\"im-shoulders\"></i></div>\n      <div class=\"im-contact-label\"><span class=\"im-contact-name\" data-pk=\"note\"></span><span class=\"im-contact-fallback\" data-pk=\"author\"></span><span class=\"im-chevron\"></span></div>\n    </div>\n    <span class=\"im-video\" aria-hidden=\"true\"></span>\n  </header>\n  <section class=\"im-chat\">\n    <div class=\"im-date\"><span class=\"im-service\">iMessage</span><span class=\"im-datetime\" data-pk=\"date\"></span></div>\n    <div class=\"im-messages\">\n      <div class=\"im-sent-group\" data-pk=\"title\"></div>\n      <div class=\"im-body\" data-pk=\"body\"></div>\n      <div class=\"im-photo-row\" data-pk-section=\"im-photo\" hidden><div class=\"im-photo-frame\" data-pk=\"im-image\"><span class=\"im-photo-hint\">点击上传图片</span></div></div>\n    </div>\n  </section>\n</div>"
+}
+@end-pk-template */
+
+/* iMessage 黑色深色模式，支持多段气泡和专属图片消息。 */
+.pk-css-page{min-height:0!important;background:#000!important;color:#fff!important;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC","SF Pro Text",sans-serif;line-height:1.35}
+.pk-css-page .im-app{width:100%;background:#000;color:#fff;min-height:500px;overflow:hidden}
+.pk-css-page .im-nav{height:93px;background:#111;position:relative;border-bottom:1px solid #262626;display:flex;justify-content:space-between;align-items:flex-start;padding:19px 15px 0}
+.pk-css-page .im-back{width:30px;height:30px;margin-top:3px;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20d%3D%22M18.5%203.5%207.5%2015l11%2011%22%20stroke%3D%22%230a84ff%22%20stroke-width%3D%223.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;flex:none}
+.pk-css-page .im-video{width:31px;height:30px;margin-top:4px;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2038%2032%22%3E%3Crect%20x%3D%221.7%22%20y%3D%225%22%20width%3D%2224%22%20height%3D%2222%22%20rx%3D%224.4%22%20stroke%3D%22%230a84ff%22%20stroke-width%3D%221.85%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22m26%2012%208-5v18l-8-5%22%20stroke%3D%22%230a84ff%22%20stroke-width%3D%221.85%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;flex:none}
+.pk-css-page .im-contact{position:absolute;left:65px;right:65px;top:13px;display:flex;align-items:center;flex-direction:column;gap:4px;min-width:0}
+.pk-css-page .im-avatar{position:relative;width:50px;height:50px;border-radius:50%;background:linear-gradient(170deg,#a8aeb9,#737986);overflow:hidden;display:block;flex:none}
+.pk-css-page .im-head{position:absolute;background:#fff;left:35%;top:21%;width:30%;height:34%;border-radius:50%}
+.pk-css-page .im-shoulders{position:absolute;left:15%;bottom:-14%;width:70%;height:46%;background:#fff;border-radius:50% 50% 15% 15%}
+.pk-css-page .im-avatar.im-has-img .im-head,.pk-css-page .im-avatar.im-has-img .im-shoulders{display:none}
+.pk-css-page .im-avatar img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;border-radius:50%!important;max-width:none!important}
+.pk-css-page .im-contact-label{display:flex;align-items:center;justify-content:center;gap:5px;max-width:100%}
+.pk-css-page .im-contact-name{color:#f8f8f9!important;font-size:13.2px;font-weight:420;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px;line-height:1.3}
+.pk-css-page .im-chevron{height:8px;width:8px;border-right:1.5px solid #55565b;border-top:1.5px solid #55565b;transform:rotate(45deg);margin-right:4px}
+.pk-css-page .im-chat{background:#000;padding:18px 10px 35px;min-height:400px}
+.pk-css-page .im-date{display:flex;align-items:center;flex-direction:column;gap:0;text-align:center;color:#89898e;line-height:1.45;margin-bottom:16px;font-size:13px;font-weight:580}
+.pk-css-page .im-service,.pk-css-page .im-datetime{color:#89898e!important;font-size:13.4px;letter-spacing:0;line-height:1.4}
+.pk-css-page .im-messages{display:flex;flex-direction:column;min-width:0;gap:0}
+.pk-css-page .im-sent-group,.pk-css-page .im-body{width:100%;display:flex;flex-direction:column;align-items:stretch;min-width:0}
+.pk-css-page .im-row{display:flex;width:100%;min-width:0;margin:1px 0}
+.pk-css-page .im-row.im-out{justify-content:flex-end}
+.pk-css-page .im-row.im-in{justify-content:flex-start}
+.pk-css-page .im-bubble{position:relative;display:block;max-width:82%;min-width:37px;padding:8px 12px 9px;border-radius:17px;font-size:18px;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC",sans-serif!important;font-weight:410;line-height:1.34;letter-spacing:-.25px;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;text-indent:0!important;box-sizing:border-box;text-align:left}
+.pk-css-page .im-out .im-bubble{background:#0a84ff;color:#fff!important}
+.pk-css-page .im-in .im-bubble{background:#2c2c30;color:#fff!important;font-size:1.085em}
+.pk-css-page .im-out.im-tail .im-bubble::after,.pk-css-page .im-in.im-tail .im-bubble::after{content:"";position:absolute;bottom:-1px;width:14px;height:17px;background:inherit}
+.pk-css-page .im-out.im-tail .im-bubble::after{right:-6px;clip-path:path("M0 0H7V9Q7 14 14 15Q5 17 0 11Z")}
+.pk-css-page .im-in.im-tail .im-bubble::after{left:-6px;clip-path:path("M14 0H7V9Q7 14 0 15Q9 17 14 11Z")}
+.pk-css-page .im-sent-group{margin:0 0 11px}
+.pk-css-page .im-body{line-height:1.35!important;letter-spacing:0!important}
+.pk-css-page .im-body .pk-css-paragraph{margin:0;white-space:pre-wrap}
+.pk-css-page .im-reply-group{display:flex;flex-direction:column;align-items:stretch;margin:10px 0 0}
+.pk-css-page .im-read{width:100%;display:block;color:#89898e!important;text-align:right;font-size:12.2px;font-weight:550;line-height:1.4;margin-top:7px;margin-bottom:9px;padding-right:3px}
+.pk-css-page .im-photo-row{width:100%;display:flex;margin:13px 0 5px;justify-content:flex-end}
+.pk-css-page .im-photo-row.im-left{justify-content:flex-start}
+.pk-css-page .im-photo-frame{position:relative;display:flex;align-items:center;justify-content:center;width:230px;max-width:75%;min-height:145px;aspect-ratio:4/3;border-radius:17px;overflow:hidden;background:#242427;border:1px solid #34343a;color:#8e8e93;cursor:pointer}
+.pk-css-page .im-photo-hint{font-size:13px;color:#8e8e93;text-align:center}
+.pk-css-page .im-photo-frame.im-has-img{border:none}
+.pk-css-page .im-photo-frame img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;position:absolute;inset:0;max-width:none!important}
+.pk-css-page .im-photo-frame.im-has-img .im-photo-hint{display:none}
+@media(max-width:350px){.pk-css-page .im-nav{padding-left:10px;padding-right:10px}.pk-css-page .im-bubble{font-size:17px;max-width:86%}}
+
+/* Protect against ordinary-text fallback when a legacy JS renderer is still active. */
+.pk-css-page .im-contact-fallback{font-size:13.2px;line-height:1.3;color:#f8f8f9!important;font-weight:420;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;max-width:170px}
+.pk-css-page .im-contact-name:not(:empty)~.im-contact-fallback{display:none}
+.pk-css-page .im-photo-row[hidden]{display:none!important}
+.pk-css-page .im-sent-group:not(:has(.im-row)):not(:empty){display:block;width:fit-content;max-width:83%;align-self:flex-end;margin:0 0 11px auto;border-radius:18px;padding:8px 12px;background:#0a84ff;color:#fff!important;font-size:18px!important;line-height:1.34!important;text-align:left!important;white-space:pre-wrap;overflow-wrap:anywhere}
+.pk-css-page .im-body:not(:has(.im-row))>p.pk-css-paragraph{display:block;width:fit-content;max-width:83%;align-self:flex-start;background:#2c2c30!important;color:#fff!important;border-radius:18px;padding:8px 12px!important;margin:1px 0!important;line-height:1.35!important;font-size:18px!important;letter-spacing:0!important;text-align:left!important;text-indent:0!important;white-space:pre-wrap;overflow-wrap:anywhere}
+.pk-css-page .im-body:not(:has(.im-row)){color:#fff!important}
+.pk-css-page .im-reply-group .im-row{width:100%}
+.pk-css-page .im-out .im-bubble,.pk-css-page .im-in .im-bubble{font-size:18px!important;line-height:1.34!important;color:#fff!important;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC","SF Pro Text",sans-serif!important;letter-spacing:0!important}
+.pk-css-page .im-body[contenteditable=true]>.pk-css-paragraph{display:block!important}
+
+/* iOS compatibility: old shared inline ink styles must not tint chat text. */
+.pk-css-page .im-contact-name,.pk-css-page .im-contact-fallback,.pk-css-page .im-sent-group:not(:has(.im-row)),.pk-css-page .im-body .pk-css-paragraph{-webkit-text-fill-color:#fff!important}

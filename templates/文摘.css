@@ -1,0 +1,66 @@
+/* @pk-template
+{
+  "id": "plain_text",
+  "name": "文摘",
+  "width": 390,
+  "html": "<article class=\"pt-page\">\n  <div class=\"pt-body\" data-pk=\"body\"></div>\n  <footer class=\"pt-sign\"><span data-pk=\"author\"></span><span class=\"pt-sep\">||</span><span data-pk=\"user\"></span></footer>\n</article>"
+}
+@end-pk-template */
+
+/* 文摘：纯文字正文，居中署名，不附加其他界面元素。 */
+.pk-css-page{
+  box-sizing:border-box!important;
+  min-height:0!important;
+  padding:0!important;
+  margin:0!important;
+  background:var(--pk-shared-paper,#fff)!important;
+  color:var(--pk-shared-ink,inherit)!important;
+  font-family:var(--pk-shared-font,serif)!important;
+}
+.pk-css-page .pt-page,
+.pk-css-page .pt-page *{box-sizing:border-box}
+.pk-css-page .pt-page{
+  width:100%;min-width:0;min-height:0;
+  padding:33px 28px 25px;
+  margin:0;
+  background:transparent;
+  color:inherit;
+}
+.pk-css-page .pt-body{
+  display:block;width:100%;min-width:0;
+  padding:0;margin:0;
+  color:inherit;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.pk-css-page .pt-body > p.pk-css-paragraph{
+  margin:0 0 .4em!important;
+  padding:0!important;
+  font-family:inherit!important;
+  font-size:inherit!important;
+  color:inherit!important;
+  line-height:inherit!important;
+  white-space:pre-wrap!important;
+  overflow-wrap:anywhere;
+}
+.pk-css-page .pt-body > p.pk-css-paragraph:last-child{margin-bottom:0!important}
+.pk-css-page .pt-body > p.pk-css-blank{margin:0!important}
+.pk-css-page .pt-sign{
+  display:block;
+  margin:26px 0 0;
+  padding:0;
+  border:0;
+  background:none;
+  box-shadow:none;
+  text-align:center;
+  line-height:1.6;
+  color:inherit;
+  font-size:0.95em;
+  font-weight:400;
+  overflow-wrap:anywhere;
+}
+.pk-css-page .pt-sign .pt-sep{padding:0;color:inherit}
+.pk-css-page .pt-sign:empty{display:none}
+@media(max-width:350px){
+  .pk-css-page .pt-page{padding:27px 21px 22px}
+}

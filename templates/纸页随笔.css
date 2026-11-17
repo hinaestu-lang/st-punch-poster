@@ -1,0 +1,72 @@
+/* @pk-template
+{
+  "id": "paper_prose_left",
+  "name": "纸页随笔",
+  "width": 390,
+  "html": "<article class=\"pn-sheet\">\n  <header class=\"pn-heading\">\n    <div class=\"pn-title\" data-pk=\"user\"></div>\n    <div class=\"pn-names\"><span data-pk=\"author\"></span></div>\n  </header>\n  <main class=\"pn-body\" data-pk=\"body\"></main>\n</article>"
+}
+@end-pk-template */
+
+/* 纸页随笔：只复刻参考图左页的纯文字排版，不带照片、边框或装饰。 */
+.pk-css-page{
+  box-sizing:border-box!important;
+  margin:0!important;padding:0!important;min-height:0!important;
+  background:var(--pk-shared-paper,#faf9f4)!important;
+  color:var(--pk-shared-ink,inherit)!important;
+  font-family:var(--pk-shared-font,"Songti SC",serif)!important;
+}
+.pk-css-page .pn-sheet,.pk-css-page .pn-sheet *{box-sizing:border-box}
+.pk-css-page .pn-sheet{
+  width:100%;min-width:0;min-height:0;
+  padding:42px 31px 27px;
+  color:inherit;background:transparent;
+}
+/* 右上角读默认 User 名，下面一行只读默认 Char 名。 */
+.pk-css-page .pn-heading{
+  display:flex;flex-direction:column;align-items:flex-end;
+  max-width:100%;min-width:0;
+  margin:0 0 66px;
+}
+.pk-css-page .pn-title{
+  max-width:13em;min-width:0;
+  margin:0;padding:0;
+  text-align:right!important;
+  white-space:pre-wrap;overflow-wrap:anywhere;
+  font-size:1.16em;line-height:1.28;
+  letter-spacing:.035em;font-weight:400;
+  color:inherit;
+}
+.pk-css-page .pn-title:empty{display:none}
+.pk-css-page .pn-names{
+  display:flex;justify-content:flex-end;flex-wrap:wrap;gap:0;
+  margin:24px 0 0;
+  max-width:100%;font-size:.9em;line-height:1.5;
+  color:inherit;white-space:normal;
+}
+/* 段落沿左页排版：两字起行、文字自然换行、全文使用共享字体和字色。 */
+.pk-css-page .pn-body{
+  display:flex;flex-direction:column;gap:.46em;
+  width:100%;min-width:0;margin:0;padding:0;
+  text-align:justify;white-space:normal;
+  color:inherit;overflow-wrap:anywhere;
+}
+.pk-css-page .pn-body > p.pk-css-paragraph{
+  display:block!important;flex:none;
+  margin:0!important;padding:0!important;
+  width:100%;max-width:100%;
+  font:inherit!important;line-height:inherit!important;
+  letter-spacing:inherit!important;color:inherit!important;
+  text-indent:2em!important;
+  text-align:justify!important;
+  text-align-last:auto!important;
+  white-space:pre-wrap!important;
+  overflow-wrap:anywhere;
+}
+.pk-css-page .pn-body > p.pk-css-blank{
+  height:0!important;min-height:0!important;
+  line-height:0!important;text-indent:0!important;
+}
+@media(max-width:350px){
+  .pk-css-page .pn-sheet{padding:34px 23px 24px}
+  .pk-css-page .pn-heading{margin-bottom:50px}
+}

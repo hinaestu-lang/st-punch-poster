@@ -1,0 +1,40 @@
+/* @pk-template
+{
+  "id": "ios_quote_menu",
+  "name": "文字卡片",
+  "width": 390,
+  "html": "<div class=\"iosq-canvas\">\n  <div class=\"iosq-ghost\" aria-hidden=\"true\"><i></i><i></i><i></i></div>\n  <div class=\"iosq-stack\">\n    <article class=\"iosq-card\">\n      <div class=\"iosq-quote\" data-pk=\"body\"></div>\n      <footer class=\"iosq-footer\"><span class=\"iosq-date\" data-pk=\"date\"></span></footer>\n    </article>\n    <details class=\"iosq-actions\" open>\n      <summary class=\"iosq-more\" aria-label=\"显示或收起操作菜单\"><span></span><span></span><span></span></summary>\n      <div class=\"iosq-menu\">\n        <div class=\"iosq-item\"><span>Edit</span><i class=\"iosq-icon iosq-pencil\" aria-hidden=\"true\"></i></div>\n        <div class=\"iosq-item\"><span>Bookmark</span><i class=\"iosq-icon iosq-bookmark\" aria-hidden=\"true\"></i></div>\n        <div class=\"iosq-gap\" aria-hidden=\"true\"></div>\n        <div class=\"iosq-item iosq-disabled\"><span>Delete</span><i class=\"iosq-icon iosq-delete\" aria-hidden=\"true\"></i></div>\n      </div>\n    </details>\n  </div>\n</div>"
+}
+@end-pk-template */
+
+/* iOS 文字卡片：日间长按操作菜单。正文及日期通过插件通用字段填充。 */
+.pk-css-page{box-sizing:border-box!important;background:#c8c8c8!important;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC",Arial,sans-serif}
+.pk-css-page *{box-sizing:border-box}
+.pk-css-page .iosq-canvas{width:100%;min-height:390px;position:relative;isolation:isolate;overflow:hidden;background:#c8c8c8}
+.pk-css-page .iosq-ghost{position:absolute;inset:0;overflow:hidden;pointer-events:none;filter:blur(11px);opacity:.44}
+.pk-css-page .iosq-ghost i{position:absolute;display:block;border-radius:4px;background:#858585}
+.pk-css-page .iosq-ghost i:nth-child(1){top:37px;left:31px;width:95px;height:16px}
+.pk-css-page .iosq-ghost i:nth-child(2){top:66px;left:26px;width:165px;height:7px;background:#b6b6b6}
+.pk-css-page .iosq-ghost i:nth-child(3){top:103px;left:21px;width:340px;height:14px;background:#d6d6d6}
+.pk-css-page .iosq-stack{position:relative;z-index:1;width:100%;padding:121px 19px 42px}
+.pk-css-page .iosq-card{width:100%;overflow:hidden;background:#fff;border-radius:12px;box-shadow:0 5px 9px rgba(0,0,0,.14),0 17px 25px rgba(0,0,0,.075)}
+.pk-css-page .iosq-quote{min-height:46px;padding:14px 12px 10px;color:#141414;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+.pk-css-page .iosq-quote p.pk-css-paragraph{margin:0!important;padding:0!important;line-height:1.43!important;font-weight:350}
+.pk-css-page .iosq-quote p.pk-css-paragraph+p.pk-css-paragraph{margin-top:4px!important}
+.pk-css-page .iosq-footer{height:29px;display:flex;align-items:center;padding:0 15px;border-top:1px solid #ededed}
+.pk-css-page .iosq-date{font-size:10px!important;font-weight:650;color:#898989!important;line-height:1.2;letter-spacing:.01em}
+.pk-css-page .iosq-actions{display:flow-root;position:relative;margin:0;padding:0}
+.pk-css-page .iosq-more{list-style:none;position:absolute;top:-30px;right:10px;z-index:3;display:flex;width:32px;height:29px;align-items:center;justify-content:center;gap:3.5px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pk-css-page .iosq-more::-webkit-details-marker{display:none}
+.pk-css-page .iosq-more::marker{content:""}
+.pk-css-page .iosq-more span{width:4px;height:4px;display:block;border-radius:50%;background:#898989}
+.pk-css-page .iosq-menu{width:min(236px,84%);margin:19px auto 0;overflow:hidden;border-radius:13px;background:#f3f3f3;box-shadow:0 1px 3px rgba(0,0,0,.015);color:#111}
+.pk-css-page .iosq-item{height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 17px 0 15px;font-size:13.5px;font-weight:400;line-height:1;letter-spacing:-.01em}
+.pk-css-page .iosq-item+.iosq-item{border-top:1px solid #dedede}
+.pk-css-page .iosq-gap{height:7px;border-top:1px solid #e0e0e0;border-bottom:1px solid #e7e7e7;background:#dedede}
+.pk-css-page .iosq-disabled{color:#a6a6a6}
+.pk-css-page .iosq-icon{width:19px;height:19px;flex:none;display:inline-block;background-position:center;background-repeat:no-repeat;background-size:contain}
+.pk-css-page .iosq-pencil{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23111111%22%20stroke-width%3D%221.55%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m15.7%205.4%202.9%202.9%22%2F%3E%3Cpath%20d%3D%22M5.4%2018.6%204.5%2020l1.4-.9%2012.7-12.7-1.9-1.9L4%2017.2l-.5%203.3%203.3-.5Z%22%2F%3E%3C%2Fsvg%3E")}
+.pk-css-page .iosq-bookmark{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23111111%22%20stroke-width%3D%221.75%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%204.9c0-.8.6-1.4%201.4-1.4h9.2c.8%200%201.4.6%201.4%201.4V21l-6-4.1L6%2021V4.9Z%22%2F%3E%3C%2Fsvg%3E")}
+.pk-css-page .iosq-delete{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238f8f8f%22%20stroke-width%3D%221.55%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4.3%206.7h15.4M9.2%206.7V4.1c0-.6.5-1.1%201.1-1.1h3.4c.6%200%201.1.5%201.1%201.1v2.6M6.2%206.7l.7%2013.4c0%20.5.5.9%201%20.9h8.2c.5%200%201-.4%201-.9l.7-13.4M10%2010.2v7.5M14%2010.2v7.5%22%2F%3E%3C%2Fsvg%3E")}
+@media(max-width:330px){.pk-css-page .iosq-stack{padding-left:14px;padding-right:14px}.pk-css-page .iosq-menu{width:min(236px,90%)}}

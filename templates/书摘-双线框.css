@@ -1,0 +1,117 @@
+/* @pk-template
+{
+  "id": "book_excerpt_doubleframe",
+  "name": "书摘-双线框",
+  "width": 390,
+  "html": "<article class=\"bk-page\">\n  <header class=\"bk-header\">\n    <h1 class=\"bk-title\" data-pk=\"title\"></h1>\n    <div class=\"bk-author\" data-pk=\"author\"></div>\n    <div class=\"bk-ornament\" aria-hidden=\"true\">✣</div>\n  </header>\n  <div class=\"bk-epigraph\" data-pk=\"subtitle\"></div>\n  <main class=\"bk-excerpt\" data-pk=\"body\"></main>\n  <footer class=\"bk-end\">— 完 —</footer>\n</article>"
+}
+@end-pk-template */
+
+/* 所有文字只跟随插件的共享「字色」「字体」；纸张跟随「纸色」。 */
+.pk-css-page{
+  box-sizing:border-box!important;
+  width:100%;min-height:0!important;margin:0!important;padding:0!important;
+  background:var(--pk-shared-paper,#171319)!important;
+  color:var(--pk-shared-ink,inherit)!important;
+  font-family:var(--pk-shared-font,"Songti SC","STSong",serif)!important;
+}
+.pk-css-page .bk-page,
+.pk-css-page .bk-page *{box-sizing:border-box}
+.pk-css-page .bk-page{
+  position:relative;isolation:isolate;
+  width:100%;min-width:0;min-height:480px;
+  padding:48px 33px 47px;
+  background:transparent;color:inherit;
+  overflow-wrap:anywhere;
+}
+/* 两圈极细边线：用当前字色的透明度，不指定红色或白色。 */
+.pk-css-page .bk-page::before,
+.pk-css-page .bk-page::after{
+  content:"";position:absolute;pointer-events:none;
+  border:1px solid currentColor;
+}
+.pk-css-page .bk-page::before{inset:6px;opacity:.34}
+.pk-css-page .bk-page::after{inset:10px;opacity:.13}
+.pk-css-page .bk-header{text-align:center;color:inherit}
+.pk-css-page .bk-title{
+  margin:0;padding:0;
+  font-family:inherit!important;
+  font-size:25px!important;line-height:1.4!important;
+  font-weight:650!important;letter-spacing:.23em;
+  text-align:center;color:inherit!important;
+  white-space:pre-wrap;overflow-wrap:anywhere;
+}
+.pk-css-page .bk-author{
+  margin:11px 0 0;
+  font-family:inherit!important;font-weight:400!important;
+  font-size:12px!important;line-height:1.65!important;
+  letter-spacing:.13em;text-align:center;
+  opacity:.65;color:inherit!important;
+  white-space:pre-wrap;
+}
+.pk-css-page .bk-ornament{
+  margin:9px auto 0;
+  font-size:19px;line-height:1.2;
+  font-family:Georgia,serif;
+  letter-spacing:0;opacity:.55;
+  color:inherit;
+}
+.pk-css-page .bk-epigraph{
+  margin:29px auto 0;
+  max-width:100%;
+  font-family:Georgia,"Times New Roman",serif!important;
+  font-weight:400!important;
+  font-size:11.5px!important;line-height:1.6!important;
+  letter-spacing:0!important;text-align:center;
+  color:inherit!important;opacity:.75;
+  white-space:pre-wrap;overflow-wrap:anywhere;
+}
+.pk-css-page .bk-epigraph[hidden]{display:none!important}
+.pk-css-page .bk-excerpt{
+  display:flex;flex-direction:column;gap:12px;
+  width:100%;min-width:0;
+  margin:15px 0 0;padding:0;
+  color:inherit!important;
+  font-family:inherit!important;
+  font-size:13px!important;line-height:1.86!important;
+  letter-spacing:.035em;
+  text-align:left;white-space:normal;
+  overflow-wrap:anywhere;
+}
+.pk-css-page .bk-excerpt > p.pk-css-paragraph{
+  display:block!important;
+  margin:0!important;padding:0!important;
+  width:100%;min-width:0;
+  font-family:inherit!important;font-size:inherit!important;
+  font-weight:400!important;line-height:inherit!important;
+  letter-spacing:inherit!important;color:inherit!important;
+  white-space:pre-wrap!important;overflow-wrap:anywhere;
+  text-align:justify!important;text-align-last:auto!important;
+  text-indent:2em!important;
+}
+.pk-css-page .bk-excerpt > p.pk-css-paragraph:first-child{
+  text-indent:0!important;
+}
+/* 首字母放大取自正文首字，不把图片里的“他”写死。 */
+.pk-css-page .bk-excerpt > p.pk-css-paragraph:first-child::first-letter{
+  float:left;
+  margin:.12em .13em 0 0;
+  font-family:inherit;font-size:2.55em;line-height:.88;
+  font-weight:400;color:inherit;
+}
+.pk-css-page .bk-excerpt > p.pk-css-blank{
+  height:.5em!important;line-height:.5!important;
+  text-indent:0!important;
+}
+.pk-css-page .bk-end{
+  margin:22px 0 0;padding:0;
+  color:inherit;opacity:.48;
+  font-family:inherit;font-size:12px;
+  line-height:1.6;text-align:center;
+  letter-spacing:.14em;
+}
+@media(max-width:350px){
+  .pk-css-page .bk-page{padding:42px 27px 47px}
+  .pk-css-page .bk-title{font-size:23px!important}
+  .pk-css-page .bk-excerpt{font-size:12.5px!important}
+}

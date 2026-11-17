@@ -1,0 +1,50 @@
+/* @pk-template
+{
+  "id": "journal_article_first_page",
+  "name": "期刊论文首页",
+  "width": 640,
+  "html": "<article class=\"jr-page\">\n  <header class=\"jr-masthead\">\n    <div class=\"jr-masthead-line\">\n      <div class=\"jr-left\"><div class=\"jr-journal\">Luggage</div><div class=\"jr-issn\">ISSN114-514 CN19-19810</div></div>\n      <div class=\"jr-right\"><div class=\"jr-date\" data-pk=\"date\">2026 年 2 月</div><div class=\"jr-issue\">第 1 卷 第 1 期(总第 1 期) 第 1 篇</div></div>\n    </div>\n    <div class=\"jr-double-rule\" aria-hidden=\"true\"></div>\n  </header>\n  <main class=\"jr-main\">\n    <header class=\"jr-article-head\">\n      <h1 class=\"jr-title\" data-pk=\"title\">已读不回的伦理重构</h1>\n      <h2 class=\"jr-subtitle\" data-pk=\"subtitle\">——基于沉默的螺旋理论的数字社交研究</h2>\n      <div class=\"jr-author\" data-pk=\"author\">Momo HIRANO</div>\n    </header>\n    <section class=\"jr-abstract\" aria-label=\"摘要\"><div class=\"jr-abstract-content\" data-pk=\"body\">在即时通讯技术高度普及的数字社会中，“已读不回”已成为一种普遍却备受争议的社交行为。传统社交伦理常将其视为不礼貌、冷漠乃至“冷暴力”，但这一判断忽视了数字交往的复杂性与个体边界需求。本研究以现象学还原与深度访谈为主要方法，对30亿名18—35岁即时通讯用户进行调研，探讨“已读不回”作为一种沟通实践的伦理正当性。研究发现，已读不回并非沟通的断裂，而是一种以沉默为载体的负向沟通，可归纳为自我保护型、关系降温型、信息悬置型与权力平衡型四种类型。在特定情境下，已读不回具备清晰的伦理合理性，是数字时代“消极礼貌”的重要体现，也是个体对抗信息过载、维护心理边界的非暴力沟通策略。研究结论有助于重新理解数字社交伦理，为构建更具包容性的线上交往规范提供理论参考。</div></section>\n    <div class=\"jr-keywords\"><strong>关键词</strong><span class=\"jr-keyword-value\" data-pk=\"note\">已读不回； 非暴力沟通； 沉默的螺旋； 数字社交； 沟通伦理； 负向沟通</span></div>\n  </main>\n</article>"
+}
+@end-pk-template */
+
+/* 期刊论文首页 · 参考图版式 / 独立 CSS 模板 */
+.pk-css-page{background:#fff!important;color:#171717;min-height:0!important}
+.pk-css-page .jr-page{box-sizing:border-box;width:100%;min-height:608px;background:#fff;color:#171717;overflow:hidden;padding:56px 18px 45px;font-family:"Times New Roman","Noto Serif CJK SC","Songti SC",SimSun,serif;-webkit-font-smoothing:antialiased}
+.pk-css-page .jr-page *{box-sizing:border-box}
+.pk-css-page .jr-masthead-line{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;min-height:39px;line-height:1.27;color:#141414}
+.pk-css-page .jr-left{flex:none;min-width:0;text-align:left}
+.pk-css-page .jr-right{min-width:0;text-align:right}
+.pk-css-page .jr-journal{font-size:16px;line-height:1.25;font-weight:400;white-space:nowrap}
+.pk-css-page .jr-issn{font-size:15.5px;line-height:1.32;white-space:nowrap}
+.pk-css-page .jr-date{font-size:15px;line-height:1.3;white-space:nowrap;-webkit-text-fill-color:#171717!important}
+.pk-css-page .jr-issue{font-size:15.5px;line-height:1.32;white-space:nowrap}
+.pk-css-page .jr-double-rule{height:4px;margin-top:4px;border-top:1.2px solid #0d0d0d;border-bottom:1.2px solid #0d0d0d}
+.pk-css-page .jr-main{padding:0 37px}
+.pk-css-page .jr-article-head{text-align:center;padding-top:48px}
+.pk-css-page .jr-title,.pk-css-page .jr-subtitle{margin:0;text-align:center;font-weight:700;color:#101010;white-space:normal;overflow-wrap:anywhere;-webkit-text-fill-color:#101010!important}
+.pk-css-page .jr-title{font-size:25px;line-height:1.52;letter-spacing:.02em}
+.pk-css-page .jr-subtitle{margin-top:4px;font-size:23px;line-height:1.58;letter-spacing:.005em}
+.pk-css-page .jr-subtitle[hidden]{display:none!important}
+.pk-css-page .jr-author{margin-top:48px;text-align:center;font-size:19px;line-height:1.38;font-weight:400;color:#111;overflow-wrap:anywhere;-webkit-text-fill-color:#111!important}
+.pk-css-page .jr-abstract{margin:23px auto 0;color:#191919}
+.pk-css-page .jr-abstract-content{font-size:15.5px;line-height:1.62;text-align:justify;letter-spacing:.012em;overflow-wrap:anywhere;word-break:normal;-webkit-text-fill-color:#191919!important}
+.pk-css-page .jr-abstract-content>p.pk-css-paragraph{margin:0 0 4px;text-indent:0!important;white-space:pre-wrap;overflow-wrap:anywhere;-webkit-text-fill-color:#191919!important}
+.pk-css-page .jr-abstract-content>p.pk-css-paragraph:first-child:before{content:"摘要";font-weight:700;margin-right:.63em;letter-spacing:0}
+/* 在无正文的静态预览里也展示摘要标签，导入后会被真实段落替换。 */
+.pk-css-page .jr-abstract-content:not(:has(>p))::before{content:"摘要";font-weight:700;margin-right:.63em}
+.pk-css-page .jr-keywords{margin-top:4px;font-size:15.5px;line-height:1.65;color:#161616;letter-spacing:.012em;overflow-wrap:anywhere;word-break:normal}
+.pk-css-page .jr-keywords>strong{font-weight:700;margin-right:.62em}
+.pk-css-page .jr-keyword-value{white-space:pre-wrap;-webkit-text-fill-color:#161616!important}
+.pk-css-page .jr-keywords:has(.jr-keyword-value:empty){display:none}
+@media(max-width:520px){
+  .pk-css-page .jr-page{padding:35px 13px 38px;min-height:520px}
+  .pk-css-page .jr-journal{font-size:12px}.pk-css-page .jr-issn{font-size:11px}
+  .pk-css-page .jr-date{font-size:11.5px}.pk-css-page .jr-issue{font-size:10.2px}
+  .pk-css-page .jr-main{padding:0 15px}
+  .pk-css-page .jr-article-head{padding-top:42px}
+  .pk-css-page .jr-title{font-size:21px}.pk-css-page .jr-subtitle{font-size:17px;line-height:1.6}
+  .pk-css-page .jr-author{margin-top:38px;font-size:16px}
+  .pk-css-page .jr-abstract{margin-top:28px}
+  .pk-css-page .jr-abstract-content,.pk-css-page .jr-keywords{font-size:13.5px;line-height:1.7}
+}
+@media print{.pk-css-page .jr-page{break-inside:avoid;background:#fff}}

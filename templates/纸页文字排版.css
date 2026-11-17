@@ -1,0 +1,189 @@
+/* @pk-template
+{
+  "id": "paper_literary",
+  "name": "纸页文字排版",
+  "width": 460,
+  "html": "<article class=\"pl-page\">\n  <aside class=\"pl-masthead\"><div class=\"pl-title\" data-pk=\"title\"></div></aside>\n  <main class=\"pl-main\">\n    <div class=\"pl-subtitle\" data-pk=\"subtitle\"></div>\n    <div class=\"pl-prose\" data-pk=\"body\"></div>\n    <footer class=\"pl-end\"><span class=\"pl-author\" data-pk=\"author\"></span></footer>\n  </main>\n</article>"
+}
+@end-pk-template */
+
+/* 左上竖题与上段正文偏左；下段正文右对齐，与右侧竖落款底部齐平。
+   所有文字仍共用插件「字色」，淡色竖题只调整透明度。 */
+.pk-css-page{
+  box-sizing:border-box!important;
+  margin:0!important;
+  padding:0!important;
+  min-height:0!important;
+  background:var(--pk-shared-paper,#fff)!important;
+  color:var(--pk-shared-ink,#222)!important;
+  font-family:var(--pk-shared-font,"Songti SC","STSong",serif)!important;
+}
+.pk-css-page .pl-page,.pk-css-page .pl-page *{box-sizing:border-box}
+.pk-css-page .pl-page{
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr);
+  gap:9px;
+  align-items:start;
+  width:100%;
+  padding:18px 22px 24px 19px;
+  margin:0;
+  background:var(--pk-shared-paper,#fff);
+  color:var(--pk-shared-ink,#222);
+  overflow:visible;
+}
+.pk-css-page .pl-masthead{
+  grid-column:1;
+  grid-row:1;
+  align-self:start;
+  width:100%;
+  min-width:0;
+  padding:1px 0 0;
+  margin:0;
+  overflow:visible;
+}
+.pk-css-page .pl-title{
+  display:block;
+  writing-mode:vertical-rl;
+  text-orientation:upright;
+  width:max-content;
+  min-width:1.36em;
+  max-width:none!important;
+  height:auto;
+  max-height:none!important;
+  margin:0;
+  padding:0 2px;
+  overflow:visible!important;
+  opacity:.34;
+  font-size:30px!important;
+  font-weight:500!important;
+  line-height:1.42!important;
+  letter-spacing:.045em!important;
+  text-align:start;
+  white-space:pre-wrap;
+  word-break:normal;
+  overflow-wrap:normal;
+}
+.pk-css-page .pl-title:empty{display:none}
+.pk-css-page .pl-main{
+  grid-column:2;
+  grid-row:1;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 45px;
+  column-gap:16px;
+  align-items:end;
+  min-width:0;
+  width:100%;
+  padding:0;
+  margin:0;
+  color:inherit;
+}
+.pk-css-page .pl-subtitle{
+  grid-column:1/-1;
+  grid-row:1;
+  margin:1px 0 11px;
+  padding:0;
+  font-size:12px!important;
+  line-height:1.5!important;
+  letter-spacing:.02em!important;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  text-align:left;
+}
+.pk-css-page .pl-subtitle:empty,.pk-css-page .pl-subtitle[hidden]{display:none!important}
+.pk-css-page .pl-prose{
+  grid-column:1;
+  grid-row:2;
+  align-self:end;
+  display:block;
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding:0;
+  font-family:inherit;
+  font-size:14px;
+  line-height:1.64;
+  font-weight:400;
+  letter-spacing:.005em;
+  text-align:left;
+  overflow-wrap:anywhere;
+  white-space:pre-wrap;
+}
+.pk-css-page .pl-prose p.pk-css-paragraph{
+  display:block;
+  margin:0 0 12px!important;
+  padding:0!important;
+  font-size:inherit!important;
+  font-family:inherit!important;
+  font-weight:inherit!important;
+  line-height:inherit!important;
+  text-align:left!important;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+.pk-css-page .pl-prose p.pk-css-paragraph:last-child{
+  margin-bottom:0!important;
+}
+/* 正文分为左右两个视觉段落，但不新增输入字段。
+   优先以空白段落分隔：空白段落之前靠左，之后靠右。
+   没有空白段落时，两段正文的最后一段靠右；四段及以上最后两段靠右。 */
+.pk-css-page .pl-prose p.pk-css-paragraph{
+  width:100%;
+  max-width:100%;
+  text-align-last:auto!important;
+}
+.pk-css-page .pl-prose:not(:has(> p.pk-css-blank)) > p.pk-css-paragraph:last-child:not(:first-child),
+.pk-css-page .pl-prose:not(:has(> p.pk-css-blank)) > p.pk-css-paragraph:nth-last-child(2):nth-child(n+3),
+.pk-css-page .pl-prose > p.pk-css-blank ~ p.pk-css-paragraph:not(.pk-css-blank){
+  text-align:right!important;
+  text-align-last:right!important;
+}
+.pk-css-page .pl-prose p.pk-css-blank{min-height:0!important;margin-bottom:6px!important}
+.pk-css-page .pl-end{
+  grid-column:2;
+  grid-row:2;
+  align-self:end;
+  justify-self:end;
+  display:flex;
+  justify-content:flex-end;
+  align-items:flex-end;
+  width:100%;
+  min-width:0;
+  min-height:0;
+  margin:0;
+  padding:0;
+  border:0;
+}
+.pk-css-page .pl-author{
+  display:block;
+  writing-mode:vertical-rl;
+  text-orientation:upright;
+  width:max-content;
+  min-width:1.34em;
+  max-width:none!important;
+  height:auto;
+  max-height:none!important;
+  padding:0;
+  margin:0;
+  overflow:visible!important;
+  font-size:31px!important;
+  line-height:1.36!important;
+  letter-spacing:.055em!important;
+  font-weight:500!important;
+  text-align:end;
+  white-space:pre-wrap;
+  word-break:normal;
+  overflow-wrap:normal;
+}
+.pk-css-page .pl-author:empty,.pk-css-page .pl-end:has(.pl-author:empty){display:none}
+@media(max-width:385px){
+  .pk-css-page .pl-page{grid-template-columns:38px minmax(0,1fr);gap:8px;padding:15px 18px 22px 16px}
+  .pk-css-page .pl-main{grid-template-columns:minmax(0,1fr) 40px;column-gap:12px}
+  .pk-css-page .pl-title{font-size:27px!important}
+  .pk-css-page .pl-author{font-size:28px!important}
+  .pk-css-page .pl-prose{font-size:13.5px}
+}
+
+/* 在海报上编辑时仍使用有实际尺寸的正文容器。 */
+.pk-css-page .pl-prose[contenteditable]{display:block;grid-column:1}
+.pk-css-page .pl-main:has(.pl-author:empty){column-gap:0}
+.pk-css-page .pl-main:has(.pl-author:empty) .pl-prose{grid-column:1/-1}

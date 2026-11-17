@@ -1,0 +1,141 @@
+/* @pk-template
+{
+  "id": "page_margin_note",
+  "name": "页边批注",
+  "width": 460,
+  "html": "<main class=\"pa-page\">\n  <span class=\"pa-rule\" aria-hidden=\"true\"></span>\n  <section class=\"pa-notes\">\n    <article class=\"pa-note\">\n      <span class=\"pa-avatar\" aria-hidden=\"true\"></span>\n      <div class=\"pa-copy\">\n        <strong class=\"pa-author\" data-pk=\"author\"></strong>\n        <div class=\"pa-body\" data-pk=\"body\"></div>\n      </div>\n    </article>\n  </section>\n</main>"
+}
+@end-pk-template */
+
+/* 页边批注：每个自然段一条批注。请配合支持多条批注的打孔海报脚本。 */
+.pk-css-page {
+  box-sizing:border-box!important;
+  margin:0!important;
+  padding:0!important;
+  min-height:0!important;
+  background:#faf9f7!important;
+  color:#a63f4a!important;
+}
+.pk-css-page .pa-page,.pk-css-page .pa-page * {box-sizing:border-box}
+.pk-css-page .pa-page {
+  position:relative;
+  padding:62px 28px 67px 73px;
+  width:100%;
+  background:#faf9f7;
+  min-height:195px;
+}
+/* Book margin separator. Each annotation gets its own thin red marker. */
+.pk-css-page .pa-rule {
+  position:absolute;
+  left:42px;
+  top:0;
+  bottom:0;
+  border-left:1px solid #d6d5d3;
+  pointer-events:none;
+}
+.pk-css-page .pa-notes {display:flex;flex-direction:column;gap:39px;min-width:0}
+.pk-css-page .pa-note {
+  position:relative;
+  display:grid;
+  grid-template-columns:41px minmax(0,1fr);
+  align-items:start;
+  gap:15px;
+  min-width:0;
+}
+.pk-css-page .pa-note::before {
+  content:"";
+  position:absolute;
+  left:-32px;
+  top:1px;
+  height:60px;
+  width:3px;
+  border-radius:2px;
+  background:#a63f4a;
+}
+/* Decorative annotation glyph: no editable avatar slot in this template. */
+.pk-css-page .pa-avatar {
+  position:relative;
+  display:block;
+  width:41px;
+  height:41px;
+  overflow:hidden;
+  border-radius:3px;
+  background:#a83d49;
+  font-size:0!important;
+  color:transparent!important;
+}
+.pk-css-page .pa-avatar::before {
+  content:"";
+  position:absolute;
+  top:6px;
+  left:15px;
+  width:12px;
+  height:14px;
+  border-radius:50%;
+  background:#f5edf0;
+}
+.pk-css-page .pa-avatar::after {
+  content:"";
+  position:absolute;
+  left:6px;
+  bottom:5px;
+  width:29px;
+  height:17px;
+  border-radius:52% 52% 2px 2px;
+  background:#f5edf0;
+}
+.pk-css-page .pa-avatar>img.pk-avatar-photo {
+  position:relative!important;
+  z-index:1;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  border-radius:3px!important;
+  object-fit:cover!important;
+}
+.pk-css-page .pa-copy {min-width:0}
+.pk-css-page .pa-author {
+  display:block;
+  margin:-1px 0 7px;
+  color:#a63f4a!important;
+  -webkit-text-fill-color:#a63f4a!important;
+  font-family:Georgia,"Songti SC","STSong",serif!important;
+  font-size:20px!important;
+  font-weight:700!important;
+  line-height:1.3!important;
+  letter-spacing:0!important;
+  overflow-wrap:anywhere;
+}
+.pk-css-page .pa-body {
+  color:#aa414c!important;
+  -webkit-text-fill-color:#aa414c!important;
+  font-family:"Songti SC","STSong","Noto Serif CJK SC","SimSun",serif!important;
+  font-size:18px!important;
+  line-height:1.65!important;
+  letter-spacing:.01em!important;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  white-space:pre-wrap;
+}
+.pk-css-page .pa-body>.pk-css-paragraph {
+  margin:0!important;
+  padding:0!important;
+  font-size:inherit!important;
+  font-family:inherit!important;
+  line-height:inherit!important;
+  color:inherit!important;
+  -webkit-text-fill-color:inherit!important;
+  text-indent:0!important;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+@media(max-width:370px){
+  .pk-css-page .pa-page{padding-left:61px;padding-right:19px}
+  .pk-css-page .pa-rule{left:34px}
+  .pk-css-page .pa-note::before{left:-28px}
+  .pk-css-page .pa-notes{gap:30px}
+  .pk-css-page .pa-note{grid-template-columns:37px minmax(0,1fr);gap:12px}
+  .pk-css-page .pa-avatar{width:37px;height:37px}
+  .pk-css-page .pa-avatar::before{left:13px}
+  .pk-css-page .pa-avatar::after{left:4px}
+}

@@ -1,0 +1,85 @@
+/* @pk-template
+{
+  "id": "threads_day",
+  "name": "脆",
+  "width": 390,
+  "html": "<div class=\"th-app\">\n  <header class=\"th-nav\">\n    <span class=\"th-ico th-back\" aria-hidden=\"true\"></span>\n    <div class=\"th-nav-title\"><strong>串文</strong><small>37.7万次浏览</small></div>\n    <div class=\"th-nav-actions\"><span class=\"th-ico th-bell\" aria-hidden=\"true\"></span><span class=\"th-ico th-more\" aria-hidden=\"true\"></span></div>\n  </header>\n  <article class=\"th-article\">\n    <div class=\"th-author-row\">\n      <span class=\"th-avatar\" data-pk=\"avatar\"></span>\n      <div class=\"th-author-line\"><strong class=\"th-name\" data-pk=\"author\"></strong><span class=\"th-date\" data-pk=\"date\"></span></div>\n      <span class=\"th-brand\"><i class=\"th-ico th-threads-mark\"></i><b>threads</b></span>\n    </div>\n    <div class=\"th-content\" data-pk=\"body\"></div>\n    <div class=\"th-page-count\">1/2</div>\n    <div class=\"th-metrics\">\n      <div class=\"th-metric\"><i class=\"th-ico th-heart\"></i><span>1.8万</span></div>\n      <div class=\"th-metric\"><i class=\"th-ico th-message\"></i><span>158</span></div>\n      <div class=\"th-metric\"><i class=\"th-ico th-repeat\"></i><span>2,283</span></div>\n      <div class=\"th-metric\"><i class=\"th-ico th-send\"></i><span>4,716</span></div>\n    </div>\n  </article>\n  <section class=\"th-activity\">\n    <div class=\"th-topic-row\"><span class=\"th-topic-magnify\" aria-hidden=\"true\"></span><strong data-pk=\"subtitle\"></strong><span class=\"th-topic-count\"> · 7.5K posts ›</span></div>\n    <div data-pk-section=\"threads-comments\">\n      <div class=\"th-sort\"><strong>热门 <span class=\"th-caret\"></span></strong><span>查看动态 ›</span></div>\n      <div class=\"th-comment\">\n        <span class=\"th-reply-avatar\" data-pk=\"threads-reply-avatar\"></span>\n        <div class=\"th-reply-main\">\n          <div class=\"th-reply-head\"><strong class=\"th-reply-name\" data-pk=\"threads-reply-name\"></strong><span class=\"th-reply-time\" data-pk=\"threads-reply-time\"></span><span class=\"th-reply-menu\" aria-hidden=\"true\">···</span></div>\n          <div class=\"th-reply-content\" data-pk=\"threads-reply-text\"></div>\n          <div class=\"th-reply-metrics\">\n            <span><i class=\"th-ico th-heart\"></i><b>2,203</b></span><span><i class=\"th-ico th-message\"></i><b>3</b></span><span><i class=\"th-ico th-repeat\"></i><b>59</b></span><span><i class=\"th-ico th-send\"></i><b>101</b></span>\n          </div>\n        </div>\n      </div>\n    </div>\n  </section>\n</div>"
+}
+@end-pk-template */
+
+.pk-css-page{min-height:0!important;background:#fff!important;color:#181818;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC",Arial,sans-serif}
+.pk-css-page .th-app{width:100%;min-height:0;box-sizing:border-box;background:#fff;color:#171717;overflow:hidden;display:flex;flex-direction:column}
+.pk-css-page .th-nav{height:73px;padding:9px 13px 10px;display:flex;align-items:flex-start;justify-content:space-between;box-sizing:border-box;position:relative;flex:none}
+.pk-css-page .th-nav-title{position:absolute;left:82px;right:82px;top:6px;text-align:center;display:flex;flex-direction:column;gap:0;align-items:center;line-height:1.26;white-space:nowrap}
+.pk-css-page .th-nav-title strong{font-weight:750;font-size:22px;letter-spacing:.035em;color:#151515}
+.pk-css-page .th-nav-title small{font-size:12px;font-weight:550;color:#9b9b9b;letter-spacing:0}
+.pk-css-page .th-nav-actions{display:flex;align-items:center;gap:13px;position:relative;z-index:1}
+.pk-css-page .th-ico{display:inline-block;flex:none;background-repeat:no-repeat;background-position:center;background-size:contain;width:24px;height:24px;vertical-align:middle}
+.pk-css-page .th-back{width:27px;height:27px;margin-top:5px}
+.pk-css-page .th-bell{width:27px;height:27px;margin-top:4px}
+.pk-css-page .th-more{width:27px;height:27px;margin-top:4px;border:1.7px solid #272727;border-radius:50%;background-size:75%}
+.pk-css-page .th-article{padding:0 12px 16px;flex:1;display:flex;flex-direction:column;min-width:0;box-sizing:border-box}
+.pk-css-page .th-author-row{display:flex;align-items:center;min-height:69px;margin-bottom:7px;gap:10px;min-width:0;box-sizing:border-box}
+.pk-css-page .th-avatar{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#efefef;color:#555;overflow:hidden;font-size:15px;font-weight:650}
+.pk-css-page .th-author-line{display:flex;align-items:baseline;gap:6px;min-width:0;white-space:nowrap;overflow:hidden}
+.pk-css-page .th-name{font-size:16.2px;font-weight:750;letter-spacing:-.015em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;color:#181818}
+.pk-css-page .th-date{font-size:13.7px;font-weight:480;color:#999;flex:none;white-space:nowrap;letter-spacing:-.035em}
+.pk-css-page .th-brand{margin-left:auto;white-space:nowrap;flex:none;display:inline-flex;gap:1px;align-items:center;line-height:1;font-size:13px;font-family:Arial,sans-serif;letter-spacing:-.075em;font-weight:800;color:#333}
+.pk-css-page .th-threads-mark{width:17px;height:17px}
+.pk-css-page .th-content{flex:0 1 auto;margin-top:0;box-sizing:border-box;font-size:16px;line-height:1.53;letter-spacing:.005em;font-weight:520;color:#1e1e1e;overflow-wrap:anywhere;word-break:normal;min-height:185px}
+.pk-css-page .th-content p.pk-css-paragraph{margin:0 0 9px;white-space:pre-wrap}
+.pk-css-page .th-content p.pk-css-paragraph:last-child{margin-bottom:0}
+.pk-css-page .th-page-count{align-self:flex-start;margin-top:11px;margin-bottom:12px;background:#f1f1f2;color:#888;border-radius:12px;padding:3px 10px;font-size:12px;line-height:1.2;letter-spacing:.01em;min-width:25px;text-align:center}
+.pk-css-page .th-metrics{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:1px 0 7px;min-width:0;color:#656565}
+.pk-css-page .th-metric{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;flex:none;font-size:12.3px;font-weight:600;line-height:1.1;letter-spacing:-.025em}
+.pk-css-page .th-metric .th-ico{width:24px;height:24px}
+.pk-css-page :is(.th-metric,.th-reply-metrics) .th-ico{background-position:center}
+.pk-css-page :is(.th-metric,.th-reply-metrics) .th-heart{background-size:106%}
+.pk-css-page :is(.th-metric,.th-reply-metrics) .th-message{background-size:102%}
+.pk-css-page :is(.th-metric,.th-reply-metrics) .th-repeat{background-size:106%}
+.pk-css-page :is(.th-metric,.th-reply-metrics) .th-send{background-size:96%}
+@media (max-width:370px){.pk-css-page .th-article{padding-left:10px;padding-right:10px}.pk-css-page .th-metric{gap:3px;font-size:11px}.pk-css-page .th-metric .th-ico{width:21px;height:21px}.pk-css-page .th-nav-actions{gap:8px}.pk-css-page .th-author-row{gap:7px}}
+.pk-css-page .th-back{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23242424%22%20stroke-width%3D%222.0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M15%2018%209%2012%2015%206%22%2F%3E%3C%2Fsvg%3E")}
+.pk-css-page .th-bell{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23242424%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M18%208a6%206%200%200%200-12%200c0%207-3%207-3%209h18c0-2-3-2-3-9%22%2F%3E%3Cpath%20d%3D%22M10%2021a2%202%200%200%200%204%200%22%2F%3E%3C%2Fsvg%3E")}
+.pk-css-page .th-more{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23242424%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%225%22%20cy%3D%2212%22%20r%3D%221.3%22%20fill%3D%22%23242424%22%20stroke%3D%22none%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%221.3%22%20fill%3D%22%23242424%22%20stroke%3D%22none%22%2F%3E%3Ccircle%20cx%3D%2219%22%20cy%3D%2212%22%20r%3D%221.3%22%20fill%3D%22%23242424%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E")}
+.pk-css-page .th-heart{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23242424%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20.5%204.7a5.4%205.4%200%200%200-7.65%200L12%205.6l-.85-.9a5.4%205.4%200%201%200-7.65%207.65L12%2021l8.5-8.65a5.4%205.4%200%200%200%200-7.65Z%22%2F%3E%3C%2Fsvg%3E")}
+.pk-css-page .th-message{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23242424%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20.7%2011.5c0%205-3.7%208.7-8.7%208.7-1.5%200-2.7-.25-3.9-.9L3%2021l1.8-4.9a8.7%208.7%200%201%201%2015.9-4.6Z%22%2F%3E%3C%2Fsvg%3E")}
+.pk-css-page .th-repeat{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23242424%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m16%203%204%204-4%204%22%2F%3E%3Cpath%20d%3D%22M4%2011V9a2%202%200%200%201%202-2h14%22%2F%3E%3Cpath%20d%3D%22m8%2021-4-4%204-4%22%2F%3E%3Cpath%20d%3D%22M20%2013v2a2%202%200%200%201-2%202H4%22%2F%3E%3C%2Fsvg%3E")}
+.pk-css-page .th-send{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23242424%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M21%203%2010%2014%22%2F%3E%3Cpath%20d%3D%22m21%203-7%2019-4-8-8-4%2019-7Z%22%2F%3E%3Cpath%20d%3D%22M10%2014%2021%203%22%2F%3E%3C%2Fsvg%3E")}
+.pk-css-page .th-threads-mark{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23242424%22%20stroke-width%3D%221.75%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M17.5%207.5c-1.4-2.3-4-3.5-6.4-3.2-4.6.5-7.1%204-7.1%208.1%200%204.5%203%207.7%207.4%207.7%204.5%200%208.2-3.1%208.2-7.1%200-2.5-1.9-4.7-4.7-5.2-3.6-.7-6.1%201.4-6.1%203.8%200%201.7%201.3%202.9%203.3%202.9%202.3%200%203.7-2.2%203.7-4.7%200-2.9-1.6-5.7-5.4-5.7%22%2F%3E%3C%2Fsvg%3E")}
+
+.pk-css-page .th-article{padding-bottom:9px}
+.pk-css-page .th-page-count{margin-bottom:8px}
+.pk-css-page .th-activity{border-top:1px solid #efefef;min-width:0;background:#fff}
+.pk-css-page .th-topic-row{padding:11px 12px 12px;display:flex;align-items:center;gap:6px;min-height:46px;font-size:13px;border-bottom:1px solid #eee;white-space:nowrap;overflow:hidden}
+.pk-css-page .th-topic-row:has([data-pk="subtitle"][hidden]){display:none}
+.pk-css-page .th-topic-row [data-pk="subtitle"]{font-size:13px!important;color:#158ede!important;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%}
+.pk-css-page .th-topic-count{font-size:12px;color:#949494;white-space:nowrap}
+.pk-css-page .th-topic-magnify{display:inline-block;flex:none;width:12px;height:12px;border:2px solid #1899e6;border-radius:50%;margin-right:2px;position:relative}
+.pk-css-page .th-topic-magnify:after{content:"";position:absolute;width:6px;height:2px;background:#1899e6;transform:rotate(45deg);right:-5px;bottom:-3px;border-radius:1px}
+.pk-css-page .th-sort{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid #eaeaea;color:#1e1e1e}
+.pk-css-page .th-sort strong{font-size:14px;font-weight:680}
+.pk-css-page .th-sort>span{font-size:13px;color:#888}
+.pk-css-page .th-sort b{font-size:19px;font-weight:350;vertical-align:middle}
+.pk-css-page .th-caret{display:inline-block;width:7px;height:7px;border-right:1.5px solid #555;border-bottom:1.5px solid #555;transform:rotate(45deg);vertical-align:3px;margin-left:3px}
+/* Threads single reply: avatar / byline + time / body / evenly sized actions. */
+.pk-css-page [data-pk-section="threads-comments"][hidden]{display:none!important}
+.pk-css-page .th-comment{display:grid;grid-template-columns:36px minmax(0,1fr);gap:10px;padding:16px 14px 14px;border-bottom:1px solid #f0f0f0;min-width:0;align-items:start}
+.pk-css-page .th-reply-avatar{width:36px;height:36px;border-radius:50%;background:#ededee;color:#777;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:650;flex:none}
+.pk-css-page .th-reply-avatar .pk-avatar-photo{width:100%!important;height:100%!important;object-fit:cover!important;border-radius:50%!important;display:block!important;transform:none!important}
+.pk-css-page .th-reply-main{display:flex;min-width:0;flex-direction:column}
+.pk-css-page .th-reply-head{display:flex;align-items:center;min-width:0;gap:7px;height:24px;line-height:1.2}
+.pk-css-page .th-reply-name{color:#171717!important;font-size:14.5px!important;font-weight:720;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pk-css-page .th-reply-time{color:#999;font-size:12.5px;font-weight:400;white-space:nowrap;flex:none}
+.pk-css-page .th-reply-menu{margin-left:auto;color:#666;flex:none;font:700 21px/1 Arial,sans-serif;letter-spacing:0;transform:translateY(-4px)}
+.pk-css-page .th-reply-content{margin:3px 0 11px;color:#222;font-size:14.5px!important;line-height:1.48;white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal}
+.pk-css-page .th-reply-metrics{display:flex;gap:17px;align-items:center;color:#888;min-width:0;flex-wrap:nowrap}
+.pk-css-page .th-reply-metrics>span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;min-width:0}
+.pk-css-page .th-reply-metrics b{font-size:11.5px;font-weight:450;color:#888}
+.pk-css-page .th-reply-metrics .th-ico{width:20px;height:20px;opacity:.88}
+@media(max-width:365px){.pk-css-page .th-reply-metrics{gap:11px}.pk-css-page .th-comment{padding-left:10px;padding-right:10px}}
+
+.pk-css-page .th-app{min-height:0!important}
+.pk-css-page .th-article{flex:0 0 auto!important}
+.pk-css-page .th-content{flex:0 1 auto!important;min-height:0!important}
+.pk-css-page .th-page-count{margin-top:9px!important}
