@@ -1755,7 +1755,6 @@ function cssFillTemplate(root, spec){
     if(current && current.getAttribute('src')===avatarSrc){
       // Keep the same element, image resource and cropping across every redraw.
       if(current.alt!==author)current.alt=author;
-      cssFitSlotPhoto(current,p,'avatarCrop');
       return;
     }
     const img=document.createElement('img');
@@ -1769,7 +1768,6 @@ function cssFillTemplate(root, spec){
     };
     // Replace only if the actual avatar source changed, never on cover movement.
     el.style.overflow='hidden';
-    cssFitSlotPhoto(img,p,'avatarCrop');
     el.replaceChildren(img);
     img.src=avatarSrc;
     el.dataset.pkAvatarSrc=avatarSrc;
@@ -1796,7 +1794,6 @@ function cssFillTemplate(root, spec){
        }
        if(photo.getAttribute('src')!==src)photo.src=src;
        photo.style.cssText='position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;max-width:none!important;pointer-events:none!important;z-index:0!important;';
-       cssFitSlotPhoto(photo,p,'skinImg');
        Array.from(el.children).forEach(n=>{if(n!==photo)n.hidden=true;});
      } else {
        if(photo)photo.remove();
@@ -2012,6 +2009,20 @@ function cssFillTemplate(root, spec){
       }
     });
   }
+  // Apply current frame-relative controls even when an existing IMG is reused.
+  root.querySelectorAll('img.pk-avatar-photo,img.im-avatar-photo').forEach(photo=>{
+    if(photo.parentElement)photo.parentElement.style.overflow='hidden';
+    if(templateId==='bubble_chat'){
+      photo.style.setProperty('position','absolute','important');
+      photo.style.setProperty('inset','0','important');
+      photo.style.setProperty('margin','0','important');
+    }
+    cssFitSlotPhoto(photo,p,'avatarCrop');
+  });
+  root.querySelectorAll('img.pk-slot-photo,img.im-upload-photo').forEach(photo=>{
+    if(photo.parentElement)photo.parentElement.style.overflow='hidden';
+    cssFitSlotPhoto(photo,p,'skinImg');
+  });
 }
 function cssSpecSource(spec) {
   const meta={id:spec.id,name:cssTemplateName(spec.id,spec.name),width:spec.width,html:spec.html};
@@ -2260,6 +2271,19 @@ async function cssTemplateExport(){
   const pictures=[];
   const blank='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
   const clone=page.cloneNode(true);
+  if(spec.id==='bubble_chat'){
+    // Preserve the measured row heights when foreignObject fonts wrap differently.
+    const selectors='.bu-group,.bu-messages > p.pk-css-paragraph';
+    const live=page.querySelectorAll(selectors),copies=clone.querySelectorAll(selectors);
+    live.forEach((node,i)=>{
+      if(!copies[i]||getComputedStyle(node).display==='none')return;
+      const box=rectOf(node);
+      copies[i].style.setProperty('height',box.h+'px','important');
+      copies[i].style.setProperty('min-height',box.h+'px','important');
+      copies[i].style.setProperty('box-sizing','border-box','important');
+      copies[i].style.setProperty('flex-shrink','0','important');
+    });
+  }
   // Collect and load the *real* photos before drawing: WebKit often loses
   // nested <img> tags when serializing HTML inside SVG foreignObject.
   const realPhotos=Array.from(page.querySelectorAll('img'));
@@ -2794,12 +2818,12 @@ const ui = {
   pick: (label, k, list, cls) => `${label ? `<div class="pk-sub">${label}</div>` : ''}<div class="pk-pick ${cls || ''}" data-pick="${k}">${list.map(([v, t]) => `<b data-v="${v}"><i></i><span>${t}</span></b>`).join('')}</div>`,
   inp: (label, k, ph) => `<div class="pk-row"><span class="pk-l">${label}</span><input class="pk-in" data-k="${k}" placeholder="${ph || ''}" autocomplete="off"></div>`,
   img: (label, k) => `<div class="pk-row"><span class="pk-l">${label}</span><input class="pk-in" data-img="${k}" placeholder="图片链接" autocomplete="off"><div class="pk-btn pk-sm" data-up="${k}">上传</div><div class="pk-btn pk-sm pk-ghost" data-clr="${k}">清除</div></div>
-    <div class="pk-img-adjust" data-img-adjust="${k}" hidden>
+    ${k==='skinImg'?'':`<div class="pk-img-adjust" data-img-adjust="${k}" hidden>
       ${ui.sl('缩放', k+'Scale', 0.5, 3, 0.05)}
       ${ui.sl('左右', k+'X', 0, 100, 1)}
       ${ui.sl('上下', k+'Y', 0, 100, 1)}
       <div class="pk-row pk-btns"><div class="pk-btn pk-ghost" data-imgreset="${k}"><i class="fa-solid fa-rotate-left"></i> 重置位置</div></div>
-    </div>`,
+    </div>`}`,
   grp: (title, body, open) => `<div class="pk-grp${open ? ' open' : ''}"><header data-fold="1"><span>${title}</span><i class="fa-solid fa-chevron-down pk-arrow"></i></header><div class="pk-grp-b">${body}</div></div>`,
 };
 
