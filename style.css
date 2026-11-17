@@ -415,8 +415,8 @@
 #pk-snip-merge-overlay .pk-snip-merge-actions .pk-snip-primary{background:var(--sn-accent,#161616)!important;color:var(--sn-accent-fg,#fff)!important}
 
 #pk-snip-tap-handle{position:fixed;right:8px;bottom:clamp(108px,21dvh,200px);z-index:100045;display:none;align-items:center;justify-content:center;padding:3px;min-width:38px;min-height:38px;width:max-content;height:max-content;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#252525;cursor:pointer;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;opacity:1}
-body:has(#chat .mes[mesid]) #pk-snip-tap-handle{display:flex}
-body:has(#pk-snip-overlay) #pk-snip-tap-handle,body:has(#pk-overlay.show) #pk-snip-tap-handle{display:none!important}
+:root:has(#chat .mes[mesid]) #pk-snip-tap-handle{display:flex}
+:root:has(#pk-snip-overlay) #pk-snip-tap-handle,:root:has(#pk-overlay.show) #pk-snip-tap-handle{display:none!important}
 #pk-snip-tap-handle[hidden]{display:none!important}
 #pk-snip-tap-handle .pk-snip-custom-icon{display:block;max-width:var(--pk-snip-icon-size,54px);max-height:var(--pk-snip-icon-size,54px);width:auto;height:auto;object-fit:contain;object-position:center;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.2))}
 #pk-snip-tap-handle .pk-snip-default-icon{display:flex;align-items:center;justify-content:center;width:41px;height:43px;border-radius:13px;background:rgba(255,255,255,.97);color:#252525;border:1px solid rgba(0,0,0,.12);box-shadow:0 2px 12px rgba(0,0,0,.17);font-size:19px;pointer-events:none}

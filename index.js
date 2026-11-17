@@ -325,7 +325,32 @@ function store() {
 const clone = o => JSON.parse(JSON.stringify(o || {}));
 const cur = () => ctx().extensionSettings[MODULE].cur;
 const persist = () => ctx().saveSettingsDebounced();
-const toast = (t, m) => window.toastr && window.toastr[t](m);
+// 部分主题会给 body 加 filter / backdrop-filter / transform 等属性。Chromium（安卓、电脑）
+// 会因此把 body 当成 position:fixed 的参照容器；而酒馆的 body 高度常常接近 0，
+// 面板就会被挤到屏幕顶端、上半截看不见（iOS 的 WebKit 不受影响）。
+// 挂载前用一个探针检测，被劫持时改挂到 <html>，绕开 body。
+let pkRootMounted = false;
+function pkLayer() {
+  const body = document.body;
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;inset:0;visibility:hidden;pointer-events:none';
+  body.appendChild(probe);
+  const r = probe.getBoundingClientRect();
+  probe.remove();
+  const tol = 2; // 允许的误差（像素）
+  const ok = Math.abs(r.top) <= tol && Math.abs(r.left) <= tol
+    && r.width >= window.innerWidth - tol && r.height >= window.innerHeight - tol;
+  if (!ok) pkRootMounted = true;
+  return ok ? body : document.documentElement;
+}
+function pkMount(el) { pkLayer().appendChild(el); return el; }
+// 浮层挂到 <html> 后，留在 body 里的酒馆提示会被压在面板下面，一并移出来。
+function pkLiftToasts() {
+  if (!pkRootMounted) return;
+  const box = document.getElementById('toast-container');
+  if (box && box.parentElement !== document.documentElement) document.documentElement.appendChild(box);
+}
+const toast = (t, m) => { if (!window.toastr) return; window.toastr[t](m); pkLiftToasts(); };
 
 // Content belongs to the current message, not the previously edited poster.
 // Keep pageSkin, font, colors, layout, toggle preferences and saved presets.
@@ -3368,7 +3393,7 @@ ${ui.sl('上下', 'avatarCropY', 0, 100, 1)}
   <input type="file" class="pk-cssfile" accept=".css,text/css" hidden>
   <input type="file" class="pk-jsonfile" accept=".json,application/json" hidden>
   <input type="file" class="pk-fontfile" accept=".ttf,.otf,.woff,.woff2,font/*" hidden>`;
-  document.body.appendChild(ov);
+  pkMount(ov);
   st.canvas = ov.querySelector('canvas');
 
   const $ = s => ov.querySelector(s);
@@ -4299,7 +4324,7 @@ function showSnippetActionMenu(text,messageId,clientX,clientY){
     hideSnippetActionMenu();stopSnippetPicking(false);
     openById(null,selectedText,reference);
   });
-  document.body.appendChild(menu);snippetActionMenu=menu;
+  pkMount(menu);snippetActionMenu=menu;
   const vv=window.visualViewport;
   const left=vv?.offsetLeft||0,top=vv?.offsetTop||0;
   const width=vv?.width||window.innerWidth,height=vv?.height||window.innerHeight;
@@ -4764,7 +4789,7 @@ function startSnippetPicking(options={}){
   if(quick)document.querySelector('#chat .mes[mesid="'+options.messageId+'"]')?.classList.add('pk-snip-active-message');
   snippetPicking=true;
   snippetMarkHost=document.createElement('div');snippetMarkHost.id='pk-snip-mark-host';
-  document.body.appendChild(snippetMarkHost);
+  pkMount(snippetMarkHost);
   snippetBar=document.createElement('div');snippetBar.id='pk-snip-bar';
   snippetBar.innerHTML='<span>点句后选收藏 / 合并 / 美化 <small data-snip-count>0 句已标记</small></span><div class="pk-snip-pick-actions"><button type="button" data-snip-pick-merge disabled>合并</button><button type="button" data-snip-pick-done>退出选择</button></div>';
   if(quick)snippetBar.querySelector('span').firstChild.textContent='点击本条消息中的句子 ';
@@ -4775,7 +4800,7 @@ function startSnippetPicking(options={}){
   snippetBar.querySelector('[data-snip-pick-done]').onclick=e=>{
     e.preventDefault();e.stopPropagation();stopSnippetPicking(!snippetQuickTarget&&!snippetTapFromFloating);
   };
-  document.body.appendChild(snippetBar);
+  pkMount(snippetBar);
   document.addEventListener('click',onSnippetClick,true);
   document.addEventListener('scroll',snippetScheduleMarks,true);
   window.addEventListener('scroll',snippetScheduleMarks,{passive:true});
@@ -5178,7 +5203,7 @@ function snippetOpenMergeEditor(plan){
     },'pk-snip-primary'));
   modal.appendChild(buttons);overlay.appendChild(modal);
   overlay.addEventListener('click',e=>{if(e.target===overlay){if(plan.fromSelection)repoSelectionMergeDrafts.length=0;overlay.remove();snippetMergeEditor=null;}});
-  document.body.appendChild(overlay);snippetMergeEditor=overlay;
+  pkMount(overlay);snippetMergeEditor=overlay;
   editor.focus();
 }
 function snippetMergeFromPicking(){
@@ -5550,7 +5575,7 @@ function openSnippetBox(){
   const css=snippetBox.querySelector('[data-snip-file="css"]');
   css.onchange=()=>{const f=css.files[0];css.value='';snippetImportCss(f);};
   snippetBox.addEventListener('click',e=>{if(e.target===snippetBox)closeSnippetBox();});
-  document.body.appendChild(snippetBox);renderSnippetBox();
+  pkMount(snippetBox);renderSnippetBox();
 }
 
 function ensureRepoWandMenu() {
@@ -5662,7 +5687,7 @@ function initSnippetTapHandle(){
     if(!document.querySelector('#chat .mes[mesid]')){snippetToast('当前没有可收藏的消息');return;}
     startSnippetPicking({fromFloating:true});
   });
-  document.body.appendChild(snippetTapHandle);syncSnippetTapHandle();
+  pkMount(snippetTapHandle);syncSnippetTapHandle();
 }
 
 // Selection is a separate, optional shortcut to the existing editor. It does
@@ -5809,7 +5834,7 @@ function ensureRepoSelectionButton(){
     if(Date.now()-lastPointer<800){e.preventDefault();e.stopPropagation();return;}
     launch(e,target.dataset.repoAction);
   });
-  repoSelectionButton=menu;document.body.appendChild(menu);
+  repoSelectionButton=menu;pkMount(menu);
 }
 function updateRepoSelection(){
   // Only inspect endpoints and eligibility during high-frequency drag events.
