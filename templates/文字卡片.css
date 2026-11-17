@@ -17,7 +17,7 @@
 .pk-css-page .iosq-ghost i:nth-child(2){top:66px;left:26px;width:165px;height:7px;background:#b6b6b6}
 .pk-css-page .iosq-ghost i:nth-child(3){top:103px;left:21px;width:340px;height:14px;background:#d6d6d6}
 .pk-css-page .iosq-stack{position:relative;z-index:1;width:100%;padding:121px 19px 42px}
-.pk-css-page .iosq-card{width:100%;overflow:hidden;background:#fff;border-radius:12px;box-shadow:0 5px 9px rgba(0,0,0,.14),0 17px 25px rgba(0,0,0,.075)}
+.pk-css-page .iosq-card{width:100%;overflow:hidden;background:#fff;border-radius:12px;box-shadow:none;border:1px solid #e5e5e5}
 .pk-css-page .iosq-quote{min-height:46px;padding:14px 12px 10px;color:#141414;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
 .pk-css-page .iosq-quote p.pk-css-paragraph{margin:0!important;padding:0!important;line-height:1.43!important;font-weight:350}
 .pk-css-page .iosq-quote p.pk-css-paragraph+p.pk-css-paragraph{margin-top:4px!important}
