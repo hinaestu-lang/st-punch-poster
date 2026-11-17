@@ -1260,13 +1260,10 @@ function cssIconSvg(name){
 // in-place editing and PNG export. This prevents one edited note from replacing
 // the entire multi-selection, and ensures that stray closing brackets are not
 // treated as separate notes.
-// A single source newline is a line break *inside* a paragraph. Only an
-// actual empty line starts a new paragraph. Keep explicit empty lines as
-// layout spacers, and use this one rule for every CSS text template.
-// Source markup sometimes encodes a visual line break as a single newline.
-// That is NOT a new paragraph and must not be displayed as a forced line-wrap.
-// Join such lines for natural browser wrapping; preserve the untouched source
-// in st.paraText so a template never mutates the selected message itself.
+// Selection extraction has already discarded HTML formatting whitespace.
+// Preserve every remaining explicit newline, including a single <br>, as a
+// paragraph boundary in all CSS templates. Automatic screen wrapping never
+// inserts a newline here. Empty lines remain optional layout spacers.
 function softJoinGap(left,right){
   if(!left||!right)return '';
   const hanKana=/[\u3400-\u9fff\uf900-\ufaff\u3040-\u30ff\u31f0-\u31ff\uff66-\uff9f]/u;
@@ -1277,31 +1274,19 @@ function softJoinGap(left,right){
     ||(hanKana.test(left)&&cjkPunctuation.test(right));
   return joined?'':' ';
 }
-function softJoinLines(value){
-  const lines=String(value??'').split('\n').map(s=>s.trim());
-  let result='';
-  for(const line of lines){
-    if(!line)continue;
-    if(!result){result=line;continue;}
-    // Use exactly the same separator as a soft newline inside a DOM text node.
-    result+=softJoinGap(result.slice(-1),line[0]);
-    result+=line;
-  }
-  return result;
-}
 function sourceParagraphParts(value){
   const raw=String(value??'').replace(/\r\n?/g,'\n');
   const result=[];
-  const separator=/\n{2,}/g;
+  const separator=/\n+/g;
   let start=0,match;
   while((match=separator.exec(raw))){
     const paragraph=raw.slice(start,match.index);
-    if(paragraph.trim())result.push({text:softJoinLines(paragraph),blank:false});
+    if(paragraph.trim())result.push({text:paragraph.trim(),blank:false});
     for(let i=1;i<match[0].length;i++)result.push({text:'',blank:true});
     start=separator.lastIndex;
   }
   const tail=raw.slice(start);
-  if(tail.trim())result.push({text:softJoinLines(tail),blank:false});
+  if(tail.trim())result.push({text:tail.trim(),blank:false});
   return result;
 }
 function sourceTextParagraphs(value){
@@ -4263,6 +4248,13 @@ function snippetNodeText(body){
     // Some themes/regex leave literal blank lines in text nodes instead of
     // creating separate <p> elements. These are real paragraph boundaries.
     // Annotate the last newline; never insert text or shift source offsets.
+    // pre/pre-wrap/pre-line text contains intentional visible newlines.
+    // Ordinary HTML source-formatting newlines still get soft-joined.
+    let whiteSpace='';
+    try{whiteSpace=window.getComputedStyle(n.parentElement).whiteSpace;}catch(_){}
+    if(/^(pre|pre-wrap|pre-line|break-spaces)$/.test(whiteSpace)){
+      for(const gap of piece.matchAll(/\n/g))breaks.set(offset+gap.index,'br');
+    }
     for(const gap of piece.matchAll(/\n(?:[ \t\u3000]*\n)+/g)){
       const last=gap[0].lastIndexOf('\n');
       breaks.set(offset+gap.index+last,'block');
