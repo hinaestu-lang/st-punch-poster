@@ -2402,7 +2402,25 @@ function postypeAvatarSrc(p) {
     const dir=side==='user'?'User Avatars':'characters';
     return '/'+dir+'/'+clean.split('/').map(encodeURIComponent).join('/');
   };
-  if(side==='char' && st.savedRecord)return resolve(st.savedRecord.avatar||'');
+  if(side==='char' && st.savedRecord){
+    const role=snippetRoleOf(st.savedRecord);
+    const actor=(c.characters||[]).find?.(item=>item?.name===role.name);
+    // Resolve the saved identity against installed cards even with no chat open.
+    const card=actor?.avatar||actor?.avatar_url;
+    if(card)return resolve(card);
+    const saved=resolve(st.savedRecord.avatar||'');
+    if(saved)return saved;
+    // Only use a live message avatar when its speaker is the saved character.
+    const messages=document.querySelectorAll('#chat .mes');
+    for(const mes of messages){
+      const id=Number(mes.getAttribute('mesid'));
+      if(c.chat?.[id]?.name!==role.name)continue;
+      const img=mes.querySelector('.avatar img');
+      const src=img?.currentSrc||img?.getAttribute('src');
+      if(src)return src;
+    }
+    return '';
+  }
   if(side==='char') {
     const chars=c.characters||[];
     const idx=c.characterId??c.characterIndex;
@@ -2712,6 +2730,7 @@ function hitTest(e) {
 function loadMessage(id, selText) {
   const m = ctx().chat[id], picked = normalizeParagraphs(selText || '');
   if (!m || !picked) return false;
+  st.savedRecord=null;
   st.isUser = !!m.is_user; st.speaker = m.name || '';
   st.base = picked;
   st.custom = null; st.customIsRendered=false; st.raw = '\u0000';
