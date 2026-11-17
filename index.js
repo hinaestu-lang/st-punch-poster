@@ -4243,8 +4243,36 @@ function snippetNodeText(body){
     }
     if(!n.textContent || n.parentElement?.closest('script,style,[hidden],[aria-hidden="true"]'))continue;
     const piece=n.textContent;
-    chunks.push({node:n,start:full.length,end:full.length+piece.length});full+=piece;
+    const offset=full.length;
+    chunks.push({node:n,start:offset,end:offset+piece.length});full+=piece;
+    // Some themes/regex leave literal blank lines in text nodes instead of
+    // creating separate <p> elements. These are real paragraph boundaries.
+    // Annotate the last newline; never insert text or shift source offsets.
+    for(const gap of piece.matchAll(/\n(?:[ \t\u3000]*\n)+/g)){
+      const last=gap[0].lastIndexOf('\n');
+      breaks.set(offset+gap.index+last,'block');
+    }
     if(/\S/u.test(piece)){brPending=false;lastBrAt=-1;}
+  }
+  // A theme may render *all* source newlines as a single <br>, including
+  // paragraph breaks. Recover only when the raw message and the rendered
+  // text match exactly after collapsing repeated newlines. If they don't
+  // match (Markdown, display regex, different content), trust the DOM instead.
+  if(full.includes('\n') && !Array.from(breaks.values()).includes('block')){
+    const mes=body.closest?.('#chat .mes[mesid]');
+    const id=Number(mes?.getAttribute('mesid'));
+    const source=Number.isInteger(id)&&id>=0 ? ctx().chat?.[id]?.mes : null;
+    if(typeof source==='string' && /\n{2,}/.test(source)){
+      const raw=normalizeParagraphs(source);
+      let flattened='',at=0;const paragraphOffsets=[];
+      for(let i=0;i<raw.length;){
+        if(raw[i]!=='\n'){flattened+=raw[i++];at++;continue;}
+        let next=i+1;while(raw[next]==='\n')next++;
+        if(next-i>1)paragraphOffsets.push(at);
+        flattened+='\n';at++;i=next;
+      }
+      if(flattened===full)for(const at of paragraphOffsets)breaks.set(at,'block');
+    }
   }
   return {full,chunks,breaks};
 }
