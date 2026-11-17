@@ -625,3 +625,42 @@ body:has(#pk-snip-overlay) #pk-snip-tap-handle,body:has(#pk-overlay.show) #pk-sn
     font-size:16px!important;
   }
 }
+
+/* Keep settings inside the visual viewport when the software keyboard opens.
+   A single bounded panel owns scrolling; scrolling never recenters the caret. */
+#pk-overlay.pk-keyboard.panel {
+  box-sizing:border-box!important;
+  inset:auto!important;
+  top:var(--pk-kb-top,0px)!important;
+  left:0!important;
+  width:100%!important;
+  height:var(--pk-kb-height,100dvh)!important;
+  max-height:var(--pk-kb-height,100dvh)!important;
+  padding:max(8px,env(safe-area-inset-top)) 8px 8px!important;
+  align-items:stretch!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+}
+#pk-overlay.pk-keyboard.panel .pk-modal {
+  height:100%!important;
+  max-height:100%!important;
+  min-height:0!important;
+  margin:0!important;
+}
+#pk-overlay.pk-keyboard.panel .pk-settings-layer {
+  flex:1 1 0%!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:hidden!important;
+}
+#pk-overlay.pk-keyboard.panel .pk-panel {
+  flex:1 1 0%!important;
+  height:auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  touch-action:pan-y;
+  -webkit-overflow-scrolling:touch;
+}
+#pk-overlay.pk-keyboard.panel .pk-stage,
+#pk-overlay.pk-keyboard.panel .pk-live-grip {display:none!important}

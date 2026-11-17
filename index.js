@@ -2764,6 +2764,7 @@ function updateEditorBounds() {
   });
 }
 let keyboardFrame = 0;
+let keyboardRevealPending = false;
 let keyboardCoolingUntil = 0;
 let fieldTimer = 0;
 let pendingField = null;
@@ -2792,14 +2793,17 @@ function queueField(entry) {
   // Never repaint a long Canvas while the iOS keyboard is still composing / visible.
   if (!keyboardIsOpen()) fieldTimer = setTimeout(flushField, 360);
 }
-function syncKeyboardViewport() {
-  if (!st.ov || !keyboardIsOpen() || compositionFields.size) return;
+function syncKeyboardViewport(reveal = false) {
+  if (!st.ov || !keyboardIsOpen()) return;
   const vv = window.visualViewport;
   const height = vv ? vv.height : window.innerHeight;
   const top = vv ? vv.offsetTop : 0;
   if (!height || height < 80) return;
   st.ov.style.setProperty('--pk-kb-height', Math.round(height) + 'px');
   st.ov.style.setProperty('--pk-kb-top', Math.round(top) + 'px');
+  // Scrolling the viewport must not pull the focused input back into view.
+  // Update keyboard geometry during composition, but leave the IME caret alone.
+  if (!reveal || compositionFields.size) return;
   // Keep the active input inside the scrollable settings panel, without scrolling the host chat.
   const active = document.activeElement;
   if (!keyboardTarget(active) || !st.ov.contains(active)) return;
@@ -2827,17 +2831,21 @@ function syncKeyboardViewport() {
   if (a.bottom > b.bottom - 12) scroller.scrollTop += a.bottom - (b.bottom - 12);
   else if (a.top < b.top + 8) scroller.scrollTop += a.top - (b.top + 8);
 }
-function queueKeyboardViewport() {
+function queueKeyboardViewport(reveal = false) {
+  keyboardRevealPending = keyboardRevealPending || reveal;
   if (keyboardFrame || !keyboardIsOpen()) return;
   keyboardFrame = requestAnimationFrame(() => {
     keyboardFrame = 0;
-    syncKeyboardViewport();
+    const reveal = keyboardRevealPending;
+    keyboardRevealPending = false;
+    syncKeyboardViewport(reveal);
   });
 }
 function keyboardDismiss() {
   if (!st.ov) return;
   if (st.ov.classList.contains('pk-keyboard')) keyboardCoolingUntil = Date.now() + 320;
   st.ov.classList.remove('pk-keyboard');
+  keyboardRevealPending = false;
   st.ov.style.removeProperty('--pk-kb-height');
   st.ov.style.removeProperty('--pk-kb-top');
   if (keyboardFrame) { window.cancelAnimationFrame(keyboardFrame); keyboardFrame = 0; }
@@ -3414,7 +3422,7 @@ function buildOverlay() {
     if (!keyboardTarget(focused) || (window.innerWidth > 520 && !/iPhone|iPad|iPod/.test(window.navigator?.userAgent||'') && !(window.navigator?.platform==='MacIntel' && window.navigator?.maxTouchPoints>1))) return;
     ov.querySelector('.pk-modal')?.style.removeProperty('height');
     ov.classList.add('pk-keyboard');
-    queueKeyboardViewport();
+    queueKeyboardViewport(true);
   });
   ov.addEventListener('focusout', e => {
     const focused=e.composedPath?.().find(node=>keyboardTarget(node))||e.target;
@@ -5722,9 +5730,9 @@ function init() {
   window.visualViewport?.addEventListener('resize',onRepoReposition);
   window.visualViewport?.addEventListener('scroll',onRepoReposition);
 
-  const onResize = () => {
+  const onResize = (event) => {
     if (!isOpen()) return;
-    if (keyboardIsOpen()) { queueKeyboardViewport(); return; }
+    if (keyboardIsOpen()) { queueKeyboardViewport(event?.type === 'resize'); return; }
     if (Date.now() < keyboardCoolingUntil) return;
     if (st.editing) syncVisualViewport();
     schedule();
