@@ -5089,10 +5089,11 @@ function snippetRenderLibrary(area){
   const toolbar=snippetMake('div','pk-snip-toolbar');
   toolbar.append(snippetButton('＋ 拾取句子',startSnippetPicking,'pk-snip-primary'),
     snippetButton('手动添加',()=>{snippetView='manual';renderSnippetBox();},'pk-snip-soft'));
-  toolbar.append(snippetButton('全选筛选结果',()=>{snippetChosen.clear();snippetFilteredItems().forEach(item=>snippetChosen.add(item.id));snippetRenderList(list);},'pk-snip-soft'),
-    snippetButton('取消选择',()=>{snippetChosen.clear();snippetRenderList(list);},'pk-snip-soft'),
+  const selectionBar=snippetMake('div','pk-snip-selection-bar');
+  selectionBar.append(snippetButton('全选',()=>{snippetChosen.clear();snippetFilteredItems().forEach(item=>snippetChosen.add(item.id));snippetRenderList(list);},'pk-snip-soft'),
+    snippetButton('取消',()=>{snippetChosen.clear();snippetRenderList(list);},'pk-snip-soft'),
     snippetButton('打标签',()=>{if(!snippetChosen.size){snippetToast('请先选择句子');return;}const value=window.prompt('添加标签（逗号分隔）','');if(value===null)return;const tags=snippetTags(value);for(const item of snippetStore())if(snippetChosen.has(item.id))item.tags=snippetTags([...snippetTags(item.tags),...tags]);persist();renderSnippetBox();},'pk-snip-soft'));
-  area.appendChild(toolbar);
+  area.append(toolbar,selectionBar);
   const list=snippetMake('div','pk-snip-list');area.appendChild(list);
   const footer=snippetMake('footer','pk-snip-footer');
   footer.appendChild(snippetMake('span','pk-snip-selected'));

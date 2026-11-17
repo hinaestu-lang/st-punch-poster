@@ -302,7 +302,7 @@
 #pk-snip-overlay .pk-snip-head button:last-child{font-size:24px}
 #pk-snip-overlay .pk-snip-area{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
 #pk-snip-overlay .pk-snip-area.pk-snip-scrolling{overflow:auto;padding-bottom:22px}
-#pk-snip-overlay .pk-snip-toolbar{grid-template-columns:1fr 1fr}
+
 #pk-snip-overlay .pk-snip-toolbar button,#pk-snip-overlay .pk-snip-primary,#pk-snip-overlay .pk-snip-soft{border-radius:12px;padding:11px 14px;font-weight:650;min-height:43px;text-align:center}
 #pk-snip-overlay .pk-snip-filters{display:flex}
 #pk-snip-overlay .pk-snip-filters input{min-width:0;flex:1;max-width:100%;outline:none}
@@ -372,7 +372,7 @@
 #pk-snip-overlay .pk-snip-filters{order:0;gap:8px;padding-bottom:12px}
 #pk-snip-overlay .pk-snip-filters input{height:40px;padding:9px 13px;border:none;background:var(--sn-soft);border-radius:12px;font-size:14px}
 #pk-snip-overlay .pk-snip-filters select{max-width:41%;min-width:108px;font-size:12px;border:none;background:var(--sn-soft);border-radius:12px}
-#pk-snip-overlay .pk-snip-toolbar{order:1;display:flex;gap:8px;margin-bottom:8px}
+#pk-snip-overlay .pk-snip-toolbar{order:1;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:2px 0 0}
 #pk-snip-overlay .pk-snip-toolbar button{min-height:38px;padding:7px 12px;border-radius:10px;font-size:13px;font-weight:600}
 #pk-snip-overlay .pk-snip-primary{background:var(--sn-accent)!important;color:var(--sn-accent-fg,#fff)!important}
 #pk-snip-overlay .pk-snip-soft{background:var(--sn-soft)!important;color:var(--sn-fg)!important}
@@ -683,3 +683,8 @@ body:has(#pk-snip-overlay) #pk-snip-tap-handle,body:has(#pk-overlay.show) #pk-sn
 #pk-snip-overlay .pk-snip-filters input{flex:1 0 100%}
 #pk-snip-overlay .pk-snip-filters select{flex:1;max-width:calc(50% - 4px);min-width:0}
 #pk-snip-overlay .pk-snip-card-quote{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;white-space:normal}
+
+#pk-snip-overlay .pk-snip-toolbar button{width:100%;min-width:0;white-space:nowrap;min-height:42px}
+#pk-snip-overlay .pk-snip-selection-bar{order:1;display:flex;justify-content:flex-end;align-items:center;gap:4px;margin:4px 0 8px}
+#pk-snip-overlay .pk-snip-selection-bar button{background:transparent;border:0;border-radius:7px;min-height:36px;padding:6px 12px;font-size:12px;font-weight:500;white-space:nowrap;color:var(--sn-text,inherit)}
+#pk-snip-overlay .pk-snip-selection-bar button:active{background:var(--sn-soft)}
