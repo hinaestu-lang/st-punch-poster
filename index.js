@@ -3594,7 +3594,9 @@ ${ui.sl('上下', 'avatarCropY', 0, 100, 1)}
   fileIn.addEventListener('change', () => {
     const f = fileIn.files[0]; fileIn.value = '';
     const dest=upKey;upKey='';
+    const draft=st.draftEpoch,settings=cur();
     if (f && dest) upload(f, url => {
+      if(st.draftEpoch!==draft||cur()!==settings||st.ov!==ov)return;
       if (dest.startsWith('pub:')) { updateEditorialImage(dest.slice(4),'src',url); fillEditorialImages(); }
       else setKey(dest,url);
     }, dest.startsWith('pub:'));
@@ -4190,6 +4192,8 @@ function wholeMessageText(id, mes) {
 function openById(id, selText, savedRecord=null) {
   const picked = normalizeParagraphs(selText || wholeMessageText(id));
   if (!picked) { toast('info', '当前消息没有可用文字'); return; }
+  flushField();
+  st.draftEpoch=(st.draftEpoch||0)+1;
   beginMessageDraft(savedRecord?'saved:'+savedRecord.id:id);
   st.savedRecord=savedRecord;
   if (!st.ov) { st.ov = buildOverlay(); fillTpl(); fillSigTpl(); fillCssList(); }
@@ -4965,7 +4969,7 @@ function snippetImportData(file){
           if(!(key in existing))existing[key]=val;
       }
       store();persist();syncSnippetTapHandle();snippetChosen.clear();snippetToast('完整插件数据已恢复','success');renderSnippetBox();
-      if(st.ov){fillCssList();syncAll();schedule(true);}return;
+      if(st.ov){fillCssList();syncAll();buildText();schedule(true);resetHistory();}return;
     }
     // Backward compatibility: old sentence-only exports remain importable.
     const items=Array.isArray(data)?data:(data?.format==='punch-poster-sentences'&&Array.isArray(data.sentences)?data.sentences:null);
@@ -4992,7 +4996,9 @@ function snippetImportCss(file){
       &&!window.confirm('已存在同名模板「'+spec.name+'」。确定覆盖吗？'))return;
     cssEntries()[spec.id]=spec;
     if(store().cssHidden)delete store().cssHidden[spec.id];
-    persist();snippetToast('已导入模板：'+spec.name,'success');renderSnippetBox();
+    persist();
+    if(st.ov){fillCssList();syncSkinSelection();schedule(true);}
+    snippetToast('已导入模板：'+spec.name,'success');renderSnippetBox();
   }).catch(error=>snippetToast(error.message||'CSS 导入失败','error'));
 }
 function snippetMergePlan(ids,picking=false){

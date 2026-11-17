@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const s=fs.readFileSync(require('node:path').join(__dirname,'../index.js'),'utf8');
+let handler,callback,writes=0;const settings={},ov={},st={draftEpoch:1,ov};
+const code=s.slice(s.indexOf("  fileIn.addEventListener('change'"),s.indexOf('  // ShadowRoot events are retargeted'));
+const fileIn={files:[{}],addEventListener(event,fn){handler=fn;}};
+const c={fileIn,upKey:'skinImg',st,ov,cur:()=>settings,upload:(file,fn)=>callback=fn,setKey:()=>writes++,updateEditorialImage(){},fillEditorialImages(){}};
+vm.runInNewContext(code,c);handler();st.draftEpoch=2;callback('old-image');assert.equal(writes,0);
+c.upKey='skinImg';handler();callback('current-image');assert.equal(writes,1);
+let refresh=0,render=0;
+const importCode=s.slice(s.indexOf('function snippetImportCss('),s.indexOf('function snippetMergePlan('));
+const entries={};
+const api=vm.runInNewContext(importCode+';snippetImportCss',{cssReadFile:()=>Promise.resolve('css'),cssClean:()=>({id:'test',name:'模板'}),cssEntries:()=>entries,store:()=>({}),persist(){},st,fillCssList:()=>refresh++,syncSkinSelection(){},schedule(){},snippetToast(){},renderSnippetBox:()=>render++});
+(async()=>{api({});await new Promise(r=>setImmediate(r));assert.equal(refresh,1);assert.equal(render,1);assert(entries.test);console.log('Passed late-upload rejection, current upload acceptance and live CSS list refresh');})().catch(e=>{console.error(e);process.exitCode=1});
