@@ -1,7 +1,7 @@
 // repo美化 · SillyTavern 扩展版
 (() => {
-  // 扩展直接运行在酒馆主页面；保留这层兼容，便于与旧的酒馆助手版共用同一份代码。
-  const window = globalThis.parent && globalThis.parent !== globalThis ? globalThis.parent : globalThis;
+  // 扩展直接运行在酒馆主页面，不再借用 parent：酒馆被套在 iframe 里时，parent 可能跨域或是别的页面。
+  const window = globalThis;
   const document = window.document;
   const { Image, FontFace, MutationObserver, SillyTavern, Path2D, DOMMatrix } = window;
   const requestAnimationFrame = window.requestAnimationFrame.bind(window);
@@ -355,10 +355,32 @@ function beginMessageDraft(messageId) {
 }
 
 
+// 结构复制但共享字符串：上传图片是几 MB 的 base64，字符串不可变，直接共享引用即可，
+// 避免撤销历史里每一步都复制一遍图片。
+function shareClone(v) {
+  if (Array.isArray(v)) return v.map(shareClone);
+  if (v && typeof v === 'object') {
+    const out = {};
+    for (const k of Object.keys(v)) if (v[k] !== undefined && typeof v[k] !== 'function') out[k] = shareClone(v[k]);
+    return out;
+  }
+  return v;
+}
+// 深比较：共享的字符串按引用即可判定相同，不再整份 JSON.stringify。
+function sameValue(a, b) {
+  if (a === b) return true;
+  if (Array.isArray(a)) return Array.isArray(b) && a.length === b.length && a.every((x, i) => sameValue(x, b[i]));
+  if (a && b && typeof a === 'object' && typeof b === 'object' && !Array.isArray(b)) {
+    const ka = Object.keys(a).filter(k => a[k] !== undefined), kb = Object.keys(b).filter(k => b[k] !== undefined);
+    return ka.length === kb.length && ka.every(k => sameValue(a[k], b[k]));
+  }
+  return false;
+}
+
 // 操作历史：撤销 / 重做只作用于当前海报，不会修改酒馆的原始消息。
 function snapshot() {
   return {
-    settings: clone(cur()), custom: st.custom, customIsRendered: !!st.customIsRendered,
+    settings: shareClone(cur()), custom: st.custom, customIsRendered: !!st.customIsRendered,
     holes: clone(st.holes), free: clone(st.free), off: clone(st.off),
     seed: st.seed, fid: st.fid,
   };
@@ -374,7 +396,7 @@ function historyPush(key = '') {
   if (st.historyLock || !st.ov || !isOpen()) return;
   const item = snapshot();
   const last = st.history[st.historyIndex];
-  if (last && JSON.stringify(last) === JSON.stringify(item)) return;
+  if (last && sameValue(last, item)) return;
   const now = Date.now();
   if (key && key === st.historyLastKey && now - st.historyLastAt < 450 && st.historyIndex > 0 && st.historyIndex === st.history.length - 1) {
     st.history[st.historyIndex] = item;
@@ -396,7 +418,7 @@ function resetHistory() {
 function historyTravel(delta) {
   const i = st.historyIndex + delta;
   if (i < 0 || i >= st.history.length) return;
-  const item = clone(st.history[i]);
+  const item = shareClone(st.history[i]);
   st.historyLock = true;
   st.historyIndex = i;
   const settings = store();
@@ -1650,7 +1672,7 @@ function cssFillTemplate(root, spec){
     }
     if(list)for(const [label,value] of unmatched)appendRow(list,label,value);
   }
-  const p=cur(),n=names(),m=sharedCopy(p);
+  const p=cur(),m=sharedCopy(p);
   const {title,subtitle,author,date}=m;
   // CSS templates supply geometry and hierarchy; editable content shares one
   // global font and ink colour with the native punch canvas.

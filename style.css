@@ -17,7 +17,7 @@
 #pk-overlay .pk-btn:active{opacity:.68}
 #pk-overlay .pk-btn.pk-pri{background:var(--pk-fg);color:var(--pk-bg);border-color:var(--pk-fg);font-weight:650}
 #pk-overlay .pk-btn.pk-ghost{border-color:transparent;background:transparent;color:var(--pk-mute)}
-#pk-overlay .pk-stage{flex:none;position:relative;height:var(--pk-stage-h);min-height:90px;display:flex;align-items:center;justify-content:center;margin:0;padding:17px 18px 13px;background:var(--pk-soft);transition:height .2s ease}
+#pk-overlay .pk-stage{flex:none;position:relative;height:var(--pk-stage-h);display:flex;align-items:center;justify-content:center;margin:0;padding:17px 18px 13px;background:var(--pk-soft);transition:height .2s ease}
 #pk-overlay.panel .pk-stage{height:var(--pk-stage-h2)}
 #pk-overlay .pk-stage canvas{display:block;max-width:100%;max-height:100%;width:auto;height:auto;border-radius:1px;box-shadow:0 3px 22px rgba(0,0,0,.10)}
 #pk-overlay .pk-stage canvas{cursor:crosshair}
@@ -79,7 +79,7 @@
 #pk-overlay .pk-step{display:inline-flex;align-items:center;height:34px;border:1px solid var(--pk-line);border-radius:10px;background:var(--pk-card)}
 #pk-overlay .pk-step b{width:29px;text-align:center;font-size:17px;font-weight:400;cursor:pointer}
 #pk-overlay .pk-cnt{min-width:20px;text-align:center;font-size:12.5px;font-weight:650;font-variant-numeric:tabular-nums}
-#pk-overlay .pk-rep{display:flex;align-items:center;gap:6px;padding:4px 0}
+#pk-overlay .pk-rep{display:flex;align-items:center;padding:4px 0}
 #pk-overlay .pk-rep>i{font-size:10px;color:var(--pk-mute)}
 #pk-overlay .pk-repf{position:relative;flex:1;min-width:0;display:flex}
 #pk-overlay .pk-repf em{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--pk-mute);font-style:normal;pointer-events:none}
@@ -258,7 +258,7 @@
 #pk-overlay.panel .pk-grp header{min-height:44px!important}
 #pk-overlay .pk-tune-open{flex:none;display:inline-flex;justify-content:center;align-items:center;width:28px;height:28px;border:1px solid var(--pk-line);border-radius:8px;background:var(--pk-card);color:var(--pk-mute);cursor:pointer;touch-action:manipulation}
 #pk-overlay .pk-tune-open:active{background:var(--pk-soft);color:var(--pk-fg)}
-#pk-overlay .pk-tune-bar{display:none!important;min-height:52px;height:52px;flex:none;align-items:center;justify-content:space-between;gap:5px;padding:0 9px;border-top:1px solid var(--pk-line);background:var(--pk-bg);position:relative;z-index:11}
+#pk-overlay .pk-tune-bar{display:none!important;min-height:52px;height:52px;flex:none;align-items:center;justify-content:space-between;gap:5px;padding:0 9px;border-top:1px solid var(--pk-line);background:var(--pk-bg);}
 #pk-overlay.pk-tuning .pk-preview-tools,#pk-overlay.pk-tuning .pk-settings-layer{display:none!important}
 #pk-overlay.pk-tuning .pk-tune-bar{display:flex!important}
 #pk-overlay.pk-tuning .pk-stage{display:flex!important;flex:1 1 auto!important;min-height:0!important;max-height:none!important;overflow:auto!important}
@@ -275,7 +275,7 @@
 #pk-overlay .pk-tune-open{font-size:16px!important;line-height:1!important}
 
 /* v36: simultaneous live preview and editing. Never cover the artwork with a drawer. */
-#pk-overlay .pk-live-grip{display:none;align-items:center;justify-content:center;gap:14px;flex:none;height:24px;min-height:24px;background:var(--pk-bg);border-top:1px solid var(--pk-line);border-bottom:1px solid var(--pk-line);touch-action:none;cursor:ns-resize;z-index:3}
+#pk-overlay .pk-live-grip{display:none;align-items:center;justify-content:center;gap:14px;flex:none;height:24px;min-height:24px;background:var(--pk-bg);border-top:1px solid var(--pk-line);border-bottom:1px solid var(--pk-line);touch-action:none;cursor:ns-resize;}
 #pk-overlay .pk-grip-lines{display:block;width:42px;height:4px;border-radius:12px;background:var(--pk-line);box-shadow:0 0 0 1px rgba(100,100,100,.09)}
 #pk-overlay .pk-live-toggle{background:transparent;border:0;font:500 11px/1 -apple-system,BlinkMacSystemFont,sans-serif;color:var(--pk-mute);padding:7px 10px;cursor:pointer}
 #pk-overlay.panel .pk-live-grip{display:flex!important}
@@ -305,7 +305,7 @@
 
 #pk-snip-overlay .pk-snip-toolbar button,#pk-snip-overlay .pk-snip-primary,#pk-snip-overlay .pk-snip-soft{border-radius:12px;padding:11px 14px;font-weight:650;min-height:43px;text-align:center}
 #pk-snip-overlay .pk-snip-filters{display:flex}
-#pk-snip-overlay .pk-snip-filters input{min-width:0;flex:1;max-width:100%;outline:none}
+#pk-snip-overlay .pk-snip-filters input{min-width:0;max-width:100%;outline:none}
 #pk-snip-overlay .pk-snip-filters select{padding:9px 6px}
 #pk-snip-overlay .pk-snip-list{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:12px}
 #pk-snip-overlay .pk-snip-role-heading strong{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -315,7 +315,7 @@
 #pk-snip-overlay .pk-snip-card{display:flex;align-items:center;margin-bottom:9px;overflow:hidden;transition:border-color .14s,background .14s}
 #pk-snip-overlay .pk-snip-card.is-selected{border-color:var(--sn-accent)}
 #pk-snip-overlay .pk-snip-card-content{display:block;text-align:left;flex:1;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere}
-#pk-snip-overlay .pk-snip-card-quote{display:block;white-space:pre-wrap;overflow-wrap:anywhere}
+#pk-snip-overlay .pk-snip-card-quote{overflow-wrap:anywhere}
 #pk-snip-overlay .pk-snip-check{flex:none;display:flex;align-items:center;justify-content:center;color:var(--sn-muted)}
 #pk-snip-overlay .pk-snip-footer{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--sn-border);font-size:12px;color:var(--sn-muted)}
 #pk-snip-overlay .pk-snip-danger{padding:10px 13px;border-radius:10px;font-size:12px;font-weight:650}
@@ -371,9 +371,9 @@
 #pk-snip-overlay .pk-snip-area{padding:15px 17px 0}
 #pk-snip-overlay .pk-snip-filters{order:0;gap:8px;padding-bottom:12px}
 #pk-snip-overlay .pk-snip-filters input{height:40px;padding:9px 13px;border:none;background:var(--sn-soft);border-radius:12px;font-size:14px}
-#pk-snip-overlay .pk-snip-filters select{max-width:41%;min-width:108px;font-size:12px;border:none;background:var(--sn-soft);border-radius:12px}
+#pk-snip-overlay .pk-snip-filters select{font-size:12px;border:none;background:var(--sn-soft);border-radius:12px}
 #pk-snip-overlay .pk-snip-toolbar{order:1;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:2px 0 0}
-#pk-snip-overlay .pk-snip-toolbar button{min-height:38px;padding:7px 12px;border-radius:10px;font-size:13px;font-weight:600}
+#pk-snip-overlay .pk-snip-toolbar button{padding:7px 12px;border-radius:10px;font-size:13px;font-weight:600}
 #pk-snip-overlay .pk-snip-primary{background:var(--sn-accent)!important;color:var(--sn-accent-fg,#fff)!important}
 #pk-snip-overlay .pk-snip-soft{background:var(--sn-soft)!important;color:var(--sn-fg)!important}
 #pk-snip-overlay .pk-snip-list{order:2;padding-top:4px}
