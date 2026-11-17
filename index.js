@@ -1489,6 +1489,21 @@ function cssFitSlotPhoto(photo,p,prefix){
   photo.style.setProperty('transform','scale('+scale+')','important');
   photo.style.setProperty('transform-origin',x+'% '+y+'%','important');
 }
+function bubbleRenderBilingual(paragraph,pair){
+  const original=document.createElement('span'),translation=document.createElement('span');
+  original.className='bu-original';translation.className='bu-translation';
+  original.textContent=pair.original;translation.textContent=pair.translation;
+  for(const node of [original,translation]){
+    node.style.setProperty('display','block','important');
+    node.style.setProperty('white-space','normal','important');
+    node.style.setProperty('text-indent','0','important');
+  }
+  translation.style.setProperty('border-top','1px dashed rgba(128,128,128,.4)','important');
+  translation.style.setProperty('margin-top','.55em','important');
+  translation.style.setProperty('padding-top','.55em','important');
+  translation.style.setProperty('opacity','.65','important');
+  paragraph.replaceChildren(original,translation);
+}
 function bubbleBilingual(text){
   const value=String(text||'').trim();
   const match=value.match(/^([\s\S]+?)\s*[（(]([^（）()]+)[）)]\s*$/);
@@ -1818,7 +1833,7 @@ function cssFillTemplate(root, spec){
        pp.className='pk-css-paragraph'+(blank?' pk-css-blank':'');
        pp.textContent=blank?'\u00a0':para;
        const bilingual=templateId==='bubble_chat'&&!blank?bubbleBilingual(para):null;
-       if(bilingual){const original=document.createElement('span'),translation=document.createElement('span');original.className='bu-original';translation.className='bu-translation';original.textContent=bilingual.original;translation.textContent=bilingual.translation;pp.replaceChildren(original,translation);}
+       if(bilingual)bubbleRenderBilingual(pp,bilingual);
        // Render line-wrapped source text naturally. This overrides template
        // pre-wrap rules, which otherwise recreate the original visual bug.
        if(!blank)pp.style.setProperty('white-space','normal','important');
