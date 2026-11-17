@@ -1,0 +1,34 @@
+/* @pk-template
+{"id":"ridi_book","name":"RIDI","width":390,"html":"<article class=\"rd-page\"><header class=\"rd-nav\"><b class=\"rd-logo\">RIDI</b><span class=\"rd-search\" aria-label=\"搜索\"></span><span class=\"rd-login\">로그인</span></header><section class=\"rd-work\"><aside class=\"rd-side\"><div class=\"rd-cover\" data-pk=\"avatar\"></div><div class=\"rd-preview\">미리보기</div></aside><div class=\"rd-details\"><div class=\"rd-category\">e북 <span>›</span> 작품</div><div class=\"rd-category\">문학 <span>›</span> 발췌</div><h1 data-pk=\"title\"></h1><div class=\"rd-rating\"><strong>★ —점</strong><span> | 관심 —</span></div><p class=\"rd-credit\"><b data-pk=\"author\"></b> <span>저자</span></p><p class=\"rd-credit\"><b data-pk=\"user\"></b> <span>발췌</span></p><p class=\"rd-date\" data-pk=\"date\"></p><p class=\"rd-subtitle\" data-pk=\"subtitle\"></p><div class=\"rd-follow\">＋ 관심</div></div></section><h2 class=\"rd-info\">작품 정보</h2><div class=\"rd-tabs\"><b>작품 소개</b><span>목차</span></div><main class=\"rd-body\" data-pk=\"body\"></main><footer class=\"rd-collapse\">접기 <span>⌃</span></footer></article>"}
+@end-pk-template */
+.rd-page{box-sizing:border-box;width:100%;background:var(--pk-shared-paper,#fff);color:var(--pk-shared-ink,#141414);font-family:var(--pk-shared-font,sans-serif);padding:0 14px 7px}
+.rd-page *{box-sizing:border-box}
+.rd-nav{display:flex;align-items:center;gap:18px;height:48px;margin-bottom:9px;font-family:Arial,sans-serif}
+.rd-logo{font-size:20px;line-height:1;color:#1e9eff;letter-spacing:-1px}
+.rd-search{margin-left:auto;width:14px;height:14px;border:1.5px solid currentColor;border-radius:50%;position:relative}
+.rd-search:after{content:"";position:absolute;width:9px;height:1.5px;background:currentColor;transform:rotate(47deg);right:-7px;bottom:-4px}
+.rd-login{border:1px solid #eee;border-radius:20px;padding:6px 10px;font-size:12px;font-weight:700;color:#808080}
+.rd-work{display:flex;align-items:flex-start;gap:14px}
+.rd-side{flex:0 0 98px;min-width:0}
+.rd-cover{width:98px;height:139px;overflow:hidden;border-radius:3px;background:#eee}
+.rd-cover img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.rd-preview{border:1px solid #ddd;border-radius:6px;text-align:center;padding:9px 0;margin-top:10px;font-size:12px;font-weight:700;opacity:.75}
+.rd-details{flex:1;min-width:0}
+.rd-category{font-size:11px;line-height:1.5;font-weight:700;opacity:.7}
+.rd-category span{font-weight:400;padding:0 2px}
+.rd-details h1{margin:9px 0 10px;font-size:20px;font-weight:800;line-height:1.2;overflow-wrap:anywhere}
+.rd-rating{font:12px/1.5 Arial,sans-serif;margin-bottom:6px}
+.rd-rating strong{color:#dc3232}
+.rd-rating span{opacity:.65}
+.rd-credit,.rd-date,.rd-subtitle{margin:4px 0;font-size:12px;line-height:1.55;overflow-wrap:anywhere}
+.rd-credit span,.rd-date{opacity:.7}
+.rd-subtitle:empty{display:none}
+.rd-follow{display:inline-block;border:1px solid #1e9eff;color:#1e9eff;border-radius:20px;padding:5px 9px;font-size:12px;font-weight:700;margin-top:8px}
+.rd-info{border-top:1px solid #ddd;margin:18px 0 0;padding:11px 0;font-size:16px;font-weight:800}
+.rd-tabs{display:flex;margin:0 -14px;border-top:2px solid #808080;text-align:center;font-size:14px}
+.rd-tabs>b,.rd-tabs>span{width:50%;padding:10px 0}
+.rd-tabs>span{background:rgba(128,128,128,.08);border-left:1px solid #ccc;border-bottom:1px solid #ccc;opacity:.45;font-weight:700}
+.rd-body{padding:15px 0 10px;font-size:14px;line-height:1.75;overflow-wrap:anywhere}
+.rd-body p{margin:0 0 1.5em}
+.rd-body p:last-child{margin-bottom:0}
+.rd-collapse{border:1px solid #ccc;border-radius:6px;text-align:center;font-size:14px;font-weight:700;padding:9px 0}

@@ -8,7 +8,7 @@ SillyTavern 第三方扩展：从聊天中划线、点句、收藏文字，制�
 
 `https://github.com/hinaestu-lang/st-punch-poster`
 
-安装后刷新 SillyTavern 页面，在魔棒菜单中打开「repo美化」。**21 份 CSS 模板已内置，安装后直接可以选择，不需要逐个导入。**
+安装后刷新 SillyTavern 页面，在魔棒菜单中打开「repo美化」。**22 份 CSS 模板已内置，安装后直接可以选择，不需要逐个导入。**
 
 > 从「酒馆助手脚本」迁移：先禁用酒馆助手中的旧「打孔海报」脚本，避免重复注入。两版共用 `extensionSettings['punch-poster']` 设置数据；已有自定义 CSS 会优先于内置同 ID 模板。
 
@@ -17,7 +17,7 @@ SillyTavern 第三方扩展：从聊天中划线、点句、收藏文字，制�
 - `manifest.json`：SillyTavern 第三方扩展清单（必须放仓库根目录）
 - `index.js`：扩展主程序和内置模板注册
 - `style.css`：界面样式
-- `templates/`：21 份独立 CSS 源文件，方便下载、修改和重新导入
+- `templates/`：22 份独立 CSS 源文件，方便下载、修改和重新导入
 
 ## 使用与升级
 
