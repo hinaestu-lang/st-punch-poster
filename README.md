@@ -24,3 +24,18 @@ SillyTavern 第三方扩展：从聊天中划线、点句、收藏文字，制�
 第一次安装后刷新页面；以后在 SillyTavern 扩展管理中更新。内置模板不占用用户的自定义模板存储；需要修改时可在 repo美化界面另行导入同 ID CSS，自己的版本会优先显示。
 
 注意：目前以 Chromium/WebKit 兼容性设计为基础，不能保证所有酒馆主题、正则和手机系统表现完全一致。
+
+## 回归检查
+
+使用 Node.js 运行以下检查，无需安装额外依赖：
+
+```sh
+node tests/paragraphs.cjs
+node tests/dom-paragraphs.cjs
+node tests/avatars.cjs
+node tests/state.cjs
+```
+
+覆盖段落提取、跨段选区、头像导出序列化、规则开关持久化、配色撤销及输入法状态。
+这些是逻辑回归检查；iOS 键盘、滚动和最终 PNG 的显示仍需在实际设备验证。
+

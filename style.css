@@ -287,8 +287,6 @@
 #pk-overlay.panel.pk-live .pk-tabs{height:35px!important;min-height:35px!important}
 #pk-overlay.panel.pk-live .pk-panel{min-height:0!important;flex:1 1 auto!important;overflow-y:auto!important}
 #pk-overlay.panel.pk-live .pk-tune-open{display:none!important}
-#pk-overlay.pk-keyboard.panel.pk-live .pk-stage{display:none!important}
-#pk-overlay.pk-keyboard.panel.pk-live .pk-settings-layer{flex:1 1 auto!important;height:auto!important;max-height:none!important}
 @media(max-width:520px){#pk-overlay.panel.pk-live .pk-modal{width:calc(100vw - 16px)!important;max-width:none!important;border-radius:17px!important}#pk-overlay.panel.pk-live .pk-stage{padding:8px!important}}
 
 #pk-snip-overlay{--sn-bg:#fff;--sn-fg:#191c20;--sn-font-size:15px;--sn-panel-height:82dvh;--sn-panel-width:94vw;position:fixed;inset:0;z-index:100003;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.48);padding:12px;color:var(--sn-fg);font:400 var(--sn-font-size)/1.52 -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sans-serif;-webkit-font-smoothing:antialiased}
@@ -678,3 +676,4 @@ body:has(#pk-snip-overlay) #pk-snip-tap-handle,body:has(#pk-overlay.show) #pk-sn
 #pk-overlay .pk-pair-rail button{display:flex;align-items:center;justify-content:center;width:42px;height:42px;flex-basis:42px}
 #pk-overlay .pk-pair-rail button span{color:var(--pk-pair-ink);font:600 23px/1.1 Georgia,"Songti SC",serif}
 #pk-overlay .pk-pair-custom{justify-content:flex-start;gap:18px}
+

@@ -291,7 +291,7 @@ function store() {
     // Restore safely even if an older import saved malformed lists.
     if(!Array.isArray(s.cur.reps))s.cur.reps=[];
     else s.cur.reps=s.cur.reps.filter(r=>r&&typeof r==='object'&&!Array.isArray(r))
-      .slice(0,300).map(r=>({from:String(r.from??''),to:String(r.to??'')}));
+      .slice(0,300).map(r=>({from:String(r.from??''),to:String(r.to??''),enabled:r.enabled!==false}));
     if(!Array.isArray(s.cur.pubImages))s.cur.pubImages=[];
     else s.cur.pubImages=s.cur.pubImages.filter(x=>x&&typeof x==='object'&&!Array.isArray(x))
       .slice(0,80).map(x=>({...x,src:typeof x.src==='string'?x.src:'',caption:typeof x.caption==='string'?x.caption:''}));
@@ -1434,17 +1434,29 @@ function cssReadableInk(el, ink){
   return bgLum>0.42?'#282828':'#f4f4f4';
 }
 
+const cssPaperStyles=new WeakMap();
 function cssApplyPaperColor(root,p){
+  // Restore template/author inline styles before undo, reset or another colour.
+  // Keep this transient state outside the DOM so exported clones do not inherit it.
+  const previous=cssPaperStyles.get(root);
+  if(previous)for(const [el,saved] of previous){
+    if(!root.contains(el))continue;
+    if(saved.value)el.style.setProperty('background-color',saved.value,saved.priority);
+    else el.style.removeProperty('background-color');
+  }
+  cssPaperStyles.delete(root);
   if(!p.cssPaperOverride)return;
   const base=window.getComputedStyle(root).backgroundColor;
-  const previous=root.dataset.pkPaperColor||'';
-  // Recolour the paper surfaces, preserving differently coloured UI panels.
   const surfaces=[root,...root.querySelectorAll('*')].filter(el=>{
     const color=window.getComputedStyle(el).backgroundColor;
-    return el===root || (color!=='transparent'&&color!=='rgba(0, 0, 0, 0)'&&(color===base||color===previous));
+    return el===root || (color!=='transparent'&&color!=='rgba(0, 0, 0, 0)'&&color===base);
   });
-  for(const el of surfaces)el.style.setProperty('background-color',p.paperColor,'important');
-  root.dataset.pkPaperColor=window.getComputedStyle(root).backgroundColor;
+  const saved=new Map();
+  for(const el of surfaces){
+    saved.set(el,{value:el.style.getPropertyValue('background-color'),priority:el.style.getPropertyPriority('background-color')});
+    el.style.setProperty('background-color',p.paperColor,'important');
+  }
+  cssPaperStyles.set(root,saved);
 }
 
 function cssFillTemplate(root, spec){
@@ -2222,13 +2234,13 @@ async function cssTemplateExport(){
   const pageBox=page.getBoundingClientRect();
   // Use rendered geometry so relative positions are identical in preview/export,
   // even when the preview is scaled to fit a phone screen.
-  const sx=w/Math.max(1,pageBox.width),sy=sx;
+  const sx=w/Math.max(1,pageBox.width);
   const rectOf=node=>{
     const r=node.getBoundingClientRect();
-    return {x:(r.left-pageBox.left)*sx,y:(r.top-pageBox.top)*sy,w:r.width*sx,h:r.height*sy};
+    return {x:(r.left-pageBox.left)*sx,y:(r.top-pageBox.top)*sx,w:r.width*sx,h:r.height*sx};
   };
   const pictures=[];
-  const blank='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+  const blank='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
   const clone=page.cloneNode(true);
   // Collect and load the *real* photos before drawing: WebKit often loses
   // nested <img> tags when serializing HTML inside SVG foreignObject.
@@ -2268,7 +2280,10 @@ async function cssTemplateExport(){
   await Promise.all(photoLoads);
   if(missingPhotos.length)throw new Error('有 '+missingPhotos.length+' 张图片加载失败，已停止导出，避免生成缺图海报。请重新上传或检查图片链接');
   // Even failed remote assets must not be serialized as untrusted URLs.
-  copyPhotos.forEach(img=>img.setAttribute('src',blank));
+  copyPhotos.forEach(img=>{
+    img.setAttribute('src',blank);
+    img.style.setProperty('visibility','hidden','important');
+  });
   clone.style.transform='none';
   const wrapper=document.createElement('div');wrapper.setAttribute('xmlns','http://www.w3.org/1999/xhtml');
   wrapper.style.cssText=`width:${w}px;height:${h}px;overflow:hidden;background:#fff`;
@@ -2794,7 +2809,7 @@ let keyboardFrame = 0;
 let keyboardRevealPending = false;
 let keyboardCoolingUntil = 0;
 let fieldTimer = 0;
-let pendingField = null;
+const pendingFields = new Map();
 const compositionFields = new Set();
 const keyboardTarget = el => el && el.matches && el.matches('input.pk-in:not([type=file]),textarea.pk-in,.pk-edta[contenteditable],[contenteditable=true]');
 function keyboardIsOpen() {
@@ -2802,20 +2817,21 @@ function keyboardIsOpen() {
 }
 function flushField() {
   clearTimeout(fieldTimer); fieldTimer = 0;
-  if (!pendingField) return;
-  const entry = pendingField; pendingField = null;
-  if (entry.type === 'replacement') {
-    const r = cur().reps[entry.index];
-    if (!r) return;
-    if (r[entry.side] === entry.value) return;
-    r[entry.side] = entry.value;
-    persist(); buildText(); schedule(); historyPush('rep-edit');
-  } else {
-    setKey(entry.key, entry.value);
+  const entries=Array.from(pendingFields.values());pendingFields.clear();
+  for(const entry of entries){
+    if (entry.type === 'replacement') {
+      const r = cur().reps[entry.index];
+      if (!r || r[entry.side] === entry.value) continue;
+      r[entry.side] = entry.value;
+      persist(); buildText(); schedule(); historyPush('rep-edit');
+    } else {
+      setKey(entry.key, entry.value);
+    }
   }
 }
 function queueField(entry) {
-  pendingField = entry;
+  const key=entry.type==='replacement'?'replacement:'+entry.index+':'+entry.side:'setting:'+entry.key;
+  pendingFields.set(key,entry);
   clearTimeout(fieldTimer);
   // Never repaint a long Canvas while the iOS keyboard is still composing / visible.
   if (!keyboardIsOpen()) fieldTimer = setTimeout(flushField, 360);
@@ -2870,6 +2886,7 @@ function queueKeyboardViewport(reveal = false) {
 }
 function keyboardDismiss() {
   if (!st.ov) return;
+  compositionFields.clear();
   if (st.ov.classList.contains('pk-keyboard')) keyboardCoolingUntil = Date.now() + 320;
   st.ov.classList.remove('pk-keyboard');
   keyboardRevealPending = false;
@@ -3409,7 +3426,9 @@ function buildOverlay() {
   ov.addEventListener('compositionend', e => {
     const target=e.composedPath?.().find(node=>keyboardTarget(node))||e.target;
     compositionFields.delete(target);
-    acceptTextInput(e);
+    // Safari can mark this final event as composing; its value is committed.
+    const entry=typedField(target);
+    if(entry)queueField(entry);
     if(!compositionFields.size && keyboardRenderPending)schedule();
   });
   ov.addEventListener('input', e=>{
@@ -3434,7 +3453,7 @@ function buildOverlay() {
     }
     if (typedField(e.target) && !compositionFields.has(e.target)) {
       const entry = typedField(e.target);
-      pendingField = entry;
+      queueField(entry);
       if(document.activeElement!==el || !keyboardIsOpen())flushField();
     }
   });
@@ -3625,7 +3644,7 @@ function buildOverlay() {
       schedule(); historyPush('img-reset:' + k);
       return;
     }
-    if (t.dataset.repdel != null) { p.reps.splice(+t.dataset.repdel, 1); persist(); fillReps(); buildText(); schedule(); historyPush('rep-del'); return; }
+    if (t.dataset.repdel != null) { flushField(); p.reps.splice(+t.dataset.repdel, 1); persist(); fillReps(); buildText(); schedule(); historyPush('rep-del'); return; }
     if (t.dataset.tpldel) { e.stopPropagation(); delete s.tpl[t.dataset.tpldel]; persist(); fillTpl(); return; }
     if (t.dataset.tpl) {
       const n = t.dataset.tpl, src = s.tpl[n] || BUILTIN[n];
@@ -3683,7 +3702,7 @@ function buildOverlay() {
       persist();syncLayoutControls();syncOne('pubOn');fillEditorialImages();historyPush('pub-add');
       upKey='pub:'+id; fileIn.click();return;
     }
-    if (act === 'rep-add') { p.reps.push({ from: '', to: '', enabled: true }); persist(); fillReps(); historyPush('rep-add'); }
+    if (act === 'rep-add') { flushField(); p.reps.push({ from: '', to: '', enabled: true }); persist(); fillReps(); historyPush('rep-add'); }
     if (act === 'random') randomHoles(+p.randomCount || 1);
     if (act === 'minus' || act === 'plus') setKey('randomCount', Math.min(99, Math.max(1, (+p.randomCount || 1) + (act === 'plus' ? 1 : -1))));
     if (act === 'clear') { st.holes = []; st.free = []; st.off = {}; schedule(); historyPush('clear'); }
@@ -4303,6 +4322,15 @@ function snippetNodeText(body){
   const walker=document.createTreeWalker(body,window.NodeFilter.SHOW_ELEMENT|window.NodeFilter.SHOW_TEXT);
   const chunks=[],breaks=new Map();let full='',n,lastBrAt=-1,brPending=false;
   const blocks=new Set(['P','DIV','LI','BLOCKQUOTE','PRE','H1','H2','H3','H4','H5','H6','DT','DD']);
+  const styles=new WeakMap();
+  const styleOf=node=>{
+    if(!node)return {};
+    if(!styles.has(node)){
+      let style={};try{style=window.getComputedStyle(node);}catch(_){}
+      styles.set(node,style);
+    }
+    return styles.get(node);
+  };
   // Themes and display regex can render paragraphs as styled <span>/<section>
   // rather than semantic <p>. Respect visible block layout without guessing
   // raw message boundaries or turning screen line wraps into paragraphs.
@@ -4311,8 +4339,7 @@ function snippetNodeText(body){
     if(blocks.has(n.tagName))return true;
     if(!/^(SPAN|SECTION|ARTICLE|MAIN|HEADER|FOOTER|ASIDE|SUMMARY)$/.test(n.tagName)
       && !n.hasAttribute('style'))return false;
-    let display='';
-    try{display=window.getComputedStyle(n).display;}catch(_){}
+    const display=styleOf(n).display;
     return /^(block|flow-root|list-item|flex|grid|table|table-row|table-caption|table-cell)$/.test(display);
   };
   const markBreak=kind=>{
@@ -4324,6 +4351,12 @@ function snippetNodeText(body){
     }else{
       breaks.set(full.length,kind);full+='\n';
     }
+  };
+  let previousBlock=null;
+  const textBlock=node=>{
+    let parent=node.parentElement;
+    while(parent&&parent!==body&&!visualBlock(parent))parent=parent.parentElement;
+    return parent||body;
   };
   while((n=walker.nextNode())){
     if(n.nodeType===1){
@@ -4339,6 +4372,13 @@ function snippetNodeText(body){
     }
     if(!n.textContent || n.parentElement?.closest('script,style,[hidden],[aria-hidden="true"]'))continue;
     const piece=n.textContent;
+    if(/\S/u.test(piece)){
+      const block=textBlock(n);
+      // TreeWalker reports block entry, but no exit event. Preserve the boundary
+      // when text follows a closed paragraph/block without another opening tag.
+      if(previousBlock&&block!==previousBlock)markBreak('block');
+      previousBlock=block;
+    }
     const offset=full.length;
     chunks.push({node:n,start:offset,end:offset+piece.length});full+=piece;
     // Some themes/regex leave literal blank lines in text nodes instead of
@@ -4346,8 +4386,7 @@ function snippetNodeText(body){
     // Annotate the last newline; never insert text or shift source offsets.
     // pre/pre-wrap/pre-line text contains intentional visible newlines.
     // Ordinary HTML source-formatting newlines still get soft-joined.
-    let whiteSpace='';
-    try{whiteSpace=window.getComputedStyle(n.parentElement).whiteSpace;}catch(_){}
+    const whiteSpace=styleOf(n.parentElement).whiteSpace;
     if(/^(pre|pre-wrap|pre-line|break-spaces)$/.test(whiteSpace)){
       for(const gap of piece.matchAll(/\n/g))breaks.set(offset+gap.index,'br');
     }
@@ -5782,7 +5821,8 @@ function init() {
   window.visualViewport?.addEventListener('resize', onResize);
   window.visualViewport?.addEventListener('scroll', onResize);
   return () => {
-    clearTimeout(fieldTimer); fieldTimer = 0; pendingField = null;
+    clearTimeout(fieldTimer); fieldTimer = 0; pendingFields.clear();
+    compositionFields.clear();keyboardRevealPending=false;
     clearTimeout(keyboardRenderTimer); keyboardRenderTimer = 0; keyboardRenderPending = false;
     if (keyboardFrame) { window.cancelAnimationFrame(keyboardFrame); keyboardFrame = 0; }
     window.removeEventListener('resize', onResize);
@@ -5816,7 +5856,10 @@ function init() {
 
 
   const dispose = init();
-  const onPageHide = () => { if (typeof window.__pkDispose === 'function') window.__pkDispose(); };
+  const onPageHide = event => {
+    // A bfcache navigation freezes the page; disposing would break Back/Forward.
+    if(!event.persisted && typeof window.__pkDispose === 'function')window.__pkDispose();
+  };
   window.__pkDispose = () => {
     globalThis.removeEventListener('pagehide', onPageHide);
     if (rafId) { window.cancelAnimationFrame(rafId); rafId = 0; }
@@ -5825,3 +5868,4 @@ function init() {
   };
   globalThis.addEventListener('pagehide', onPageHide);
 })();
+

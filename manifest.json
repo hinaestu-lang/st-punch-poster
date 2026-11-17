@@ -6,7 +6,8 @@
   "js": "index.js",
   "css": "style.css",
   "author": "hinaestu-lang",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "auto_update": true,
   "homePage": "https://github.com/hinaestu-lang/st-punch-poster"
 }
+
