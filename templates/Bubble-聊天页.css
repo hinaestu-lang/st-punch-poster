@@ -292,3 +292,5 @@ div[xmlns="http://www.w3.org/1999/xhtml"] .pk-css-page .bu-avatar img{visibility
 .bu-time-48{order:144}
 .bu-thread:not(:has(.bu-messages>p:nth-child(48):not(.pk-css-blank)))>:is(.bu-group-48,.bu-time-48){display:none!important}
 .bu-messages>p:nth-child(n+49){order:190}
+
+.bu-original,.bu-translation{display:block;white-space:normal}.bu-translation{border-top:1px dashed #d9d9d9;margin-top:.55em;padding-top:.55em;opacity:.65}

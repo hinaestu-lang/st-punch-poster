@@ -1,10 +1,5 @@
 /* @pk-template
-{
-  "id": "dictionary_entry",
-  "name": "字典",
-  "width": 390,
-  "html": "<article class=\"dc-page\"><header class=\"dc-running\" data-pk=\"author\"></header><section class=\"dc-definition\"><h1 class=\"dc-headword\" data-pk=\"title\"></h1><main class=\"dc-entry\" data-pk=\"body\"></main></section><footer class=\"dc-source\" data-pk=\"user\"></footer></article>"
-}
+{"id":"dictionary_entry","name":"字典","width":390,"html":"<article class=\"dc-page\"><header class=\"dc-running\" data-pk=\"author\"></header><section class=\"dc-definition\"><h1 class=\"dc-headword\" data-pk=\"title\"></h1><main class=\"dc-entry\" data-pk=\"body\"></main></section><footer class=\"dc-source\" data-pk=\"title\"></footer></article>"}
 @end-pk-template */
 
 /* Compact dictionary entry. All wording comes from the editor. */
