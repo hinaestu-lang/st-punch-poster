@@ -4314,11 +4314,11 @@ const snippetPrefs=()=>{
   return s.snippetPrefs;
 };
 function snippetToast(message,type='info'){toast(type,message);}
-function snippetCharAvatar(raw){
+function snippetCharAvatar(raw,directory='characters'){
   if(typeof raw!=='string'||!raw.trim())return '';
   const s=raw.trim();
   if(/^(?:data:image\/|blob:|https?:\/\/|\/)/i.test(s))return s;
-  return '/characters/'+s.replace(/^\.?\/?characters\//i,'').split('/').map(encodeURIComponent).join('/');
+  return '/'+directory+'/'+s.replace(/^\.?\/?(?:characters|User Avatars)\//i,'').split('/').map(encodeURIComponent).join('/');
 }
 // ST also sets is_system on /hide messages. Only accept a hidden message
 // as a source when its *actual* speaker name can be verified in this chat.
@@ -4338,14 +4338,15 @@ function snippetCurrentCharacter(messageId){
   if(msg?.is_user){
     const name=String(msg.name||c.name1||'用户').trim()||'用户';
     const domAvatar=document.querySelector('#chat .mes[mesid="'+messageId+'"] .avatar img');
-    const avatar=domAvatar?.currentSrc||domAvatar?.getAttribute('src')||snippetCharAvatar(c.user_avatar||c.userAvatar||'');
+    const avatar=domAvatar?.currentSrc||domAvatar?.getAttribute('src')||snippetCharAvatar(c.user_avatar||c.userAvatar||'','User Avatars');
     return {roleKey:'user:'+name,roleName:name,avatar:avatar||''};
   }
   const chars=Array.isArray(c.characters)?c.characters:[];
   const idx=c.characterId??c.characterIndex;
   const fromMessage=msg&&!msg.is_user&&snippetMessageEligible(messageId)&&typeof msg.name==='string'?msg.name.trim():'';
   const active=chars[idx];
-  const actor=chars.find(v=>v?.name&&fromMessage&&v.name===fromMessage) || (active?.name===fromMessage||!fromMessage?active:null) || chars.find(v=>v?.name===c.name2&&c.name2===fromMessage);
+  const matches=chars.filter(v=>v?.name&&v.name===fromMessage);
+  const actor=(active&&(!fromMessage||active.name===fromMessage)?active:null)||(matches.length===1?matches[0]:null);
   const name=fromMessage||actor?.name||c.name2||'';
   // Use name as a portable grouping key across chats, not volatile message indices.
   const key=name?'char:'+name:'unclassified';
