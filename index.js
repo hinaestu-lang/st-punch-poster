@@ -325,51 +325,78 @@ function store() {
 const clone = o => JSON.parse(JSON.stringify(o || {}));
 const cur = () => ctx().extensionSettings[MODULE].cur;
 const persist = () => ctx().saveSettingsDebounced();
-// 部分主题会给 body 加 filter / backdrop-filter / transform 等属性。Chromium（安卓、电脑）
-// 会因此把 body 当成 position:fixed 的参照容器；而酒馆的 body 高度常常接近 0，
-// 面板就会被挤到屏幕顶端、上半截看不见（iOS 的 WebKit 不受影响）。
-// 挂载前用一个探针检测，被劫持时改挂到 <html>，绕开 body。
-let pkRootMounted = false;
-function pkLayer() {
-  const body = document.body;
-  const probe = document.createElement('div');
-  probe.style.cssText = 'position:fixed;inset:0;visibility:hidden;pointer-events:none';
-  body.appendChild(probe);
-  const r = probe.getBoundingClientRect();
-  probe.remove();
-  const tol = 2; // 允许的误差（像素）
-  // 取较小值：clientWidth/Height 不含滚动条；怪异模式下它是整页高度，这时 innerHeight 更小。
+// 有些主题、脚本或安卓 WebView 会让 position:fixed 不再以屏幕为参照：
+// 参照容器可能偏移、缩放，或者高度为 0，面板就会被挤到屏幕顶端。
+// 做法：测量参照容器的实际位置，偏了就建一个承载层 #pk-layer，按测得的偏差
+// 反向补偿，让它正好盖住屏幕；插件的浮层都挂进这个层，以它为参照。
+// 正常环境测不到偏差，就不建这个层，浮层照旧直接挂在 body 下。
+const PK_FIX_TOL = 2; // 判断偏差的容差（像素）
+let pkHost = null;
+function pkViewportSize() {
+  // 取较小值：clientWidth/Height 不含滚动条；怪异模式下 clientHeight 是整页高度。
   const de = document.documentElement;
-  const vw = Math.min(window.innerWidth, de.clientWidth || window.innerWidth);
-  const vh = Math.min(window.innerHeight, de.clientHeight || window.innerHeight);
-  const ok = Math.abs(r.top) <= tol && Math.abs(r.left) <= tol
-    && r.width >= vw - tol && r.height >= vh - tol;
-  if (!ok) pkRootMounted = true;
-  return ok ? body : document.documentElement;
+  return {
+    w: Math.min(window.innerWidth, de.clientWidth || window.innerWidth),
+    h: Math.min(window.innerHeight, de.clientHeight || window.innerHeight),
+  };
 }
-function pkMount(el) { pkLayer().appendChild(el); return el; }
-// 浮层挂到 <html> 后，留在 body 里的酒馆提示会被压在面板下面，一并移出来。
-// 移出 body 后不再继承 body 的字体和颜色，把这几项按原样写到提示框上，外观保持不变。
-const PK_TOAST_INHERIT = ['font-family', 'font-size', 'line-height', 'color'];
-let pkLiftedToasts = null;
-function pkLiftToasts() {
-  if (!pkRootMounted) return;
-  const box = document.getElementById('toast-container');
-  if (!box || box.parentElement === document.documentElement) return;
-  const from = window.getComputedStyle(document.body);
-  for (const k of PK_TOAST_INHERIT) box.style.setProperty(k, from.getPropertyValue(k));
-  document.documentElement.appendChild(box);
-  pkLiftedToasts = box;
+// 在 parent 里放两个看不见的探针：一个铺满（测参照容器的范围），一个 100×100（测原点和缩放）。
+function pkFixedFrame(parent) {
+  const fill = document.createElement('div');
+  const unit = document.createElement('div');
+  fill.style.cssText = 'position:fixed;inset:0;visibility:hidden;pointer-events:none';
+  unit.style.cssText = 'position:fixed;left:0;top:0;width:100px;height:100px;visibility:hidden;pointer-events:none';
+  parent.append(fill, unit);
+  const a = fill.getBoundingClientRect(), b = unit.getBoundingClientRect();
+  fill.remove(); unit.remove();
+  return { fill: a, ox: b.left, oy: b.top, sx: b.width / 100 || 1, sy: b.height / 100 || 1 };
 }
-// 卸载插件时把提示框放回 body，并清掉写入的样式。
-function pkRestoreToasts() {
-  const box = pkLiftedToasts;
-  pkLiftedToasts = null;
-  if (!box || !box.isConnected || box.parentElement === document.body) return;
-  for (const k of PK_TOAST_INHERIT) box.style.removeProperty(k);
-  document.body.appendChild(box);
+function pkFixedHijacked(frame) {
+  const v = pkViewportSize(), r = frame.fill;
+  return Math.abs(r.left) > PK_FIX_TOL || Math.abs(r.top) > PK_FIX_TOL
+    || Math.abs(r.width - v.w) > PK_FIX_TOL || Math.abs(r.height - v.h) > PK_FIX_TOL;
 }
-const toast = (t, m) => { if (!window.toastr) return; window.toastr[t](m); pkLiftToasts(); };
+// 把承载层贴到屏幕上：先按测得的原点和缩放算位置，再量一次，把剩余偏差补掉。
+function pkPinHost() {
+  if (!pkHost) return;
+  const f = pkFixedFrame(document.body), v = pkViewportSize();
+  const s = pkHost.style;
+  s.left = (-f.ox / f.sx) + 'px';
+  s.top = (-f.oy / f.sy) + 'px';
+  s.width = v.w + 'px';
+  s.height = v.h + 'px';
+  // 参照容器被缩放时反向缩放回来；translate(0) 让承载层自己成为子浮层的参照容器。
+  s.transform = (Math.abs(f.sx - 1) > 0.01 || Math.abs(f.sy - 1) > 0.01)
+    ? `scale(${1 / f.sx},${1 / f.sy})` : 'translate(0,0)';
+  const r = pkHost.getBoundingClientRect();
+  if (Math.abs(r.left) > 0.5) s.left = (parseFloat(s.left) - r.left / f.sx) + 'px';
+  if (Math.abs(r.top) > 0.5) s.top = (parseFloat(s.top) - r.top / f.sy) + 'px';
+}
+function pkEnsureHost() {
+  if (pkHost?.isConnected) { pkPinHost(); return pkHost; }
+  pkHost = document.createElement('div');
+  pkHost.id = 'pk-layer';
+  // z-index 低于酒馆提示框（999999），提示框仍显示在面板上方。
+  pkHost.style.cssText = 'position:fixed;margin:0;padding:0;border:0;z-index:100000;transform-origin:0 0;pointer-events:none';
+  document.body.appendChild(pkHost);
+  window.addEventListener('resize', pkPinHost);
+  window.addEventListener('orientationchange', pkPinHost);
+  pkPinHost();
+  return pkHost;
+}
+function pkRemoveHost() {
+  window.removeEventListener('resize', pkPinHost);
+  window.removeEventListener('orientationchange', pkPinHost);
+  pkHost?.remove();
+  pkHost = null;
+}
+function pkMount(el) {
+  // 一旦检测到偏差就一直使用承载层；每次挂载都重新测量、校正一次。
+  if (pkHost || pkFixedHijacked(pkFixedFrame(document.body))) pkEnsureHost().appendChild(el);
+  else document.body.appendChild(el);
+  return el;
+}
+const toast = (t, m) => window.toastr && window.toastr[t](m);
 
 // Content belongs to the current message, not the previously edited poster.
 // Keep pageSkin, font, colors, layout, toggle preferences and saved presets.
@@ -6045,7 +6072,7 @@ function init() {
     globalThis.removeEventListener('pagehide', onPageHide);
     if (rafId) { window.cancelAnimationFrame(rafId); rafId = 0; }
     dispose();
-    pkRestoreToasts();
+    pkRemoveHost();
     window.__pkDispose = null;
   };
   globalThis.addEventListener('pagehide', onPageHide);

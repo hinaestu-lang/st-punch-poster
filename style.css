@@ -688,3 +688,6 @@
 #pk-snip-overlay .pk-snip-selection-bar{order:1;display:flex;justify-content:flex-end;align-items:center;gap:4px;margin:4px 0 8px}
 #pk-snip-overlay .pk-snip-selection-bar button{background:transparent;border:0;border-radius:7px;min-height:36px;padding:6px 12px;font-size:12px;font-weight:500;white-space:nowrap;color:var(--sn-text,inherit)}
 #pk-snip-overlay .pk-snip-selection-bar button:active{background:var(--sn-soft)}
+/* 承载层：本身不接收点击，挂在里面的浮层照常可点；高亮层保持点击穿透。 */
+#pk-layer>*{pointer-events:auto}
+#pk-layer>#pk-snip-mark-host{pointer-events:none}
