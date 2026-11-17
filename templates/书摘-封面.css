@@ -1,0 +1,21 @@
+/* @pk-template
+{
+  "id": "book_excerpt_cover",
+  "name": "书摘-封面",
+  "width": 390,
+  "html": "<article class=\"ec-page\"><main class=\"ec-body\" data-pk=\"body\"></main><footer class=\"ec-book\"><div class=\"ec-cover\" data-pk=\"avatar\"></div><div class=\"ec-info\"><h1 class=\"ec-title\" data-pk=\"title\"></h1><p class=\"ec-author\" data-pk=\"author\"></p></div></footer></article>"
+}
+@end-pk-template */
+
+/* 封面读取插件头像设置；文字完全由正文、作品名、作者栏填入。 */
+.pk-css-page{box-sizing:border-box!important;margin:0!important;padding:0!important;min-height:0!important;background:var(--pk-shared-paper,#fff)!important;color:var(--pk-shared-ink,#242424)!important;font-family:var(--pk-shared-font,"PingFang SC",sans-serif)!important}
+.pk-css-page .ec-page{width:100%;margin:0;color:inherit;background:transparent}
+.pk-css-page .ec-body{display:flex;flex-direction:column;gap:1em;padding:17px 20px 20px;margin:0;min-width:0;font-size:17px;line-height:1.9;text-align:justify;overflow-wrap:anywhere;word-break:normal}
+.pk-css-page .ec-body>p.pk-css-paragraph{flex:none;min-width:0;font:inherit!important;color:inherit!important;text-align:inherit;white-space:normal}
+.pk-css-page .ec-book{display:flex;align-items:center;gap:13px;padding:19px 20px 20px;margin:0;border-top:1px solid currentColor;border-top-color:color-mix(in srgb,currentColor 15%,transparent)}
+.pk-css-page .ec-cover{flex:0 0 42px;width:42px;height:60px;min-width:42px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:0;background:rgba(127,127,127,.12);font-size:22px;color:inherit;box-shadow:0 1px 5px rgba(0,0,0,.08)}
+.pk-css-page .ec-cover>img.pk-avatar-photo{display:block;width:100%!important;height:100%!important;object-fit:cover!important;border-radius:0!important}
+.pk-css-page .ec-info{flex:1;min-width:0}
+.pk-css-page .ec-title{margin:0 0 5px;padding:0;font-size:19px;line-height:1.35;font-weight:700;overflow-wrap:anywhere}
+.pk-css-page .ec-author{margin:0;padding:0;font-size:12px;line-height:1.45;opacity:.65;overflow-wrap:anywhere}
+@media(max-width:350px){.pk-css-page .ec-body{padding-left:17px;padding-right:17px}.pk-css-page .ec-book{padding-left:17px;padding-right:17px;gap:11px}}
