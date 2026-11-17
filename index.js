@@ -2996,6 +2996,11 @@ function beginInlineEdit(){
       body.classList.add('ep-editing');
       body.textContent=st.paraText;
     }
+    if(templateId==='bubble_chat'){
+      // Edit the canonical bilingual source, not presentation spans with stripped brackets.
+      body.textContent=st.paraText;
+      body.style.setProperty('white-space','pre-wrap','important');
+    }
     st.inlineBodies=editableCssTargets(templateId,body);
     if(!st.inlineBodies.length){
       st.inlineBody=null;st.inlineEditing=false;st.editing=false;
@@ -3036,6 +3041,7 @@ function finishInlineEdit(save){
     ['-webkit-user-select','user-select','-webkit-touch-callout','outline','outline-offset','cursor','min-height'].forEach(key=>target.style.removeProperty(key));
   }
   if(st.inlineKind==='essay_grid')st.inlineBody?.classList.remove('ep-editing');
+  if(st.inlineKind==='bubble_chat')st.inlineBody?.style.removeProperty('white-space');
   st.inlineBody=null;st.inlineBodies=[];st.inlineKind='';
   st.inlineEditing=false;st.editing=false;
   ov.classList.remove('pk-inline-editing');

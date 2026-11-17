@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const s=fs.readFileSync(require('node:path').join(__dirname,'../index.js'),'utf8');
+const body={textContent:'rendered',classList:{add(){}},style:{setProperty(){}}};
+const ov={querySelector:()=>({}),classList:{remove(){},add(){}}};
+const st={ov,paraText:'안녕（你好）',base:'안녕（你好）',custom:null};
+body.focus=()=>{};
+const code=s.slice(s.indexOf('function beginInlineEdit('),s.indexOf('function finishInlineEdit('));
+const api=vm.runInNewContext(code+';beginInlineEdit',{st,panel(){},cssActive:()=>true,inlineCssBody:()=>body,cur:()=>({pageSkin:'css:bubble_chat'}),editableCssTargets:()=>[body]});
+api();assert.equal(body.textContent,'안녕（你好）');assert(st.inlineEditing);
+console.log('Passed bilingual edit initialization with canonical translation markers');
