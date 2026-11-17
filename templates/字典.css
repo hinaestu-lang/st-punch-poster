@@ -1,0 +1,19 @@
+/* @pk-template
+{
+  "id": "dictionary_entry",
+  "name": "字典",
+  "width": 390,
+  "html": "<article class=\"dc-page\"><header class=\"dc-running\" data-pk=\"author\"></header><main class=\"dc-entry\" data-pk=\"body\"></main><footer class=\"dc-source\" data-pk=\"user\"></footer></article>"
+}
+@end-pk-template */
+
+/* 字典书页：页眉读取 char 姓名，页脚读取 user 姓名，正文完全由选中文字填入。 */
+.pk-css-page{box-sizing:border-box!important;margin:0!important;padding:0!important;min-height:0!important;background:var(--pk-shared-paper,#fff)!important;color:var(--pk-shared-ink,#222)!important;font-family:var(--pk-shared-font,"Songti SC","STSong",serif)!important}
+.pk-css-page .dc-page{width:100%;padding:23px 24px 25px;box-sizing:border-box;color:inherit;background:transparent}
+.pk-css-page .dc-running{margin:0;padding:0 6px 5px;border-bottom:1px solid currentColor;text-align:center;font-size:15px;line-height:1.35;font-weight:400;letter-spacing:.06em;overflow-wrap:anywhere}
+.pk-css-page .dc-entry{margin:27px 0 0;min-width:0;color:inherit;font-family:inherit;text-align:justify;overflow-wrap:anywhere;word-break:normal}
+.pk-css-page .dc-entry>p.pk-css-paragraph{font:inherit!important;color:inherit!important;text-align:justify;text-align-last:auto;white-space:normal;margin:0 0 .25em!important}
+.pk-css-page .dc-entry>p.pk-css-paragraph:first-child::first-letter{float:left;font-size:1.85em;line-height:1.06;margin:.04em .1em 0 0;font-weight:500}
+.pk-css-page .dc-source{margin:9px 0 0;padding-left:1em;text-align:left;font-size:12px;line-height:1.45;font-weight:400;letter-spacing:.02em;overflow-wrap:anywhere}
+.pk-css-page .dc-source:empty{display:none}
+@media(max-width:350px){.pk-css-page .dc-page{padding:20px 20px 23px}.pk-css-page .dc-entry{margin-top:23px}}
