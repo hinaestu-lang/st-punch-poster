@@ -2404,6 +2404,7 @@ function postypeAvatarSrc(p) {
   };
   if(side==='char' && st.savedRecord){
     const role=snippetRoleOf(st.savedRecord);
+    if(role.key.startsWith('user:'))return resolve(st.savedRecord.avatar||'');
     const candidates=(c.characters||[]).filter(item=>item?.name===role.name);
     const saved=resolve(st.savedRecord.avatar||'');
     const exact=candidates.find(item=>[item.avatar,item.avatar_url].some(raw=>raw&&resolve(raw)===saved));
@@ -2428,9 +2429,10 @@ function postypeAvatarSrc(p) {
     const chars=c.characters||[];
     const idx=c.characterId??c.characterIndex;
     const byId=chars?.[idx];
-    const byName=chars.find?.(v=>v?.name && (v.name===st.speaker||v.name===c.name2));
-    const actor=byId?.avatar?byId:byName;
-    const raw=actor?.avatar||actor?.avatar_url||c.characterAvatar||'';
+    const speaker=st.speaker||c.name2||'';
+    const matching=chars.filter?.(actor=>actor?.name===speaker)||[];
+    const actor=(byId?.name===speaker?byId:null)||(matching.length===1?matching[0]:null);
+    const raw=actor?.avatar||actor?.avatar_url||(!speaker||speaker===c.name2?c.characterAvatar:'')||'';
     if(raw)return resolve(raw);
   }else {
     const raw=c.userAvatar||c.user_avatar||c.personaAvatar||c.persona_avatar||'';
