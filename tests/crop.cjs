@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const s=fs.readFileSync(require('node:path').join(__dirname,'../index.js'),'utf8');
+const fit=vm.runInNewContext(s.slice(s.indexOf('function cssFitSlotPhoto('),s.indexOf('function bubbleBilingual('))+';cssFitSlotPhoto');
+const values={},photo={style:{setProperty:(k,v)=>values[k]=v}};
+fit(photo,{},'skinImg');assert.equal(values['object-fit'],'cover');assert.equal(values['object-position'],'50% 50%');
+fit(photo,{skinImgFit:'contain',skinImgX:0,skinImgY:100,skinImgScale:2},'skinImg');
+assert.equal(values['object-fit'],'contain');assert.equal(values['object-position'],'0% 100%');assert.equal(values.transform,'scale(2)');assert.equal(values['transform-origin'],'0% 100%');
+assert(!('left' in values));assert(!('width' in values));
+fit(photo,{skinImgX:99,avatarCropX:25,avatarCropY:75},'avatarCrop');assert.equal(values['object-position'],'25% 75%');
+console.log('Passed frame-relative fit, zoom, position and independent avatar controls');
