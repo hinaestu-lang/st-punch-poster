@@ -1,4 +1,4 @@
-// 打孔海报 · SillyTavern 扩展版
+// repo美化 · SillyTavern 扩展版
 (() => {
   // 扩展直接运行在酒馆主页面；保留这层兼容，便于与旧的酒馆助手版共用同一份代码。
   const window = globalThis.parent && globalThis.parent !== globalThis ? globalThis.parent : globalThis;
@@ -4814,7 +4814,7 @@ function snippetExportData(){
   const json=JSON.stringify(data,null,2);
   const blob=new window.Blob([json],{type:'application/json;charset=utf-8'});
   const url=window.URL.createObjectURL(blob);
-  download(url,'打孔海报-完整备份.json');
+  download(url,'repo美化-完整备份.json');
   window.setTimeout(()=>window.URL.revokeObjectURL(url),30000);
 }
 function snippetReadBackupText(file){
@@ -4873,7 +4873,7 @@ function snippetImportData(file){
         incoming.snippetPrefs={};
       const existing=store();
       if(snippetImportMode==='replace'){
-        if(!window.confirm('将用备份替换「打孔海报」的全部设置、CSS 模板、收藏和预设。请先保存当前备份。确定恢复？'))return;
+        if(!window.confirm('将用备份替换「repo美化」的全部设置、CSS 模板、收藏和预设。请先保存当前备份。确定恢复？'))return;
         for(const key of Object.keys(existing))delete existing[key];
         Object.assign(existing,incoming);
       }else{
@@ -4892,7 +4892,7 @@ function snippetImportData(file){
     }
     // Backward compatibility: old sentence-only exports remain importable.
     const items=Array.isArray(data)?data:(data?.format==='punch-poster-sentences'&&Array.isArray(data.sentences)?data.sentences:null);
-    if(!items)throw Error('不是有效的打孔海报完整备份或旧收藏备份');
+    if(!items)throw Error('不是有效的repo美化完整备份或旧收藏备份');
     const valid=snippetValidatedItems(items);
     const replace=snippetImportMode==='replace';
     if(replace&&!window.confirm('此文件只有收藏数据。确定替换全部收藏吗？其余插件数据不会改动。'))return;
@@ -5349,8 +5349,8 @@ function snippetRenderSettings(area){
     store().pickedSentences=[];snippetChosen.clear();persist();snippetToast('已清空收藏','success');renderSnippetBox();
   },'pk-snip-danger-outline'));
   area.appendChild(snippetButton('清空整个插件数据',()=>{
-    if(!window.confirm('这会清空打孔海报的全部收藏、CSS 模板、预设、编辑信息和外观设置。请先导出完整备份。继续吗？'))return;
-    if(!window.confirm('最后确认：所有打孔海报插件设置都将恢复初始状态，且无法撤销。确定清空？'))return;
+    if(!window.confirm('这会清空repo美化的全部收藏、CSS 模板、预设、编辑信息和外观设置。请先导出完整备份。继续吗？'))return;
+    if(!window.confirm('最后确认：所有repo美化插件设置都将恢复初始状态，且无法撤销。确定清空？'))return;
     const state=store();
     for(const key of Object.keys(state))delete state[key];
     state.cur=clone(BASE);state.tpl={};state.sigTpl={};state.cssTpl={};state.cssHidden={};

@@ -1,12 +1,12 @@
 {
-  "display_name": "打孔海报",
+  "display_name": "repo美化",
   "loading_order": 100,
   "requires": [],
   "optional": [],
   "js": "index.js",
   "css": "style.css",
   "author": "hinaestu-lang",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "auto_update": true,
   "homePage": "https://github.com/hinaestu-lang/st-punch-poster"
 }
