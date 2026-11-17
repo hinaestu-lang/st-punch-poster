@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const source=fs.readFileSync(require('node:path').join(__dirname,'../index.js'),'utf8');
+const state={postypeAvatarImg:'same-image',postypeAvatarMode:'char'};
+let saves=0,renders=0,history=0;
+const code=source.slice(source.indexOf('function setKey('),source.indexOf('function fmt('));
+const setKey=vm.runInNewContext(code+';setKey',{cur:()=>state,persist:()=>saves++,schedule:()=>renders++,historyPush:()=>history++,syncOne(){},syncLayoutControls(){},syncTex(){},buildText(){},syncRepUI(){}});
+setKey('postypeAvatarImg','same-image');
+assert.equal(state.postypeAvatarMode,'custom');assert.equal(saves,1);assert.equal(renders,1);assert.equal(history,1);
+setKey('postypeAvatarImg','same-image');assert.equal(saves,1);
+setKey('postypeAvatarImg','');assert.equal(state.postypeAvatarImg,'');
+console.log('Passed same-image upload mode switch, persistence and redraw checks');

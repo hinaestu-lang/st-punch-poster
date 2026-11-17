@@ -2170,12 +2170,12 @@ function cssTrimExportWhiteTail(canvas, scale){
 
 // Keep avatars in the exported layout instead of painting them later at live
 // preview coordinates. WebKit can reflow foreignObject text differently.
-function cssExportAvatar(node, copy, image, cache){
-  const key=node.currentSrc||node.getAttribute('src')||node.src;
+function cssExportAvatar(node, copy, image, cache, maxEdge=256){
+  const key=(node.currentSrc||node.getAttribute('src')||node.src)+'|'+maxEdge;
   let url=cache.get(key);
   if(!url){
     const canvas=document.createElement('canvas');
-    const scale=Math.min(1,256/Math.max(image.naturalWidth,image.naturalHeight));
+    const scale=Math.min(1,maxEdge/Math.max(image.naturalWidth,image.naturalHeight));
     canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));
     canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
     const context=canvas.getContext('2d');
@@ -2287,7 +2287,8 @@ async function cssTemplateExport(){
     }
     if(!image.naturalWidth||!image.naturalHeight){ missingPhotos.push(src); return; }
     if(copyPhotos[i] && node.matches('img.pk-avatar-photo, img.im-avatar-photo')){
-      cssExportAvatar(node,copyPhotos[i],image,avatarCache);
+      const edge=Math.min(2048,Math.max(256,Math.ceil(Math.max(visual.w,visual.h)*((+cur().width||1080)/390))));
+      cssExportAvatar(node,copyPhotos[i],image,avatarCache,edge);
       return;
     }
     pictures.push({image,visual,clipBox,radius,fit,posX,posY});
@@ -3512,11 +3513,7 @@ function buildOverlay() {
     const dest=upKey;upKey='';
     if (f && dest) upload(f, url => {
       if (dest.startsWith('pub:')) { updateEditorialImage(dest.slice(4),'src',url); fillEditorialImages(); }
-      else {
-        if(dest==='postypeAvatarImg')cur().postypeAvatarMode='custom';
-        setKey(dest,url);
-        if(dest==='postypeAvatarImg'){syncOne('postypeAvatarMode');syncLayoutControls();}
-      }
+      else setKey(dest,url);
     }, dest.startsWith('pub:'));
   });
   // ShadowRoot events are retargeted to the host; use composedPath to locate the text glyph.
@@ -3942,13 +3939,16 @@ function setKey(k, v) {
   if(k==='paperColor')p.cssPaperOverride=true;
   const switchHoleColor = k === 'holeColor' && p.holeMode !== 'color';
   if (switchHoleColor) { p.holeMode='color'; syncOne('holeMode'); }
-  if (p[k] === v && !switchHoleColor) return;
+  const switchAvatar = k === 'postypeAvatarImg' && !!v && p.postypeAvatarMode !== 'custom';
+  if(switchAvatar)p.postypeAvatarMode='custom';
+  if (p[k] === v && !switchHoleColor && !switchAvatar) return;
   p[k] = v;
   persist();
   if (k === 'repOn') { buildText(); syncRepUI(); }
   if (k === 'pageSkin') buildText();
   if (k === 'arrange' || k === 'layoutMode' || k === 'singleScraps' || k === 'pubOn' || k === 'pageSkin' || k === 'skinImg' || k === 'postypeAvatarMode' || k === 'threadsReplyAvatarMode' || k === 'threadsShowComments' || k === 'ao3ShowMetadata' || k === 'imessageShowImage' || k === 'imessageAvatarMode') syncLayoutControls();
   if (k === 'paperColor' || k === 'backColor') syncTex();
+  if(switchAvatar){syncOne('postypeAvatarMode');syncLayoutControls();}
   syncOne(k);
   if (k !== 'randomCount') schedule();
   historyPush('set:' + k);
