@@ -1,5 +1,5 @@
 /* @pk-template
-{"id":"dictionary_entry","name":"字典","width":390,"html":"<article class=\"dc-page\"><header class=\"dc-running\" data-pk=\"author\"></header><section class=\"dc-definition\"><h1 class=\"dc-headword\" data-pk=\"title\"></h1><main class=\"dc-entry\" data-pk=\"body\"></main></section><footer class=\"dc-source\" data-pk=\"title\"></footer></article>"}
+{"id":"dictionary_entry","name":"字典","width":390,"html":"<article class=\"dc-page\"><header class=\"dc-running\" data-pk=\"author\"></header><section class=\"dc-definition\"><h1 class=\"dc-headword\" data-pk=\"title\"></h1><main class=\"dc-entry\" data-pk=\"body\"></main></section><footer class=\"dc-source\" data-pk=\"note\"></footer></article>"}
 @end-pk-template */
 
 /* Compact dictionary entry. All wording comes from the editor. */
@@ -14,4 +14,6 @@
 .pk-css-page .dc-entry>p:not(.pk-css-blank)::before{counter-increment:definition;content:counter(definition);display:inline-flex;align-items:center;justify-content:center;width:1.05em;height:1.05em;margin-right:.2em;border-radius:50%;background:currentColor;font:700 .75em/1 Arial,sans-serif;vertical-align:.08em;-webkit-text-fill-color:var(--pk-shared-paper,#fff)}
 .pk-css-page .dc-entry>p.pk-css-blank{display:none!important}
 .pk-css-page .dc-source{clear:both;margin:4px 0 0;padding-left:1em;text-align:left;font-size:12px;line-height:1.4;font-weight:400;letter-spacing:.02em;overflow-wrap:anywhere}
+.pk-css-page .dc-source:empty{display:none}
+
 .pk-css-page .dc-source:empty{display:none}
