@@ -4254,26 +4254,6 @@ function snippetNodeText(body){
     }
     if(/\S/u.test(piece)){brPending=false;lastBrAt=-1;}
   }
-  // A theme may render *all* source newlines as a single <br>, including
-  // paragraph breaks. Recover only when the raw message and the rendered
-  // text match exactly after collapsing repeated newlines. If they don't
-  // match (Markdown, display regex, different content), trust the DOM instead.
-  if(full.includes('\n') && !Array.from(breaks.values()).includes('block')){
-    const mes=body.closest?.('#chat .mes[mesid]');
-    const id=Number(mes?.getAttribute('mesid'));
-    const source=Number.isInteger(id)&&id>=0 ? ctx().chat?.[id]?.mes : null;
-    if(typeof source==='string' && /\n{2,}/.test(source)){
-      const raw=normalizeParagraphs(source);
-      let flattened='',at=0;const paragraphOffsets=[];
-      for(let i=0;i<raw.length;){
-        if(raw[i]!=='\n'){flattened+=raw[i++];at++;continue;}
-        let next=i+1;while(raw[next]==='\n')next++;
-        if(next-i>1)paragraphOffsets.push(at);
-        flattened+='\n';at++;i=next;
-      }
-      if(flattened===full)for(const at of paragraphOffsets)breaks.set(at,'block');
-    }
-  }
   return {full,chunks,breaks};
 }
 // Slice by stable source offsets, rendering true block starts as paragraph breaks.
