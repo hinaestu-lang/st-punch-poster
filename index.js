@@ -59,6 +59,7 @@ const BASE = {
   width: 1080,              // 打孔导出宽度 / CSS 高清倍率基准
   cssPageWidth: 0,          // CSS 页面实际布局宽度（0 = 模板原宽），同时用于预览与 PNG 导出
 
+  cssPaperOverride: false,
   paperColor: '#fbfaf6',    // 正文纸色（碎片就是从这张纸上剪的）
   paperTex: 'none',         // 正文纸纹理
   paperImg: '',             // 正文纸底图
@@ -222,6 +223,18 @@ const BUILTIN = {
 const COLOR_RAIL = ['#25262a','#555b67','#2b4b70','#7dabc5','#3e6259','#95b29b','#735c8d','#b9a7cc','#9e3d46','#df7f73','#ad7754','#e1bf9e','#8f9594','#d6d2c9','#d6e450','#f8f5eb','#ffffff','#000000'];
 function colorRail(key){
   return `<div class="pk-color-rail" aria-label="左右滑动选择颜色">${COLOR_RAIL.map(c=>`<button type="button" data-color-key="${key}" data-color-value="${c}" title="${c}" aria-label="选择颜色 ${c}" style="--pk-rail-color:${c}"></button>`).join('')}</div>`;
+}
+
+
+const COLOR_PAIRS = [
+  {name:'素白',paper:'#ffffff',ink:'#25262a'},
+  {name:'米纸',paper:'#fbfaf6',ink:'#2b2b2b'},
+  ...Object.entries(BUILTIN).filter(([,p])=>p.paperColor&&p.ink)
+    .map(([name,p])=>({name,paper:p.paperColor,ink:p.ink}))
+];
+function pairedColorRail(){
+  return '<div class="pk-color-rail pk-pair-rail" aria-label="纸色与字色配色">'+COLOR_PAIRS.map((p,i)=>
+    '<button type="button" data-color-pair="'+i+'" aria-label="'+esc(p.name)+'" title="'+esc(p.name)+'" style="--pk-rail-color:'+p.paper+';--pk-pair-ink:'+p.ink+'"><span>字</span></button>').join('')+'</div>';
 }
 
 
@@ -878,7 +891,7 @@ function applyReps(t) {
   if (!p.repOn || !Array.isArray(p.reps)) return t;
   const n = names();
   const res = v => (v || '').replace(/{{char}}/gi, n.char).replace(/{{user}}/gi, n.user);
-  p.reps.map(r => [res(r.from).trim(), res(r.to)]).filter(([f]) => f)
+  p.reps.filter(r => r && r.enabled !== false).map(r => [res(r.from).trim(), res(r.to)]).filter(([f]) => f)
     .sort((a, b) => Array.from(b[0]).length - Array.from(a[0]).length)
     .forEach(([f, to]) => { t = replaceAnyCaseScript(t, f, to); });
   return t;
@@ -1421,6 +1434,19 @@ function cssReadableInk(el, ink){
   return bgLum>0.42?'#282828':'#f4f4f4';
 }
 
+function cssApplyPaperColor(root,p){
+  if(!p.cssPaperOverride)return;
+  const base=window.getComputedStyle(root).backgroundColor;
+  const previous=root.dataset.pkPaperColor||'';
+  // Recolour the paper surfaces, preserving differently coloured UI panels.
+  const surfaces=[root,...root.querySelectorAll('*')].filter(el=>{
+    const color=window.getComputedStyle(el).backgroundColor;
+    return el===root || (color!=='transparent'&&color!=='rgba(0, 0, 0, 0)'&&(color===base||color===previous));
+  });
+  for(const el of surfaces)el.style.setProperty('background-color',p.paperColor,'important');
+  root.dataset.pkPaperColor=window.getComputedStyle(root).backgroundColor;
+}
+
 function cssFillTemplate(root, spec){
   // Hide modules the owner does not want, including older CSS files already imported.
   const templateId=String(spec?.id||'');
@@ -1545,6 +1571,7 @@ function cssFillTemplate(root, spec){
   root.style.setProperty('--pk-shared-ink',p.ink||'#2b2b2b');
   // CSS templates can opt in to the existing paper colour; typography uses one shared ink colour.
   root.style.setProperty('--pk-shared-paper',p.paperColor||'#fbfaf6');
+  cssApplyPaperColor(root,p);
   if(templateId!=='ao3_work')root.querySelectorAll('[data-pk="title"],[data-pk="subtitle"],[data-pk="author"],[data-pk="note"],[data-pk="signature-extra"]').forEach(el=>{
     el.style.setProperty('font-family',sharedFont,'important');
     // All title, subtitle, byline and body ink in CSS typography templates
@@ -3109,10 +3136,11 @@ function buildOverlay() {
             </div>
           `, true)}
         </div>
-        ${ui.grp('替换', `
-          ${ui.tg('启用', 'repOn')}
+        <section class="pk-replacement">
+          <div class="pk-replacement-head"><strong>替换</strong><button type="button" class="pk-tg" data-tg="repOn" role="switch" aria-label="启用替换"><i></i></button></div>
           <div class="pk-repbox"><div class="pk-reps"></div>
-          <div class="pk-row pk-btns"><div class="pk-btn" data-act="rep-add">添加规则</div></div></div>`)}
+          <div class="pk-row pk-btns"><div class="pk-btn" data-act="rep-add">添加规则</div></div></div>
+        </section>
 
       </div>
 
@@ -3128,19 +3156,13 @@ function buildOverlay() {
 <div class="pk-fonts">${Object.entries(FONTS).filter(([, f]) => !f.hidden).map(([k, f]) => `<b data-font="${k}" style="${f.fam ? `font-family:'${f.fam}'` : f.stack ? `font-family:${f.stack.replace(/"/g, "'")}` : ''}">${f.name}</b>`).join('')}</div>
           <div class="pk-note">左右滑动浏览字体，点击立即预览。</div>`, true)}
         ${ui.grp('文字排版', `
-          <div class="pk-cols">${ui.col('字色', 'ink')}${colorRail('ink')}</div>
+          ${pairedColorRail()}<div class="pk-cols pk-pair-custom">${ui.col('字色', 'ink')}${ui.col('纸色', 'paperColor')}</div>
           <div data-css-align-control>${ui.seg('对齐', 'textAlign', [['left', '左'], ['center', '中'], ['right', '右'], ['justify', '两端']])}</div><div class="pk-note" data-paper-align-note hidden>纸页文字排版固定上段左对齐、下段右对齐，不能用通用对齐设置修改。</div>
           ${ui.sl('字号', 'fontSize', 24, 80, 1)}
           ${ui.sl('行距', 'lineHeight', 1.2, 3.2, 0.05)}
           ${ui.sl('字距', 'letterSpacing', 0, 20, 1)}
           ${ui.sl('边距', 'padX', 20, 240, 2)}
           ${ui.tg('首行缩进', 'indent')}`, false)}
-        <div data-css-only>
-          ${ui.grp('CSS 模板配色', `
-            <div class="pk-cols">${ui.col('纸张颜色', 'paperColor')}${colorRail('paperColor')}</div>
-            <div class="pk-note">背景在此设置；所有文字（含竖排标题、署名）统一读取上方「文字排版 → 字色」。</div>
-          `, false)}
-        </div>
         <div data-punch-only class="pk-punch-suite">
           ${ui.grp('打孔器', `
         ${ui.grp('打孔器文案样式', `
@@ -3176,8 +3198,7 @@ function buildOverlay() {
           <div class="pk-cols">${ui.col('孔色', 'holeColor')}${colorRail('holeColor')}</div>
 `, true)}
         <div data-punch-only>
-        ${ui.grp('纸张颜色与纹样', `
-          <div class="pk-cols">${ui.col('纸张颜色', 'paperColor')}${colorRail('paperColor')}</div>
+        ${ui.grp('纸张纹样', `
           ${ui.pick('纸张纹样', 'paperTex', TEX)}
           <div data-double-only>
             <div class="pk-cols">${ui.col('碎片区底色', 'backColor')}${colorRail('backColor')}</div>
@@ -3511,9 +3532,21 @@ function buildOverlay() {
 
   ov.addEventListener('click', e => {
     if (e.target === ov) { close(); return; }
-    const t = e.target.closest('[data-font],[data-act],[data-up],[data-clr],[data-imgreset],[data-fold],[data-tab],[data-tg],.pk-seg b,.pk-pick b,[data-tpl],[data-tpldel],[data-sigtpl],[data-sigtpldel],[data-repdel],[data-fontcat],[data-layout-tpl],[data-zine-tpl],[data-skin],[data-cssdel],[data-cssexport],[data-skin-group],[data-pubupload],[data-pubremove],[data-tune],[data-widthpreset],[data-color-key]');
+    const t = e.target.closest('[data-font],[data-act],[data-up],[data-clr],[data-imgreset],[data-fold],[data-tab],[data-tg],.pk-seg b,.pk-pick b,[data-tpl],[data-tpldel],[data-sigtpl],[data-sigtpldel],[data-repdel],[data-fontcat],[data-layout-tpl],[data-zine-tpl],[data-skin],[data-cssdel],[data-cssexport],[data-skin-group],[data-pubupload],[data-pubremove],[data-tune],[data-widthpreset],[data-color-key],[data-color-pair],[data-reptoggle]');
     if (!t) return;
     const s = store(), p = cur();
+    if(t.dataset.colorPair!=null){
+      flushField();
+      const pair=COLOR_PAIRS[Number(t.dataset.colorPair)];if(!pair)return;
+      p.paperColor=pair.paper;p.ink=pair.ink;p.cssPaperOverride=true;
+      persist();syncOne('paperColor');syncOne('ink');schedule();historyPush('paired-color');return;
+    }
+    if(t.dataset.reptoggle!=null){
+      flushField();
+      const rule=p.reps[Number(t.dataset.reptoggle)];if(!rule)return;
+      rule.enabled=rule.enabled===false;
+      persist();fillReps();buildText();schedule();historyPush('rep-toggle');return;
+    }
     if(t.dataset.colorKey){setKey(t.dataset.colorKey,t.dataset.colorValue);return;}
     if(t.dataset.widthpreset) {setKey('cssPageWidth',+t.dataset.widthpreset);return;}
     if (t.dataset.tune) { startTune(t.dataset.tune); return; }
@@ -3650,7 +3683,7 @@ function buildOverlay() {
       persist();syncLayoutControls();syncOne('pubOn');fillEditorialImages();historyPush('pub-add');
       upKey='pub:'+id; fileIn.click();return;
     }
-    if (act === 'rep-add') { p.reps.push({ from: '', to: '' }); persist(); fillReps(); historyPush('rep-add'); }
+    if (act === 'rep-add') { p.reps.push({ from: '', to: '', enabled: true }); persist(); fillReps(); historyPush('rep-add'); }
     if (act === 'random') randomHoles(+p.randomCount || 1);
     if (act === 'minus' || act === 'plus') setKey('randomCount', Math.min(99, Math.max(1, (+p.randomCount || 1) + (act === 'plus' ? 1 : -1))));
     if (act === 'clear') { st.holes = []; st.free = []; st.off = {}; schedule(); historyPush('clear'); }
@@ -3792,6 +3825,7 @@ function syncRepUI() {
   if (!st.ov) return;
   const box = st.ov.querySelector('.pk-repbox');
   if (box) box.hidden = !cur().repOn;
+  st.ov.querySelector('[data-tg="repOn"]')?.setAttribute('aria-checked',String(!!cur().repOn));
 }
 
 function fillReps() {
@@ -3799,6 +3833,7 @@ function fillReps() {
   const hint = f => (f || '').replace(/{{char}}/gi, n.char).replace(/{{user}}/gi, n.user);
   st.ov.querySelector('.pk-reps').innerHTML = (cur().reps || []).map((r, i) => `
     <div class="pk-rep">
+      <button type="button" class="pk-tg ${r.enabled!==false?'on':''}" data-reptoggle="${i}" role="switch" aria-checked="${r.enabled!==false}" aria-label="运行第 ${i+1} 条替换规则"><i></i></button>
       <div class="pk-repf"><input class="pk-in" data-rf="${i}" value="${esc(r.from)}" placeholder="原词" autocomplete="off">${/{{(char|user)}}/i.test(r.from) ? `<em>${esc(hint(r.from))}</em>` : ''}</div>
       <i class="fa-solid fa-arrow-right"></i>
       <input class="pk-in" data-rt="${i}" value="${esc(r.to)}" placeholder="替换成" autocomplete="off">
@@ -3863,6 +3898,7 @@ function syncLayoutControls() {
 
 function setKey(k, v) {
   const p = cur();
+  if(k==='paperColor')p.cssPaperOverride=true;
   const switchHoleColor = k === 'holeColor' && p.holeMode !== 'color';
   if (switchHoleColor) { p.holeMode='color'; syncOne('holeMode'); }
   if (p[k] === v && !switchHoleColor) return;
@@ -3881,6 +3917,11 @@ function fmt(v, step) { const d = (String(step).split('.')[1] || '').length; ret
 
 function syncOne(k) {
   const ov = st.ov, p = cur(), v = p[k];
+  if(k==='ink'||k==='paperColor')ov.querySelectorAll('[data-color-pair]').forEach(button=>{
+    const pair=COLOR_PAIRS[Number(button.dataset.colorPair)];
+    const selected=!!pair&&pair.ink.toLowerCase()===String(p.ink).toLowerCase()&&pair.paper.toLowerCase()===String(p.paperColor).toLowerCase();
+    button.classList.toggle('on',selected);button.setAttribute('aria-pressed',String(selected));
+  });
   ov.querySelectorAll(`[data-color-key="${k}"]`).forEach(b=>b.classList.toggle('on',String(b.dataset.colorValue).toLowerCase()===String(v||'').toLowerCase()));
   ov.querySelectorAll(`[data-sl="${k}"]`).forEach(el => {
     const min = +el.dataset.min, max = +el.dataset.max;
