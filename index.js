@@ -993,15 +993,70 @@ function replaceAnyCaseScript(text, from, to) {
   return result.join('');
 }
 
-function applyReps(t) {
+// 当前生效的替换规则（开关关闭时为空），按原词长度从长到短。
+function activeReps() {
   const p = cur();
-  if (!p.repOn || !Array.isArray(p.reps)) return t;
+  if (!p.repOn || !Array.isArray(p.reps)) return [];
   const n = names();
   const res = v => (v || '').replace(/{{char}}/gi, n.char).replace(/{{user}}/gi, n.user);
-  p.reps.filter(r => r && r.enabled !== false).map(r => [res(r.from).trim(), res(r.to)]).filter(([f]) => f)
-    .sort((a, b) => Array.from(b[0]).length - Array.from(a[0]).length)
-    .forEach(([f, to]) => { t = replaceAnyCaseScript(t, f, to); });
+  return p.reps.filter(r => r && r.enabled !== false).map(r => [res(r.from).trim(), res(r.to)]).filter(([f]) => f)
+    .sort((a, b) => Array.from(b[0]).length - Array.from(a[0]).length);
+}
+function applyReps(t) {
+  for (const [f, to] of activeReps()) t = replaceAnyCaseScript(t, f, to);
   return t;
+}
+// 与 applyReps 结果相同，另外记录每个输出字符来自原文的哪一段 [起, 止)（按 Unicode 字符计）。
+// 编辑后用它把改动换算回原文，替换开关因此始终有效。
+function applyRepsMapped(t) {
+  let chars = Array.from(t), src = chars.map((_, i) => [i, i + 1]);
+  for (const [f, to] of activeReps()) {
+    const needle = Array.from(f).map(repKey), toChars = Array.from(to);
+    const folded = chars.map(repKey), outC = [], outS = [];
+    let pendingStart = null; // 被替换成空字符串的原文，并入下一个输出字符
+    for (let i = 0; i < chars.length;) {
+      let matched = i + needle.length <= chars.length;
+      for (let j = 0; matched && j < needle.length; j++) if (folded[i + j] !== needle[j]) matched = false;
+      if (matched) {
+        const s = src[i][0], e = src[i + needle.length - 1][1];
+        if (toChars.length) {
+          const start = pendingStart ?? s; pendingStart = null;
+          for (const ch of toChars) { outC.push(ch); outS.push([start, e]); }
+        } else if (outS.length) outS[outS.length - 1] = [outS[outS.length - 1][0], e];
+        else pendingStart = pendingStart ?? s;
+        i += needle.length;
+      } else {
+        const r = src[i];
+        outC.push(chars[i]); outS.push(pendingStart != null ? [pendingStart, r[1]] : r);
+        pendingStart = null; i++;
+      }
+    }
+    chars = outC; src = outS;
+  }
+  return { text: chars.join(''), chars, src };
+}
+// 把「替换后显示的文字」上的编辑换算回原文。S 为原文（已规整），edited 为编辑结果。
+// 返回新的原文；换算后对不上编辑结果时返回 null，由调用方退回旧做法。
+function repsSourceEdit(S, edited, fold) {
+  const m = applyRepsMapped(S), R0 = m.chars, R1 = Array.from(fold(edited));
+  if (m.text === S) return R1.join(''); // 没有替换生效：编辑内容本身就是原文
+  let a = 0;
+  while (a < R0.length && a < R1.length && R0[a] === R1[a]) a++;
+  let b = 0;
+  while (b < R0.length - a && b < R1.length - a && R0[R0.length - 1 - b] === R1[R1.length - 1 - b]) b++;
+  if (a === R0.length && R0.length === R1.length) return S; // 没有改动
+  const same = (i, j) => m.src[i][0] === m.src[j][0] && m.src[i][1] === m.src[j][1];
+  // 改动落在某个被替换的词中间时，扩展到整个词，整体换回。
+  let r0 = a, r1 = R0.length - b;
+  while (r0 > 0 && r0 < R0.length && same(r0 - 1, r0)) r0--;
+  while (r1 > 0 && r1 < R0.length && same(r1 - 1, r1)) r1++;
+  const Sc = Array.from(S);
+  const srcStart = r0 < R0.length ? m.src[r0][0] : Sc.length;
+  const srcEnd = r1 > r0 ? m.src[r1 - 1][1] : srcStart;
+  const inserted = R0.slice(r0, a).join('') + R1.slice(a, R1.length - b).join('') + R0.slice(R0.length - b, r1).join('');
+  const back = Sc.slice(0, srcStart).join('') + inserted + Sc.slice(srcEnd).join('');
+  // 验证：对换算结果重新替换，必须得到编辑后的文字。
+  return fold(applyReps(back)) === R1.join('') ? back : null;
 }
 
 function normalizeParagraphs(t) {
@@ -3185,9 +3240,22 @@ function finishInlineEdit(save){
   st.inlineEditing=false;st.editing=false;
   ov.classList.remove('pk-inline-editing');
   keyboardDismiss();
-  if(save && result!==st.inlineOriginal){
-    st.custom=result;st.customIsRendered=true;
-    buildText();historyPush('inline-edit');
+  if(save){
+    if(st.customIsRendered){
+      // 旧版本保存的文字已经是替换后的结果，保持原来的处理方式。
+      if(result!==st.inlineOriginal){st.custom=result;buildText();historyPush('inline-edit');}
+    }else{
+      // 编辑框里显示的是替换后的文字，st.inlineOriginal 是替换前的原文。
+      // 把编辑换算回原文再保存，替换开关之后仍可随时开关；换算失败才退回旧做法。
+      const fold=wasCss?normalizeParagraphs:normalize;
+      const S=fold(st.inlineOriginal);
+      const back=repsSourceEdit(S,result,fold);
+      if(back!==null){
+        if(back!==S){st.custom=back;buildText();historyPush('inline-edit');}
+      }else if(fold(result)!==fold(applyReps(S))){
+        st.custom=result;st.customIsRendered=true;buildText();historyPush('inline-edit');
+      }
+    }
   }
   st.inlineOriginal='';
   fillEditorialImages();
