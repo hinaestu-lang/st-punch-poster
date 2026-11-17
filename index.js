@@ -864,8 +864,13 @@ function spacedText(g, text, x, y, sp, align) {
 function names() {
   const c = ctx();
   const saved=st.savedRecord;
-  const currentChat=String(c.chatId??c.chatName??'');
-  const sameSource=!!saved?.sourceChat&&saved.sourceChat===currentChat;
+  let currentChat=String(c.chatId??c.chatName??'');
+  try{currentChat=String(c.getCurrentChatId?.()||currentChat);}catch(_){}
+  const message=Number.isInteger(saved?.messageId)?c.chat?.[saved.messageId]:null;
+  const sameMessage=!!saved&&!!message&&message.name===snippetRoleOf(saved).name
+    &&String(saved.text||'').trim().length>0
+    &&normalize(String(message.mes||'')).includes(normalize(saved.text));
+  const sameSource=(!!saved?.sourceChat&&saved.sourceChat===currentChat)||sameMessage;
   return { user: saved ? (saved.userName || (sameSource?c.name1:'') || '') : (c.name1 || ''), char: st.savedRecord?snippetRoleOf(st.savedRecord).name:((!st.isUser && st.speaker) || c.name2 || '') };
 }
 
@@ -4279,7 +4284,7 @@ function showSnippetActionMenu(text,messageId,clientX,clientY){
   menu.style.left=Math.round(x)+'px';menu.style.top=Math.round(Math.max(top+7,y))+'px';
   // No timer: iPhone users must not have to race a disappearing menu.
 }
-const snippetChatIdentity=()=>String(ctx().chatId??ctx().chatName??'');
+const snippetChatIdentity=()=>{const c=ctx();try{return String(c.getCurrentChatId?.()||c.chatId||c.chatName||'');}catch(_){return String(c.chatId??c.chatName??'');}};
 let snippetQuickTarget=null; // null = library picker, otherwise {id, chatKey, message} for one message
 let snippetView='library', snippetFilter='all', snippetSearch='', snippetDetailId=null;
 let snippetImportMode='merge';
@@ -4369,7 +4374,7 @@ function addPickedSentence(text,sourceId,roleHint,span=null,quiet=false){
   if(already){if(!quiet)snippetToast('这句话已经收藏过了');return already;}
   const id=snippetNewId();
   const rec={id,text:value,messageId:Number.isInteger(sourceId)?sourceId:null,
-    sourceChat:String(ctx().chatId??ctx().chatName??''),roleKey:role.roleKey,roleName:role.roleName,
+    sourceChat:snippetChatIdentity(),roleKey:role.roleKey,roleName:role.roleName,
     avatar:role.avatar,userName:ctx().name1||'',savedAt:Date.now(),
     ...(span&&span.sourceOffsetMode==='message'&&Number.isInteger(span.start)&&Number.isInteger(span.end)
       ?{sourceStart:span.start,sourceEnd:span.end,sourceOffsetMode:'message'}:{})};
