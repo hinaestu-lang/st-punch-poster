@@ -4193,17 +4193,9 @@ function showSnippetActionMenu(text,messageId,clientX,clientY){
     }
     const plan=chosen.length>1?snippetMergePlan(chosen.map(item=>item.id),true):null;
     const selectedText=plan?.proposal||chosen[0].text;
-    const preferred=chosen.find(item=>Number.isInteger(item.messageId))?.messageId;
-    const reference=chosen[0]||{messageId};
-    const chosenId=snippetDraftMessageId({
-      messageId:Number.isInteger(preferred)?preferred:messageId,
-      roleKey:reference.roleKey,sourceChat:snippetChatIdentity()
-    });
-    if(chosenId===null){
-      snippetToast('当前聊天找不到可用于美化的来源消息，请先切换到相应聊天','error');return;
-    }
+    const reference=chosen[0];
     hideSnippetActionMenu();stopSnippetPicking(false);
-    openById(chosenId,selectedText);
+    openById(null,selectedText,reference);
   });
   document.body.appendChild(menu);snippetActionMenu=menu;
   const vv=window.visualViewport;
@@ -4290,24 +4282,6 @@ function snippetRoleOf(item){
   const key=typeof item?.roleKey==='string'&&item.roleKey?item.roleKey:'unclassified';
   const name=typeof item?.roleName==='string'&&item.roleName?item.roleName:(key==='unclassified'?'未分类':key.replace(/^(?:char:|user:)/,''));
   return {key,name,avatar:typeof item?.avatar==='string'?item.avatar:''};
-}
-// Find a real chat message to host a saved quote in the editor.
-// Imported/legacy unclassified quotes have no trustworthy role attribution:
-// try their original current-chat message, then a usable recent message.
-// Classified quotes must never be attributed to an unrelated speaker.
-function snippetDraftMessageId(item){
-  const chat=ctx().chat||[];
-  const roleKey=snippetRoleOf(item).key;
-  const matches=id=>snippetMessageEligible(id)
-    &&(roleKey==='unclassified'||snippetCurrentCharacter(id).roleKey===roleKey);
-  const usable=id=>Number.isInteger(id)&&id>=0&&matches(id)&&!!wholeMessageText(id);
-  const currentChat=String(ctx().chatId??ctx().chatName??'');
-  if(item?.sourceChat===currentChat && usable(item.messageId))return item.messageId;
-  // Prefer visible speech. Hidden /hide messages are fallback sources only
-  // when their actual speaker can still be verified (see helper above).
-  for(let id=chat.length-1;id>=0;id--)if(!chat[id]?.is_system&&usable(id))return id;
-  for(let id=chat.length-1;id>=0;id--)if(usable(id))return id;
-  return null;
 }
 function addPickedSentence(text,sourceId,roleHint,span=null,quiet=false){
   const value=normalizeParagraphs(String(text||'')).trim();
