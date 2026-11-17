@@ -450,7 +450,7 @@ const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const isOpen = () => !!(st.ov && st.ov.classList.contains('show'));
 let keyboardRenderPending = false, keyboardRenderTimer = 0;
 function schedule(force = false) {
-  if (!force && (keyboardIsOpen() || Date.now() < keyboardCoolingUntil)) {
+  if (compositionFields.size || (!force && (keyboardIsOpen() || Date.now() < keyboardCoolingUntil))) {
     keyboardRenderPending = true;
     // After the keyboard closes, flush the last deferred preview automatically.
     if (!keyboardIsOpen() && !keyboardRenderTimer) {
@@ -463,7 +463,11 @@ function schedule(force = false) {
   }
   keyboardRenderPending = false;
   if (rafId) return;
-  rafId = requestAnimationFrame(() => { rafId = 0; render(true); updatePreviewZoom(); });
+  rafId = requestAnimationFrame(() => {
+    rafId = 0;
+    if(compositionFields.size){keyboardRenderPending=true;return;}
+    render(true); updatePreviewZoom();
+  });
 }
 
 const texCache = new Map();
@@ -2763,7 +2767,7 @@ let keyboardFrame = 0;
 let keyboardCoolingUntil = 0;
 let fieldTimer = 0;
 let pendingField = null;
-const compositionFields = new WeakSet();
+const compositionFields = new Set();
 const keyboardTarget = el => el && el.matches && el.matches('input.pk-in:not([type=file]),textarea.pk-in,.pk-edta[contenteditable],[contenteditable=true]');
 function keyboardIsOpen() {
   return st.ov && st.ov.classList.contains('pk-keyboard');
@@ -2789,7 +2793,7 @@ function queueField(entry) {
   if (!keyboardIsOpen()) fieldTimer = setTimeout(flushField, 360);
 }
 function syncKeyboardViewport() {
-  if (!st.ov || !keyboardIsOpen()) return;
+  if (!st.ov || !keyboardIsOpen() || compositionFields.size) return;
   const vv = window.visualViewport;
   const height = vv ? vv.height : window.innerHeight;
   const top = vv ? vv.offsetTop : 0;
@@ -3368,13 +3372,16 @@ function buildOverlay() {
     if (entry) queueField(entry);
   };
   ov.addEventListener('compositionstart', e => {
-    if (!typedField(e.target)) return;
-    compositionFields.add(e.target);
+    const target=e.composedPath?.().find(node=>keyboardTarget(node))||e.target;
+    if (!keyboardTarget(target)) return;
+    compositionFields.add(target);
     clearTimeout(fieldTimer);
   });
   ov.addEventListener('compositionend', e => {
-    compositionFields.delete(e.target);
+    const target=e.composedPath?.().find(node=>keyboardTarget(node))||e.target;
+    compositionFields.delete(target);
     acceptTextInput(e);
+    if(!compositionFields.size && keyboardRenderPending)schedule();
   });
   ov.addEventListener('input', e=>{
     const el=e.target;
