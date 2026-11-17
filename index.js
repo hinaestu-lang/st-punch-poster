@@ -338,17 +338,36 @@ function pkLayer() {
   const r = probe.getBoundingClientRect();
   probe.remove();
   const tol = 2; // 允许的误差（像素）
+  // 取较小值：clientWidth/Height 不含滚动条；怪异模式下它是整页高度，这时 innerHeight 更小。
+  const de = document.documentElement;
+  const vw = Math.min(window.innerWidth, de.clientWidth || window.innerWidth);
+  const vh = Math.min(window.innerHeight, de.clientHeight || window.innerHeight);
   const ok = Math.abs(r.top) <= tol && Math.abs(r.left) <= tol
-    && r.width >= window.innerWidth - tol && r.height >= window.innerHeight - tol;
+    && r.width >= vw - tol && r.height >= vh - tol;
   if (!ok) pkRootMounted = true;
   return ok ? body : document.documentElement;
 }
 function pkMount(el) { pkLayer().appendChild(el); return el; }
 // 浮层挂到 <html> 后，留在 body 里的酒馆提示会被压在面板下面，一并移出来。
+// 移出 body 后不再继承 body 的字体和颜色，把这几项按原样写到提示框上，外观保持不变。
+const PK_TOAST_INHERIT = ['font-family', 'font-size', 'line-height', 'color'];
+let pkLiftedToasts = null;
 function pkLiftToasts() {
   if (!pkRootMounted) return;
   const box = document.getElementById('toast-container');
-  if (box && box.parentElement !== document.documentElement) document.documentElement.appendChild(box);
+  if (!box || box.parentElement === document.documentElement) return;
+  const from = window.getComputedStyle(document.body);
+  for (const k of PK_TOAST_INHERIT) box.style.setProperty(k, from.getPropertyValue(k));
+  document.documentElement.appendChild(box);
+  pkLiftedToasts = box;
+}
+// 卸载插件时把提示框放回 body，并清掉写入的样式。
+function pkRestoreToasts() {
+  const box = pkLiftedToasts;
+  pkLiftedToasts = null;
+  if (!box || !box.isConnected || box.parentElement === document.body) return;
+  for (const k of PK_TOAST_INHERIT) box.style.removeProperty(k);
+  document.body.appendChild(box);
 }
 const toast = (t, m) => { if (!window.toastr) return; window.toastr[t](m); pkLiftToasts(); };
 
@@ -6026,6 +6045,7 @@ function init() {
     globalThis.removeEventListener('pagehide', onPageHide);
     if (rafId) { window.cancelAnimationFrame(rafId); rafId = 0; }
     dispose();
+    pkRestoreToasts();
     window.__pkDispose = null;
   };
   globalThis.addEventListener('pagehide', onPageHide);
