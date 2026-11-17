@@ -450,7 +450,7 @@ const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const isOpen = () => !!(st.ov && st.ov.classList.contains('show'));
 let keyboardRenderPending = false, keyboardRenderTimer = 0;
 function schedule(force = false) {
-  if (compositionFields.size || (!force && (keyboardIsOpen() || Date.now() < keyboardCoolingUntil))) {
+  if (compositionFields.size || (keyboardIsOpen() && !st.editing) || (!force && (keyboardIsOpen() || Date.now() < keyboardCoolingUntil))) {
     keyboardRenderPending = true;
     // After the keyboard closes, flush the last deferred preview automatically.
     if (!keyboardIsOpen() && !keyboardRenderTimer) {
@@ -465,7 +465,7 @@ function schedule(force = false) {
   if (rafId) return;
   rafId = requestAnimationFrame(() => {
     rafId = 0;
-    if(compositionFields.size){keyboardRenderPending=true;return;}
+    if(compositionFields.size || (keyboardIsOpen() && !st.editing)){keyboardRenderPending=true;return;}
     render(true); updatePreviewZoom();
   });
 }
@@ -3405,12 +3405,13 @@ function buildOverlay() {
     }
     if (typedField(e.target) && !compositionFields.has(e.target)) {
       const entry = typedField(e.target);
-      pendingField = entry; flushField();
+      pendingField = entry;
+      if(document.activeElement!==el || !keyboardIsOpen())flushField();
     }
   });
   ov.addEventListener('focusin', e => {
     const focused=e.composedPath?.().find(node=>keyboardTarget(node))||e.target;
-    if (!keyboardTarget(focused) || window.innerWidth > 520) return;
+    if (!keyboardTarget(focused) || (window.innerWidth > 520 && !/iPhone|iPad|iPod/.test(window.navigator?.userAgent||'') && !(window.navigator?.platform==='MacIntel' && window.navigator?.maxTouchPoints>1))) return;
     ov.querySelector('.pk-modal')?.style.removeProperty('height');
     ov.classList.add('pk-keyboard');
     queueKeyboardViewport();

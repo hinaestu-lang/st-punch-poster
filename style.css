@@ -618,3 +618,10 @@ body:has(#pk-snip-overlay) #pk-snip-tap-handle,body:has(#pk-overlay.show) #pk-sn
 #pk-overlay .pk-live-grip{position:relative;z-index:2}
 
 #pk-repo-selection [hidden]{display:none!important}
+
+/* Keep iOS text fields at 16px to avoid focus zoom and viewport relayout. */
+@supports (-webkit-touch-callout: none) {
+  #pk-overlay input.pk-in,#pk-overlay textarea.pk-in {
+    font-size:16px!important;
+  }
+}
