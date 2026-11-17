@@ -2107,6 +2107,40 @@ function cssTrimExportWhiteTail(canvas, scale){
   return cropped;
 }
 
+// Keep avatars in the exported layout instead of painting them later at live
+// preview coordinates. WebKit can reflow foreignObject text differently.
+function cssExportAvatar(node, copy, image, cache){
+  const key=node.currentSrc||node.getAttribute('src')||node.src;
+  let url=cache.get(key);
+  if(!url){
+    const canvas=document.createElement('canvas');
+    const scale=Math.min(1,256/Math.max(image.naturalWidth,image.naturalHeight));
+    canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));
+    canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
+    const context=canvas.getContext('2d');
+    if(!context)throw new Error('头像无法转换，请重新导出');
+    context.drawImage(image,0,0,canvas.width,canvas.height);
+    url=canvas.toDataURL('image/png');
+    cache.set(key,url);
+  }
+  // A background on a non-IMG element survives Safari foreignObject rendering
+  // without a broken-image icon. Copy computed styles since template selectors
+  // may target IMG specifically. The element stays in the original layout slot.
+  const replacement=document.createElement('span');
+  replacement.className=copy.className;
+  replacement.setAttribute('aria-hidden','true');
+  const css=window.getComputedStyle(node);
+  for(const property of Array.from(css)){
+    replacement.style.setProperty(property,css.getPropertyValue(property),'important');
+  }
+  const fit=css.objectFit||'fill';
+  replacement.style.setProperty('background-image','url("'+url+'")','important');
+  replacement.style.setProperty('background-size',fit==='cover'||fit==='contain'?fit:'100% 100%','important');
+  replacement.style.setProperty('background-position',css.objectPosition||'50% 50%','important');
+  replacement.style.setProperty('background-repeat','no-repeat','important');
+  copy.replaceWith(replacement);
+}
+
 async function cssTemplateExport(){
   // Flush the same complete source used by the preview and the inline editor.
   if(st.inlineEditing)finishInlineEdit(true);
@@ -2170,6 +2204,7 @@ async function cssTemplateExport(){
   const realPhotos=Array.from(page.querySelectorAll('img'));
   const copyPhotos=Array.from(clone.querySelectorAll('img'));
   const missingPhotos=[];
+  const avatarCache=new Map();
   const photoLoads=realPhotos.map(async(node,i)=>{
     const src=node.currentSrc||node.getAttribute('src')||node.src;
     if(!src)return;
@@ -2190,6 +2225,10 @@ async function cssTemplateExport(){
       try{await image.decode();}catch{ missingPhotos.push(src); return; }
     }
     if(!image.naturalWidth||!image.naturalHeight){ missingPhotos.push(src); return; }
+    if(copyPhotos[i] && node.matches('img.pk-avatar-photo, img.im-avatar-photo')){
+      cssExportAvatar(node,copyPhotos[i],image,avatarCache);
+      return;
+    }
     pictures.push({image,visual,clipBox,radius,fit,posX,posY});
     // The opaque image is drawn separately after the HTML SVG has been rendered.
     // This also prevents huge embedded photos from exhausting WebKit memory.
