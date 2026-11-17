@@ -881,7 +881,10 @@ function applyReps(t) {
 }
 
 function normalizeParagraphs(t) {
-  return String(t || '').replace(/\r\n?/g, '\n').replace(/[ \t\u3000]+\n/g, '\n').trim();
+  // Unicode U+2029 is a paragraph boundary; U+2028 is a soft line break.
+  return String(t || '').replace(/\r\n?/g, '\n')
+    .replace(/\u2029/g, '\n\n').replace(/\u2028/g, '\n')
+    .replace(/[ \t\u3000]+\n/g, '\n').trim();
 }
 function normalize(t) {
   // Keep the historical one-newline representation for Canvas and favorites.
@@ -4219,6 +4222,18 @@ function snippetNodeText(body){
   const walker=document.createTreeWalker(body,window.NodeFilter.SHOW_ELEMENT|window.NodeFilter.SHOW_TEXT);
   const chunks=[],breaks=new Map();let full='',n,lastBrAt=-1,brPending=false;
   const blocks=new Set(['P','DIV','LI','BLOCKQUOTE','PRE','H1','H2','H3','H4','H5','H6','DT','DD']);
+  // Themes and display regex can render paragraphs as styled <span>/<section>
+  // rather than semantic <p>. Respect visible block layout without guessing
+  // raw message boundaries or turning screen line wraps into paragraphs.
+  // Avoid computing styles for ordinary inlines.
+  const visualBlock=n=>{
+    if(blocks.has(n.tagName))return true;
+    if(!/^(SPAN|SECTION|ARTICLE|MAIN|HEADER|FOOTER|ASIDE|SUMMARY)$/.test(n.tagName)
+      && !n.hasAttribute('style'))return false;
+    let display='';
+    try{display=window.getComputedStyle(n).display;}catch(_){}
+    return /^(block|flow-root|list-item|flex|grid|table|table-row|table-caption|table-cell)$/.test(display);
+  };
   const markBreak=kind=>{
     if(!full)return;
     if(full.endsWith('\n')){
@@ -4236,7 +4251,7 @@ function snippetNodeText(body){
         // node between the tags. Upgrade metadata without inserting bytes.
         if(brPending&&lastBrAt>=0)breaks.set(lastBrAt,'block');
         markBreak('br');lastBrAt=full.length-1;brPending=true;
-      }else if(n!==body&&blocks.has(n.tagName)){
+      }else if(n!==body&&visualBlock(n)){
         markBreak('block');brPending=false;lastBrAt=-1;
       }
       continue;
@@ -5447,7 +5462,9 @@ function positionRepoSelection(record){
   const rects=Array.from(record.range.getClientRects()).filter(r=>r.width>0&&r.height>0&&r.bottom>top&&r.top<top+height);
   // Anchor to the first selected line, not the last line of a multiline selection.
   const rect=rects[0]||record.range.getBoundingClientRect();
-  if(!rect?.width||rect.bottom<top||rect.top>top+height)return false;
+  // Safari can move the selected range briefly outside the visual viewport.
+  // Clamp the action menu rather than closing it during handle dragging.
+  if(!rect?.width)return false;
   const bw=repoSelectionButton.offsetWidth||220, bh=repoSelectionButton.offsetHeight||41;
   const x=Math.max(left+8,Math.min(left+width-bw-8,rect.left+rect.width/2-bw/2));
   // The native iOS selection toolbar usually sits just above the selected line.
@@ -5594,18 +5611,21 @@ function init() {
   const onRepoSelectionChange=()=>updateRepoSelection();
   const onRepoSelectionOutside=e=>{
     if(repoSelectionButton?.contains(e.target))return;
-    // The pending drag range is newer than the previously shown menu.
+    const body=e.target?.closest?.('#chat .mes[mesid] .mes_text');
+    if(body){
+      // Long presses and dragging Safari selection handles cause pointerdown
+      // inside message text. These are not outside-menu dismissals.
+      repoSelectionTextPress=repoSelectionDismissed
+        ?{started:Date.now(),body,x:e.clientX,y:e.clientY,pointerId:e.pointerId}:null;
+      return;
+    }
     const previous=repoSelectionPending||repoSelectionRecord;
     if(previous){
       repoSelectionDismissed=previous;
       hideRepoSelection();
     }
-    // A regular tap on message text can dismiss the iOS selection without
-    // creating a new one. Do NOT re-arm the same stale range on pointerdown.
-    const body=e.target?.closest?.('#chat .mes[mesid] .mes_text');
-    if(!body)repoSelectionLastTap=null;
-    repoSelectionTextPress=body&&repoSelectionDismissed
-      ?{started:Date.now(),body,x:e.clientX,y:e.clientY,pointerId:e.pointerId}:null;
+    repoSelectionLastTap=null;
+    repoSelectionTextPress=null;
   };
   const onRepoSelectStart=e=>{
     if(e.target?.closest?.('#chat .mes[mesid] .mes_text')){
@@ -5648,7 +5668,9 @@ function init() {
   };
   const onRepoReposition=()=>{
     if(!repoSelectionRecord||!repoSelectionButton?.classList.contains('show'))return;
-    if(!repoSelectionContextValid(repoSelectionRecord)||!positionRepoSelection(repoSelectionRecord))hideRepoSelection();
+    if(!repoSelectionContextValid(repoSelectionRecord)){hideRepoSelection();return;}
+    // Transient off-screen range geometry must not dismiss a valid selection.
+    positionRepoSelection(repoSelectionRecord);
   };
   document.addEventListener('selectionchange',onRepoSelectionChange);
   document.addEventListener('pointerdown',onRepoSelectionOutside,true);
