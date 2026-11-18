@@ -2651,6 +2651,15 @@ function postypeAvatarSrc(p) {
   return '';
 }
 
+// 头像地址里的卡片文件名：/characters/x.png 和 /thumbnail?type=avatar&file=x.png 都取出 x.png。
+function avatarFileKey(url){
+  if(typeof url!=='string'||!url)return '';
+  const m=/[?&]file=([^&#]+)/.exec(url);
+  let f=m?m[1]:url.split(/[?#]/)[0].split('/').pop()||'';
+  try{f=decodeURIComponent(f);}catch{}
+  return f.toLowerCase();
+}
+
 function render(preview) {
   // A deleted template can remain in undo history or an older preset. Avoid a blank preview.
   if(cssActive() && !cssTemplateRecord()) {
@@ -4514,14 +4523,6 @@ function messageCharAvatar(id){
   if(src&&!/default-avatar|unknown-avatar/i.test(src))return src;
   const same=chars.filter(v=>v?.name&&v.name===msg.name);
   return same.length===1&&same[0].avatar?snippetCharAvatar(same[0].avatar):'';
-}
-// 头像地址里的卡片文件名：/characters/x.png 和 /thumbnail?type=avatar&file=x.png 都取出 x.png。
-function avatarFileKey(url){
-  if(typeof url!=='string'||!url)return '';
-  const m=/[?&]file=([^&#]+)/.exec(url);
-  let f=m?m[1]:url.split(/[?#]/)[0].split('/').pop()||'';
-  try{f=decodeURIComponent(f);}catch{}
-  return f.toLowerCase();
 }
 // ST also sets is_system on /hide messages. Only accept a hidden message
 // as a source when its *actual* speaker name can be verified in this chat.
