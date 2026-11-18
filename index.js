@@ -2601,12 +2601,15 @@ function postypeAvatarSrc(p) {
     if(role.key.startsWith('user:'))return resolve(st.savedRecord.avatar||'');
     const candidates=(c.characters||[]).filter(item=>item?.name===role.name);
     const saved=resolve(st.savedRecord.avatar||'');
-    const exact=candidates.find(item=>[item.avatar,item.avatar_url].some(raw=>raw&&resolve(raw)===saved));
+    const savedKey=avatarFileKey(saved);
+    const exact=savedKey?candidates.find(item=>[item.avatar,item.avatar_url].some(raw=>raw&&avatarFileKey(resolve(raw))===savedKey)):null;
     const actor=exact||(candidates.length===1?candidates[0]:null);
     // Ambiguous names never select an arbitrary character card.
     const card=actor?.avatar||actor?.avatar_url;
     if(card)return resolve(card);
     if(saved)return saved;
+    const fromMessage=st.avatarMesId!=null?messageCharAvatar(st.avatarMesId):'';
+    if(fromMessage)return fromMessage;
     if(candidates.length>1)return '';
     // Only use a live message avatar when its speaker is the saved character.
     const messages=document.querySelectorAll('#chat .mes');
@@ -2620,6 +2623,9 @@ function postypeAvatarSrc(p) {
     return '';
   }
   if(side==='char') {
+    const mes=st.avatarMesId!=null?c.chat?.[st.avatarMesId]:null;
+    const fromMessage=mes&&mes.name===(st.speaker||mes.name)?messageCharAvatar(st.avatarMesId):'';
+    if(fromMessage)return fromMessage;
     const chars=c.characters||[];
     const idx=c.characterId??c.characterIndex;
     const byId=chars?.[idx];
@@ -2929,7 +2935,7 @@ function hitTest(e) {
 function loadMessage(id, selText) {
   const m = ctx().chat[id], picked = normalizeParagraphs(selText || '');
   if (!m || !picked) return false;
-  st.savedRecord=null;
+  st.savedRecord=null; st.avatarMesId=id;
   st.isUser = !!m.is_user; st.speaker = m.name || '';
   st.base = picked;
   st.custom = null; st.customIsRendered=false; st.raw = '\u0000';
@@ -4360,6 +4366,9 @@ function openById(id, selText, savedRecord=null) {
   if (!st.ov) { st.ov = buildOverlay(); fillTpl(); fillSigTpl(); fillCssList(); }
   if(savedRecord){
     st.isUser=false;st.speaker=snippetRoleOf(savedRecord).name;st.base=picked;
+    // 收藏来自当前聊天、原消息还在时，用它来分辨同名角色卡。
+    const mid=savedRecord.messageId;
+    st.avatarMesId=Number.isInteger(mid)&&savedRecord.sourceChat===snippetChatIdentity()&&ctx().chat?.[mid]?.name===st.speaker?mid:null;
     st.custom=null;st.customIsRendered=false;st.raw='\u0000';buildText();
   }else if (!loadMessage(id, picked)) { toast('info', '没有可用的消息'); return; }
   keyboardDismiss();
@@ -4485,6 +4494,35 @@ function snippetCharAvatar(raw,directory='characters'){
   if(/^(?:data:image\/|blob:|https?:\/\/|\/)/i.test(s))return s;
   return '/'+directory+'/'+s.replace(/^\.?\/?(?:characters|User Avatars)\//i,'').split('/').map(encodeURIComponent).join('/');
 }
+// 同名角色卡按名字分不出来，所以直接看这条消息自己记录的头像：
+// /sendas 等写入 force_avatar，群聊消息带 original_avatar（发言角色卡的文件名），
+// 单聊消息属于当前角色卡；都没有时再看页面上这条消息显示的头像。
+function messageCharAvatar(id){
+  const c=ctx(), msg=Number.isInteger(id)?c.chat?.[id]:null;
+  if(!msg||msg.is_user)return '';
+  const forced=typeof msg.force_avatar==='string'?msg.force_avatar.trim():'';
+  if(forced){
+    const persona=/^\.?\/?User Avatars\//i;
+    return persona.test(forced)?snippetCharAvatar(forced.replace(persona,''),'User Avatars'):snippetCharAvatar(forced);
+  }
+  if(typeof msg.original_avatar==='string'&&msg.original_avatar.trim())return snippetCharAvatar(msg.original_avatar);
+  const chars=Array.isArray(c.characters)?c.characters:[];
+  const active=c.groupId?null:chars[c.characterId??c.characterIndex];
+  if(active?.avatar&&active.name===msg.name)return snippetCharAvatar(active.avatar);
+  const img=document.querySelector('#chat .mes[mesid="'+id+'"] .avatar img');
+  const src=img?.currentSrc||img?.getAttribute('src')||'';
+  if(src&&!/default-avatar|unknown-avatar/i.test(src))return src;
+  const same=chars.filter(v=>v?.name&&v.name===msg.name);
+  return same.length===1&&same[0].avatar?snippetCharAvatar(same[0].avatar):'';
+}
+// 头像地址里的卡片文件名：/characters/x.png 和 /thumbnail?type=avatar&file=x.png 都取出 x.png。
+function avatarFileKey(url){
+  if(typeof url!=='string'||!url)return '';
+  const m=/[?&]file=([^&#]+)/.exec(url);
+  let f=m?m[1]:url.split(/[?#]/)[0].split('/').pop()||'';
+  try{f=decodeURIComponent(f);}catch{}
+  return f.toLowerCase();
+}
 // ST also sets is_system on /hide messages. Only accept a hidden message
 // as a source when its *actual* speaker name can be verified in this chat.
 // Ordinary system/narrator messages must not inherit the active character.
@@ -4515,8 +4553,7 @@ function snippetCurrentCharacter(messageId){
   const name=fromMessage||actor?.name||c.name2||'';
   // Use name as a portable grouping key across chats, not volatile message indices.
   const key=name?'char:'+name:'unclassified';
-  const domAvatar=Number.isInteger(messageId)&&!msg?.is_user?document.querySelector('#chat .mes[mesid="'+messageId+'"] .avatar img'):null;
-  const avatar=(domAvatar?.currentSrc||domAvatar?.getAttribute('src')||'')
+  const avatar=(Number.isInteger(messageId)&&!msg?.is_user?messageCharAvatar(messageId):'')
     ||snippetCharAvatar(actor?.avatar||actor?.avatar_url||(!fromMessage?c.characterAvatar:'')||'');
   return {roleKey:key,roleName:name||'未分类',avatar:avatar||''};
 }
