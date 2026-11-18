@@ -1035,30 +1035,77 @@ function applyRepsMapped(t) {
   }
   return { text: chars.join(''), chars, src };
 }
+// 逐字比对（Myers 算法）：返回 a 中每个字是否保留，以及插在 a 各位置前的新字。
+// 改动太多时返回 null，由调用方改用粗略算法。
+const REPS_DIFF_MAX = 3000; // 最多容忍的改动字数，超过就不做逐字比对
+function repsCharDiff(a, b) {
+  const N = a.length, M = b.length, maxD = Math.min(N + M, REPS_DIFF_MAX), off = maxD + 2;
+  const v = new Int32Array(2 * maxD + 5), trace = [];
+  v[off + 1] = 0;
+  let done = false;
+  for (let d = 0; d <= maxD && !done; d++) {
+    trace.push(v.slice(off - d - 1, off + d + 2));
+    for (let k = -d; k <= d; k += 2) {
+      let x = (k === -d || (k !== d && v[off + k - 1] < v[off + k + 1])) ? v[off + k + 1] : v[off + k - 1] + 1;
+      let y = x - k;
+      while (x < N && y < M && a[x] === b[y]) { x++; y++; }
+      v[off + k] = x;
+      if (x >= N && y >= M) { done = true; break; }
+    }
+  }
+  if (!done) return null;
+  const kept = new Array(N).fill(false), ins = new Array(N + 1).fill('');
+  let x = N, y = M;
+  for (let d = trace.length - 1; d >= 0; d--) {
+    const t = trace[d], at = k => t[k + d + 1], k = x - y;
+    const pk = (k === -d || (k !== d && at(k - 1) < at(k + 1))) ? k + 1 : k - 1;
+    const px = at(pk), py = px - pk;
+    while (x > px && y > py) { kept[x - 1] = true; x--; y--; }
+    if (d > 0) { if (x === px) ins[x] = b[y - 1] + ins[x]; }
+    x = px; y = py;
+  }
+  return { kept, ins };
+}
 // 把「替换后显示的文字」上的编辑换算回原文。S 为原文（已规整），edited 为编辑结果。
-// 返回新的原文；换算后对不上编辑结果时返回 null，由调用方退回旧做法。
+// 没改动过的字一律换回原文，替换开关因此一直有效；改过的被替换词才按你写的保存。
+// 返回新的原文；换算结果对不上编辑内容时返回 null，由调用方退回旧做法。
 function repsSourceEdit(S, edited, fold) {
   const m = applyRepsMapped(S), R0 = m.chars, R1 = Array.from(fold(edited));
   if (m.text === S) return R1.join(''); // 没有替换生效：编辑内容本身就是原文
+  if (R0.length === R1.length && R0.every((ch, i) => ch === R1[i])) return S; // 没有改动
+  const Sc = Array.from(S), check = back => fold(applyReps(back)) === R1.join('') ? back : null;
+  const same = (i, j) => m.src[i][0] === m.src[j][0] && m.src[i][1] === m.src[j][1];
+  const diff = repsCharDiff(R0, R1);
+  if (diff) {
+    const { kept, ins } = diff;
+    let out = '';
+    for (let u0 = 0; u0 < R0.length;) {
+      let u1 = u0 + 1;
+      while (u1 < R0.length && same(u1 - 1, u1)) u1++;
+      out += ins[u0];
+      let whole = true;
+      for (let i = u0; i < u1; i++) if (!kept[i] || (i > u0 && ins[i])) { whole = false; break; }
+      if (whole) out += Sc.slice(m.src[u0][0], m.src[u0][1]).join('');
+      else for (let i = u0; i < u1; i++) out += (i > u0 ? ins[i] : '') + (kept[i] ? R0[i] : '');
+      u0 = u1;
+    }
+    out += ins[R0.length];
+    const ok = check(out);
+    if (ok !== null) return ok;
+  }
+  // 粗略算法：只比开头和结尾，中间整段按编辑内容保存。
   let a = 0;
   while (a < R0.length && a < R1.length && R0[a] === R1[a]) a++;
   let b = 0;
   while (b < R0.length - a && b < R1.length - a && R0[R0.length - 1 - b] === R1[R1.length - 1 - b]) b++;
-  if (a === R0.length && R0.length === R1.length) return S; // 没有改动
-  const same = (i, j) => m.src[i][0] === m.src[j][0] && m.src[i][1] === m.src[j][1];
-  // 改动落在某个被替换的词中间时，扩展到整个词，整体换回。
   let r0 = a, r1 = R0.length - b;
   while (r0 > 0 && r0 < R0.length && same(r0 - 1, r0)) r0--;
   while (r1 > 0 && r1 < R0.length && same(r1 - 1, r1)) r1++;
-  const Sc = Array.from(S);
   const srcStart = r0 < R0.length ? m.src[r0][0] : Sc.length;
   const srcEnd = r1 > r0 ? m.src[r1 - 1][1] : srcStart;
   const inserted = R0.slice(r0, a).join('') + R1.slice(a, R1.length - b).join('') + R0.slice(R0.length - b, r1).join('');
-  const back = Sc.slice(0, srcStart).join('') + inserted + Sc.slice(srcEnd).join('');
-  // 验证：对换算结果重新替换，必须得到编辑后的文字。
-  return fold(applyReps(back)) === R1.join('') ? back : null;
+  return check(Sc.slice(0, srcStart).join('') + inserted + Sc.slice(srcEnd).join(''));
 }
-
 function normalizeParagraphs(t) {
   // Unicode U+2029 is a paragraph boundary; U+2028 is a soft line break.
   return String(t || '').replace(/\r\n?/g, '\n')
@@ -2635,6 +2682,8 @@ function postypeAvatarSrc(p) {
     const raw=actor?.avatar||actor?.avatar_url||(!speaker||speaker===c.name2?c.characterAvatar:'')||'';
     if(raw)return resolve(raw);
   }else {
+    const fromMessage=st.avatarMesId!=null?messageUserAvatar(st.avatarMesId):'';
+    if(fromMessage)return fromMessage;
     const raw=c.userAvatar||c.user_avatar||c.personaAvatar||c.persona_avatar||'';
     if(raw)return resolve(raw);
   }
@@ -3908,7 +3957,8 @@ ${ui.sl('上下', 'avatarCropY', 0, 100, 1)}
     }
     if (t.dataset.fold) { t.parentElement.classList.toggle('open'); queueFitSettingsView(); return; }
     if (t.dataset.tab) { panel(t.dataset.tab); return; }
-    if (t.dataset.tg) { setKey(t.dataset.tg, !p[t.dataset.tg]); return; }
+    // 先应用还在输入中的替换规则，再切换开关，开关才会用上刚改的规则。
+    if (t.dataset.tg) { if (t.dataset.tg === 'repOn') flushField(); setKey(t.dataset.tg, !p[t.dataset.tg]); return; }
     if (t.parentElement && t.parentElement.dataset.seg) { const k = t.parentElement.dataset.seg; setKey(k, k === 'width' ? +t.dataset.v : t.dataset.v); return; }
     if (t.parentElement && t.parentElement.dataset.pick) { setKey(t.parentElement.dataset.pick, t.dataset.v); return; }
     if (t.dataset.up) { upKey = t.dataset.up; fileIn.click(); return; }
@@ -4524,6 +4574,17 @@ function messageCharAvatar(id){
   const same=chars.filter(v=>v?.name&&v.name===msg.name);
   return same.length===1&&same[0].avatar?snippetCharAvatar(same[0].avatar):'';
 }
+// 用户消息记着发送时用的人设头像（force_avatar），中途换过人设也能对上；
+// 没有记录时用页面上这条消息显示的头像。
+function messageUserAvatar(id){
+  const c=ctx(), msg=Number.isInteger(id)?c.chat?.[id]:null;
+  if(!msg?.is_user)return '';
+  const forced=typeof msg.force_avatar==='string'?msg.force_avatar.trim():'';
+  if(forced)return snippetCharAvatar(forced.replace(/^\.?\/?User Avatars\//i,''),'User Avatars');
+  const img=document.querySelector('#chat .mes[mesid="'+id+'"] .avatar img');
+  const src=img?.currentSrc||img?.getAttribute('src')||'';
+  return src&&!/default-avatar|unknown-avatar/i.test(src)?src:'';
+}
 // ST also sets is_system on /hide messages. Only accept a hidden message
 // as a source when its *actual* speaker name can be verified in this chat.
 // Ordinary system/narrator messages must not inherit the active character.
@@ -4541,8 +4602,7 @@ function snippetCurrentCharacter(messageId){
   const c=ctx(), chat=c.chat||[], msg=Number.isInteger(messageId)?chat[messageId]:null;
   if(msg?.is_user){
     const name=String(msg.name||c.name1||'用户').trim()||'用户';
-    const domAvatar=document.querySelector('#chat .mes[mesid="'+messageId+'"] .avatar img');
-    const avatar=domAvatar?.currentSrc||domAvatar?.getAttribute('src')||snippetCharAvatar(c.user_avatar||c.userAvatar||'','User Avatars');
+    const avatar=messageUserAvatar(messageId)||snippetCharAvatar(c.user_avatar||c.userAvatar||'','User Avatars');
     return {roleKey:'user:'+name,roleName:name,avatar:avatar||''};
   }
   const chars=Array.isArray(c.characters)?c.characters:[];
