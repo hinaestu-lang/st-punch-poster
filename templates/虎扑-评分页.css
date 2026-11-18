@@ -1,0 +1,95 @@
+/* @pk-template
+{
+  "id": "hupu_rating",
+  "name": "虎扑-评分页",
+  "width": 390,
+  "html": "<article class=\"hp-page\">\n<section class=\"hp-profile\"><div class=\"hp-portrait\" data-pk=\"image\"><span>人物图片</span></div><div class=\"hp-profile-info\"><h1><span data-pk=\"author\"></span><i class=\"hp-chevron\"></i></h1><span class=\"hp-tag\" data-pk=\"subtitle\"></span><p class=\"hp-kda\" data-pk=\"note\"></p></div></section>\n<section class=\"hp-rating\"><div class=\"hp-rating-grid\"><div class=\"hp-score-panel\"><div class=\"hp-score-brand\">虎扑评分<sup>®</sup><small>i</small></div><strong class=\"hp-score\"></strong><span class=\"hp-voters\"></span></div><div class=\"hp-bars\"><div class=\"hp-rating-row hp-row-5\"><span class=\"hp-tiny-stars\">★★★★★</span><span class=\"hp-track\"><i></i></span><span class=\"hp-percent\"></span></div><div class=\"hp-rating-row hp-row-4\"><span class=\"hp-tiny-stars\">★★★★</span><span class=\"hp-track\"><i></i></span><span class=\"hp-percent\"></span></div><div class=\"hp-rating-row hp-row-3\"><span class=\"hp-tiny-stars\">★★★</span><span class=\"hp-track\"><i></i></span><span class=\"hp-percent\"></span></div><div class=\"hp-rating-row hp-row-2\"><span class=\"hp-tiny-stars\">★★</span><span class=\"hp-track\"><i></i></span><span class=\"hp-percent\"></span></div><div class=\"hp-rating-row hp-row-1\"><span class=\"hp-tiny-stars\">★</span><span class=\"hp-track\"><i></i></span><span class=\"hp-percent\"></span></div></div></div><div class=\"hp-rate-now\"><span>立即评分</span><span class=\"hp-empty-stars\">★ ★ ★ ★ ★</span></div></section>\n<div class=\"hp-divider\"></div><section class=\"hp-comments\"><header class=\"hp-comments-heading\"><h2>亮回复 <small>/1</small></h2><div class=\"hp-tabs\"><b>最亮</b><span>最晚</span><span>最早</span></div></header><article class=\"hp-comment\"><div class=\"hp-comment-avatar\" data-pk=\"avatar\"></div><div class=\"hp-comment-main\"><div class=\"hp-comment-name\" data-pk=\"title\"></div><div class=\"hp-comment-stars\">★★★★★</div><div class=\"hp-comment-text\" data-pk=\"body\"></div><footer class=\"hp-comment-meta\"><span data-pk=\"date\"></span><b>回复</b><span class=\"hp-like\"><i class=\"hp-bulb\">ϟ</i><span class=\"hp-like-count\"></span></span></footer></div></article></section><footer class=\"hp-toolbar\"><div class=\"hp-input\">认真表达，这里总有人聆听<span class=\"hp-smile\" aria-hidden=\"true\"><i></i></span><i class=\"hp-picture\"></i></div><div class=\"hp-tool\"><i class=\"hp-chat-icon\"></i><small>1</small></div><div class=\"hp-tool\"><i class=\"hp-share-icon\">↗</i><small>分享</small></div></footer></article>"
+}
+@end-pk-template */
+
+/* 独立导入模板；不需要修改插件。字段：
+人物图=配图；人物名=char/作者；标签=副标题；战绩=备注（可填 K/D/A:…）；
+评论名=u/标题；评论头像=头像栏；评论内容=正文；时间地点=日期栏。
+下方评分、票数、分布及点赞数是可编辑的装饰数据，不会自动读取比赛。
+*/
+.pk-css-page{--hp-score:"9.6";--hp-voters:"100 JRs评分";--hp-likes:"12";--hp-five:90%;--hp-four:5%;--hp-three:2%;--hp-two:1%;--hp-one:2%;--hp-five-text:"90.0%";--hp-four-text:"5.0%";--hp-three-text:"2.0%";--hp-two-text:"1.0%";--hp-one-text:"2.0%";box-sizing:border-box!important;margin:0!important;padding:0!important;min-height:0!important;background:#fff!important;color:#252525!important;font:14px/1.45 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif!important}
+.pk-css-page *{box-sizing:border-box}
+.pk-css-page .hp-page{width:100%;background:inherit;color:inherit;overflow:hidden}
+.pk-css-page .hp-profile{display:flex;gap:12px;padding:14px 16px 0;min-height:152px}
+.pk-css-page .hp-portrait{position:relative;flex:0 0 95px;width:95px;height:132px;overflow:hidden;background:#f6f6f6;color:#a0a0a5;display:flex;align-items:center;justify-content:center;font-size:12px;border-radius:2px}
+.pk-css-page .hp-portrait img{width:100%!important;height:100%!important;object-fit:contain!important;border-radius:0!important}
+.pk-css-page .hp-profile-info{min-width:0;padding-top:1px;flex:1}
+.pk-css-page .hp-profile-info h1{display:flex;align-items:center;gap:7px;font-size:19px;line-height:1.35;font-weight:600;margin:0 0 13px;overflow-wrap:anywhere}
+.pk-css-page .hp-chevron{flex:none;display:inline-block;width:9px;height:9px;border-top:1.5px solid;border-right:1.5px solid;transform:rotate(45deg)}
+.pk-css-page .hp-tag{display:inline-block;max-width:100%;background:#f1eff5;color:#645478;border-radius:1px;padding:1px 4px;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+.pk-css-page .hp-tag:empty{display:none}
+.pk-css-page .hp-kda{font-size:12px;line-height:1.4;margin:10px 0 0;color:#959599;white-space:pre-line;overflow-wrap:anywhere}
+.pk-css-page .hp-kda:empty{display:none}
+.pk-css-page .hp-rating{margin:11px 16px 16px;padding:10px 16px 13px;background:#f6fcfd}
+.pk-css-page .hp-rating-grid{display:grid;grid-template-columns:65px minmax(0,1fr);gap:8px;align-items:center}
+.pk-css-page .hp-score-panel{display:flex;flex-direction:column;align-items:flex-start;white-space:nowrap}
+.pk-css-page .hp-score-brand{font-size:13px;line-height:1.3;font-weight:900;font-style:italic;color:#36abd2;letter-spacing:-1px}
+.pk-css-page .hp-score-brand sup{font-size:7px;vertical-align:super;letter-spacing:0}
+.pk-css-page .hp-score-brand small{display:inline-block;margin-left:4px;font-size:8px;line-height:9px;text-align:center;width:9px;height:9px;border-radius:50%;background:#bde3ee;color:#fff;font-style:normal}
+.pk-css-page .hp-score{font-size:25px;line-height:1.3;color:#31a9d2;font-style:italic;font-weight:600}
+.pk-css-page .hp-score::before{content:var(--hp-score)}
+.pk-css-page .hp-voters{font-size:9px;color:#999;letter-spacing:.3px}
+.pk-css-page .hp-voters::before{content:var(--hp-voters)}
+.pk-css-page .hp-bars{display:grid;gap:4px}
+.pk-css-page .hp-rating-row{display:grid;grid-template-columns:39px minmax(0,1fr) 30px;gap:7px;align-items:center;height:7px;font-size:8px;line-height:1}
+.pk-css-page .hp-tiny-stars{text-align:right;color:#a9d8e8;letter-spacing:1px;white-space:nowrap;font-size:8px}
+.pk-css-page .hp-track{height:3px;background:#e6f2fa;overflow:hidden}
+.pk-css-page .hp-track i{display:block;height:100%;background:#30a9d1}
+.pk-css-page .hp-percent{color:#999;font-size:8px;white-space:nowrap}
+.pk-css-page .hp-row-5 .hp-track i{width:var(--hp-five)}
+.pk-css-page .hp-row-5 .hp-percent::before{content:var(--hp-five-text)}
+.pk-css-page .hp-row-4 .hp-track i{width:var(--hp-four)}
+.pk-css-page .hp-row-4 .hp-percent::before{content:var(--hp-four-text)}
+.pk-css-page .hp-row-3 .hp-track i{width:var(--hp-three)}
+.pk-css-page .hp-row-3 .hp-percent::before{content:var(--hp-three-text)}
+.pk-css-page .hp-row-2 .hp-track i{width:var(--hp-two)}
+.pk-css-page .hp-row-2 .hp-percent::before{content:var(--hp-two-text)}
+.pk-css-page .hp-row-1 .hp-track i{width:var(--hp-one)}
+.pk-css-page .hp-row-1 .hp-percent::before{content:var(--hp-one-text)}
+.pk-css-page .hp-rate-now{display:flex;align-items:center;justify-content:space-between;margin-top:12px;color:#666;font-size:13px}
+.pk-css-page .hp-empty-stars{color:#c9cbd2;font-size:25px;line-height:1;letter-spacing:2px;white-space:nowrap}
+.pk-css-page .hp-divider{height:8px;background:#f1f2f5}
+.pk-css-page .hp-comments{padding:16px 16px 20px}
+.pk-css-page .hp-comments-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:26px}
+.pk-css-page .hp-comments-heading h2{font-size:16px;line-height:1.3;margin:0;font-weight:700;white-space:nowrap}
+.pk-css-page .hp-comments-heading small{font-size:12px;font-weight:500}
+.pk-css-page .hp-tabs{display:flex;font-size:12px;line-height:1.3;background:#f5f4fa;color:#99999f;border:1px solid #f5f4fa}
+.pk-css-page .hp-tabs>*{padding:5px 11px;font-weight:400}
+.pk-css-page .hp-tabs b{background:#fff;color:#292929;font-weight:600}
+.pk-css-page .hp-comment{display:flex;gap:12px;align-items:flex-start}
+.pk-css-page .hp-comment-avatar{flex:0 0 32px;width:32px;height:32px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#f4f2ed;color:#aaa;font-size:16px}
+.pk-css-page .hp-comment-avatar img{display:block;width:100%!important;height:100%!important;object-fit:cover!important;border-radius:50%!important}
+.pk-css-page .hp-comment-main{flex:1;min-width:0}
+.pk-css-page .hp-comment-name{font-size:14px;line-height:1.3;color:#99999e;overflow-wrap:anywhere;font-weight:400}
+.pk-css-page .hp-comment-stars{font-size:15px;line-height:1.15;color:#31a9d1;letter-spacing:1px;margin:0 0 8px}
+.pk-css-page .hp-comment-text{font-size:16px;line-height:1.65;overflow-wrap:anywhere;word-break:normal;color:inherit}
+.pk-css-page .hp-comment-text p{margin:0;font:inherit;color:inherit}
+.pk-css-page .hp-comment-meta{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;color:#9b9ba1;line-height:1.5}
+.pk-css-page .hp-comment-meta>[data-pk="date"]{min-width:0;overflow-wrap:anywhere}
+.pk-css-page .hp-comment-meta>b{font-weight:500;color:#606065;white-space:nowrap}
+.pk-css-page .hp-like{display:flex;align-items:center;gap:5px;margin-left:auto;padding-left:8px;white-space:nowrap}
+.pk-css-page .hp-bulb{display:inline-flex;align-items:center;justify-content:center;border:1.4px solid currentColor;border-radius:50%;width:12px;height:14px;font-size:11px;font-weight:700;line-height:1;font-style:normal;position:relative}
+.pk-css-page .hp-bulb::after{content:"";position:absolute;bottom:-4px;left:3px;width:4px;height:2px;border-top:1px solid;border-bottom:1px solid}
+.pk-css-page .hp-like-count::before{content:var(--hp-likes)}
+.pk-css-page .hp-toolbar{display:flex;align-items:center;gap:12px;padding:12px 16px 16px;background:inherit}
+.pk-css-page .hp-input{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:9px 8px;background:#f5f4fa;color:#999aa3;font-size:11px;line-height:1.4;white-space:nowrap}
+.pk-css-page .hp-input>span{margin-left:auto;font-size:19px;line-height:1}
+.pk-css-page .hp-picture{flex:none;width:13px;height:11px;border:1.2px solid;position:relative;overflow:hidden}
+.pk-css-page .hp-picture::after{content:"";position:absolute;width:8px;height:8px;border:1px solid;transform:rotate(45deg);top:5px;left:1px}
+.pk-css-page .hp-tool{flex:none;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:21px}
+.pk-css-page .hp-tool small{font-size:11px;line-height:1.2}
+.pk-css-page .hp-chat-icon{width:19px;height:15px;border:2px solid;position:relative;margin-bottom:3px}
+.pk-css-page .hp-chat-icon::after{content:"";position:absolute;left:3px;bottom:-5px;width:5px;height:5px;border-left:2px solid;transform:skewY(-40deg);background:#fff}
+.pk-css-page .hp-share-icon{font-size:27px;line-height:18px;font-style:normal}
+
+/* Draw the face rather than relying on OS emoji glyphs. */
+.pk-css-page .hp-input>.hp-smile{position:relative;display:inline-block;flex:0 0 15px;width:15px;height:15px;margin-left:auto;border:1.4px solid currentColor;border-radius:50%;font-size:0;line-height:0;color:#92949e}
+.pk-css-page .hp-smile::before,.pk-css-page .hp-smile::after{content:"";position:absolute;top:3px;width:1.7px;height:1.7px;border-radius:50%;background:currentColor}
+.pk-css-page .hp-smile::before{left:3px}
+.pk-css-page .hp-smile::after{right:3px}
+.pk-css-page .hp-smile>i{position:absolute;left:3px;bottom:2.5px;width:6px;height:4px;border-bottom:1.2px solid currentColor;border-radius:0 0 7px 7px}
