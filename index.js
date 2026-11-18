@@ -2701,12 +2701,16 @@ function postypeAvatarSrc(p) {
 }
 
 // 头像地址里的卡片文件名：/characters/x.png 和 /thumbnail?type=avatar&file=x.png 都取出 x.png。
-function avatarFileKey(url){
-  if(typeof url!=='string'||!url)return '';
+// 内嵌图片（data:、blob:）没有文件名。
+function avatarFileName(url){
+  if(typeof url!=='string'||!url||/^(?:data|blob):/i.test(url))return '';
   const m=/[?&]file=([^&#]+)/.exec(url);
   let f=m?m[1]:url.split(/[?#]/)[0].split('/').pop()||'';
   try{f=decodeURIComponent(f);}catch{}
-  return f.toLowerCase();
+  return f;
+}
+function avatarFileKey(url){
+  return avatarFileName(url).toLowerCase();
 }
 
 function render(preview) {
@@ -4448,7 +4452,8 @@ function openById(id, selText, savedRecord=null) {
 let snippetBox=null, snippetBar=null, snippetPicking=false;
 let snippetTagFilter='';
 function snippetTags(value){return [...new Set((Array.isArray(value)?value:String(value||'').split(/[,，、\n]/)).filter(x=>typeof x==='string').map(x=>x.trim().slice(0,40)).filter(Boolean))].slice(0,20);}
-function snippetFilteredItems(){return snippetStore().filter(item=>item&&typeof item.text==='string'&&(snippetFilter==='all'||snippetRoleOf(item).key===snippetFilter)&&(!snippetTagFilter||snippetTags(item.tags).includes(snippetTagFilter))&&(!snippetSearch||[item.text,snippetRoleOf(item).name,...snippetTags(item.tags)].join(' ').toLowerCase().includes(snippetSearch.toLowerCase())));}
+// 按卡片分开的组，筛选值带 #卡片文件名；其余按角色名筛选，和以前一样。
+function snippetFilteredItems(){let files=null;const groupKey=item=>snippetFilter.includes('#')?snippetGroupOf(item,files||=snippetCardFiles()).key:snippetRoleOf(item).key;return snippetStore().filter(item=>item&&typeof item.text==='string'&&(snippetFilter==='all'||groupKey(item)===snippetFilter)&&(!snippetTagFilter||snippetTags(item.tags).includes(snippetTagFilter))&&(!snippetSearch||[item.text,snippetRoleOf(item).name,...snippetTags(item.tags)].join(' ').toLowerCase().includes(snippetSearch.toLowerCase())));}
 let snippetTapFromFloating=false;
 let snippetActionMenu=null;
 function hideSnippetActionMenu(){
@@ -4622,6 +4627,43 @@ function snippetRoleOf(item){
   const key=typeof item?.roleKey==='string'&&item.roleKey?item.roleKey:'unclassified';
   const name=typeof item?.roleName==='string'&&item.roleName?item.roleName:(key==='unclassified'?'未分类':key.replace(/^(?:char:|user:)/,''));
   return {key,name,avatar:typeof item?.avatar==='string'?item.avatar:''};
+}
+// 收藏按角色分组：同名的不同角色卡（或同名人设）按头像文件分开，名字后面注明卡片文件名；
+// 名字唯一时分组与以前完全相同。files 是 roleKey → 该名字下出现过的卡片文件集合。
+function snippetCardFiles(records=snippetStore()){
+  const files=new Map();
+  for(const item of records){
+    if(!item||typeof item.text!=='string')continue;
+    const r=snippetRoleOf(item), f=avatarFileKey(r.avatar);
+    if(r.key==='unclassified'||!f)continue;
+    if(!files.has(r.key))files.set(r.key,new Set());
+    files.get(r.key).add(f);
+  }
+  return files;
+}
+function snippetGroupOf(item,files=snippetCardFiles()){
+  const r=snippetRoleOf(item), set=files.get(r.key);
+  const base={key:r.key,roleKey:r.key,name:r.name,roleName:r.name,avatar:r.avatar};
+  if(!set||set.size<2)return base;
+  const f=avatarFileKey(r.avatar), stem=avatarFileName(r.avatar).replace(/\.[^.]+$/,'');
+  return {...base,key:r.key+'#'+f,name:r.name+(f?'（'+stem+'）':'（未分辨）')};
+}
+// 收藏头像依次尝试：按卡片文件生成的缩略图（换了访问地址也能用）→ 存下的地址 →
+// 卡片原图 → 名字唯一的角色卡。前一个加载失败再试下一个。
+function snippetAvatarCandidates(role){
+  const url=role.avatar||'', user=String(role.roleKey||role.key||'').startsWith('user:');
+  const file=avatarFileName(url), out=[];
+  if(file){
+    const type=(/[?&]type=([a-z]+)/i.exec(url)||[])[1]||(user?'persona':'avatar');
+    out.push('/thumbnail?type='+encodeURIComponent(type)+'&file='+encodeURIComponent(file));
+  }
+  if(url)out.push(url);
+  if(file)out.push(snippetCharAvatar(file,user?'User Avatars':'characters'));
+  if(!user&&!file){
+    const name=role.roleName||role.name, same=(ctx().characters||[]).filter(v=>v?.name&&v.name===name);
+    if(same.length===1&&same[0].avatar)out.push(snippetCharAvatar(same[0].avatar));
+  }
+  return [...new Set(out.filter(Boolean))];
 }
 function addPickedSentence(text,sourceId,roleHint,span=null,quiet=false){
   const value=normalizeParagraphs(String(text||'')).trim();
@@ -5060,12 +5102,18 @@ function snippetApplyAppearance(){
 }
 function snippetAvatarElement(role){
   const avatar=document.createElement('span');avatar.className='pk-snip-avatar';
-  const url=role.avatar||'';
-  if(url){
-    const im=document.createElement('img');im.alt='';im.loading='lazy';im.src=url;
-    im.onerror=()=>{im.remove();avatar.textContent=Array.from(role.name||'未')[0];};
+  const initial=Array.from(role.roleName||role.name||'未')[0];
+  const urls=snippetAvatarCandidates(role);
+  if(urls.length){
+    const im=document.createElement('img');im.alt='';im.loading='lazy';
+    let i=0;
+    im.onerror=()=>{
+      if(++i<urls.length){im.src=urls[i];return;}
+      im.remove();avatar.textContent=initial;
+    };
+    im.src=urls[0];
     avatar.appendChild(im);
-  }else avatar.textContent=Array.from(role.name||'未')[0];
+  }else avatar.textContent=initial;
   return avatar;
 }
 function snippetLabelTime(item){
@@ -5265,7 +5313,8 @@ function snippetMergePlan(ids,picking=false){
   const records=ids.map(id=>typeof id==='object'?id:(picking?snippetMarks.find(item=>item.id===id):all.find(item=>item.id===id))).filter(Boolean);
   if(records.length<2){snippetToast('至少选择两句才能合并');return null;}
   const keys=new Set(records.map(item=>snippetRoleOf(item).key));
-  if(keys.size!==1){snippetToast('请先选择同一角色的句子合并，避免角色归属混乱','error');return null;}
+  const cards=snippetCardFiles(records);
+  if(keys.size!==1||[...cards.values()].some(set=>set.size>1)){snippetToast('请先选择同一角色的句子合并，避免角色归属混乱','error');return null;}
 
   const currentChat=snippetChatIdentity();
   const sourceCache=new Map(),positions=new Map();
@@ -5445,7 +5494,8 @@ function snippetRenderLibrary(area){
   input.oninput=()=>{snippetSearch=input.value;snippetChosen.clear();snippetVisibleCounts.clear();snippetRenderList(area.querySelector('.pk-snip-list'));};
   const choose=document.createElement('select');choose.setAttribute('aria-label','按角色筛选');
   const known=new Map();
-  for(const item of snippetStore().filter(item=>item&&typeof item.text==='string')){const role=snippetRoleOf(item);known.set(role.key,role.name);}
+  const files=snippetCardFiles();
+  for(const item of snippetStore().filter(item=>item&&typeof item.text==='string')){const role=snippetGroupOf(item,files);known.set(role.key,role.name);}
   for(const [id,name] of [['all','全部角色'],...known.entries()]){
     const option=document.createElement('option');option.value=id;option.textContent=name;choose.appendChild(option);
   }
@@ -5488,7 +5538,13 @@ function snippetRenderList(list){
   list.replaceChildren();
   const records=snippetFilteredItems();
   const grouped=new Map();
-  for(const item of records){const role=snippetRoleOf(item);if(!grouped.has(role.key))grouped.set(role.key,{role,items:[]});grouped.get(role.key).items.push(item);}
+  const files=snippetCardFiles();
+  for(const item of records){
+    const role=snippetGroupOf(item,files);
+    if(!grouped.has(role.key))grouped.set(role.key,{role,items:[]});
+    const g=grouped.get(role.key);g.items.push(item);
+    if(!g.role.avatar&&role.avatar)g.role={...g.role,avatar:role.avatar};
+  }
   if(!records.length)list.appendChild(snippetMake('div','pk-snip-empty',snippetStore().length?'没有找到相关句子':'尚无收藏。点「拾取句子」开始保存。'));
   for(const {role,items} of grouped.values()){
     const group=snippetMake('section','pk-snip-role-group');
@@ -5546,7 +5602,7 @@ function snippetUpdateSelectionFooter(){
 function snippetRenderDetail(area){
   const item=snippetStore().find(x=>x.id===snippetDetailId);
   if(!item){snippetView='library';renderSnippetBox();return;}
-  const role=snippetRoleOf(item);
+  const role=snippetGroupOf(item);
   area.appendChild(snippetButton('‹ 返回收藏',()=>{snippetView='library';renderSnippetBox();},'pk-snip-back'));
   const card=snippetMake('div','pk-snip-detail-card');
   const head=snippetMake('div','pk-snip-role-heading');
@@ -5734,14 +5790,21 @@ function snippetRenderManual(area){
   const editor=document.createElement('textarea');editor.rows=5;editor.placeholder='粘贴或输入想收藏的一句话';editor.className='pk-snip-manual-input';area.appendChild(editor);
   const roleSelect=document.createElement('select');roleSelect.className='pk-snip-manual-role';
   const current=snippetCurrentCharacter(null);
-  const roles=new Map([[current.roleKey,current]]);
+  // 当前角色也按卡片分组，和收藏里同一张卡的组合并成一项。
+  const files=snippetCardFiles([...snippetStore(),{text:'',...current}]);
+  const labels=new Map();
+  const currentGroup=snippetGroupOf({text:'',...current},files);
+  const roles=new Map([[currentGroup.key,current]]);
+  labels.set(currentGroup.key,currentGroup.name);
   roles.set('unclassified',{roleKey:'unclassified',roleName:'未分类',avatar:''});
   for(const item of snippetStore()){
     if(!item||typeof item.text!=='string')continue;
-    const role=snippetRoleOf(item);roles.set(role.key,{roleKey:role.key,roleName:role.name,avatar:role.avatar});
+    const g=snippetGroupOf(item,files);
+    if(!roles.has(g.key)||!roles.get(g.key).avatar&&g.avatar)roles.set(g.key,{roleKey:g.roleKey,roleName:g.roleName,avatar:g.avatar});
+    labels.set(g.key,g.name);
   }
-  for(const role of roles.values()){
-    const o=document.createElement('option');o.value=role.roleKey;o.textContent=role.roleName;roleSelect.append(o);
+  for(const [key,role] of roles){
+    const o=document.createElement('option');o.value=key;o.textContent=labels.get(key)||role.roleName;roleSelect.append(o);
   }
   area.append(snippetField('归属角色',roleSelect),snippetButton('加入收藏',()=>{
     if(!editor.value.trim())return snippetToast('先输入一句话');
