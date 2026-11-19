@@ -2264,11 +2264,16 @@ function fillCssList(){
     const line=document.createElement('div');line.className='pk-css-item';
     const item=document.createElement('button');item.type='button';item.dataset.skin=rec.id==='punch'?'punch':'css:'+rec.id;
     item.innerHTML='<span class="pk-skin-name"></span><i class="fa-solid fa-check"></i>';
-    item.querySelector('.pk-skin-name').textContent=cssTemplateName(rec.id, cssEntries()[rec.id]?.name||rec.name);
+    // 自己导入的模板与内置模板同 ID 时，导入的那份会覆盖内置版：标出来，删除按钮改为恢复内置。
+    const overriding=!!(cssEntries()[rec.id]&&BUILTIN_CSS[rec.id]);
+    item.querySelector('.pk-skin-name').textContent=cssTemplateName(rec.id, cssEntries()[rec.id]?.name||rec.name)+(overriding?'（导入版）':'');
     line.append(item);
     if(rec.id!=='punch'){
       const exportBtn=document.createElement('button');exportBtn.type='button';exportBtn.dataset.cssexport=rec.id;exportBtn.textContent='导出';exportBtn.title='导出 CSS';line.append(exportBtn);
-      const remove=document.createElement('button');remove.type='button';remove.dataset.cssdel=rec.id;remove.textContent='删除';remove.title='从模板列表隐藏或删除';line.append(remove);
+      const remove=document.createElement('button');remove.type='button';remove.dataset.cssdel=rec.id;
+      remove.textContent=overriding?'恢复内置':'删除';
+      remove.title=overriding?'删除你导入的这份，改用插件内置的版本':'从模板列表隐藏或删除';
+      line.append(remove);
     }
     dest.appendChild(line);
   });
@@ -3960,8 +3965,15 @@ ${ui.sl('上下', 'avatarCropY', 0, 100, 1)}
     if(t.dataset.cssdel){
       e.preventDefault();e.stopPropagation();
       const id=t.dataset.cssdel;
-      if(cssEntries()[id])delete cssEntries()[id];
-      if(BUILTIN_CSS[id])store().cssHidden[id]=true;
+      if(cssEntries()[id]){
+        delete cssEntries()[id];
+        // 有同名内置模板：只删导入的那份，恢复成内置版本，模板保持选中。
+        if(BUILTIN_CSS[id]){
+          if(store().cssHidden)delete store().cssHidden[id];
+          st.cssSignature='';persist();fillCssList();syncAll();schedule(true);
+          toast('success','已恢复为插件内置的模板');return;
+        }
+      }else if(BUILTIN_CSS[id])store().cssHidden[id]=true;
       if(cur().pageSkin==='css:'+id)cur().pageSkin='punch';
       st.cssSignature='';persist();fillCssList();syncAll();schedule(true);
       toast('success','已从模板列表移除');return;
