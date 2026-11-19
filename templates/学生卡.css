@@ -1,0 +1,116 @@
+/* @pk-template
+{
+  "id": "student_id_card",
+  "name": "学生卡",
+  "width": 390,
+  "html": "<article class=\"sid\">\n  <header class=\"sid-header\">Student ID Card</header>\n  <div class=\"sid-card\">\n    <div class=\"sid-grid\">\n      <div class=\"sid-photo-column\">\n        <div class=\"sid-photo\" data-pk=\"avatar\"></div>\n        <div class=\"sid-barcode\" aria-hidden=\"true\"></div>\n      </div>\n      <div class=\"sid-info\">\n        <div class=\"sid-heading\">学生证</div>\n        <dl class=\"sid-fields\">\n          <div><dt>姓名</dt><dd data-pk=\"author\"></dd></div>\n          <div><dt>班级</dt><dd data-pk=\"subtitle\"></dd></div>\n          <div><dt>学号</dt><dd data-pk=\"note\"></dd></div>\n          <div><dt>生日</dt><dd data-pk=\"date\"></dd></div>\n        </dl>\n      </div>\n    </div>\n  </div>\n  <section class=\"sid-story\">\n    <div class=\"sid-body\" data-pk=\"body\"></div>\n  </section>\n</article>"
+}
+@end-pk-template */
+
+.pk-css-page {
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  background: transparent !important;
+}
+.pk-css-page .sid,
+.pk-css-page .sid * {
+  box-sizing: border-box;
+}
+.pk-css-page .sid {
+  --sid-band: #181818;
+  --sid-paper: #fff;
+  width: 100%;
+  min-width: 0;
+  color: #171717;
+  font-family: var(--pk-shared-font, system-ui, sans-serif);
+  overflow-wrap: anywhere;
+}
+.pk-css-page .sid-header {
+  padding: 9px 20px;
+  background: var(--sid-band);
+  color: #fff;
+  font: 500 15px/1.35 system-ui, sans-serif;
+}
+.pk-css-page .sid-card {
+  padding: 18px clamp(12px, 5vw, 20px) 14px;
+  background: var(--sid-paper);
+}
+.pk-css-page .sid-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 28%) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(10px, 5vw, 22px);
+  padding-bottom: 10px;
+  border-bottom: 1px solid #b8b8b8;
+}
+.pk-css-page .sid-photo {
+  aspect-ratio: 7 / 9;
+  overflow: hidden;
+  background: #e7eef3;
+}
+.pk-css-page .sid-photo .pk-avatar-photo {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  object-fit: cover !important;
+  object-position: center 35% !important;
+}
+.pk-css-page .sid-barcode {
+  height: 17px;
+  margin-top: 8px;
+  background: repeating-linear-gradient(90deg,
+    #171717 0 1px, transparent 1px 2px, #171717 2px 4px,
+    transparent 4px 5px, #171717 5px 6px, transparent 6px 8px,
+    #171717 8px 11px, transparent 11px 12px, #171717 12px 13px,
+    transparent 13px 15px, #171717 15px 16px, transparent 16px 17px,
+    #171717 17px 19px, transparent 19px 21px);
+}
+.pk-css-page .sid-fields {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+.pk-css-page .sid-fields > div {
+  display: grid;
+  grid-template-columns: 2.5em minmax(0, 1fr);
+  align-items: baseline;
+  gap: 7px;
+}
+.pk-css-page .sid-fields dt {
+  color: #626262;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.pk-css-page .sid-fields dd {
+  display: block !important;
+  min-height: 1.65em;
+  margin: 0;
+  padding: 2px 2px 3px;
+  border-bottom: 1px solid #ddd;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.pk-css-page .sid-story {
+  border-block: 10px solid var(--sid-band);
+  background: var(--sid-paper);
+}
+.pk-css-page .sid-body {
+  padding: 21px clamp(12px, 5vw, 20px) 22px;
+  line-height: 1.75;
+}
+.pk-css-page .sid-body > :first-child { margin-top: 0; }
+.pk-css-page .sid-body > :last-child { margin-bottom: 0; }
+.pk-css-page .sid-body img { max-width: 100%; height: auto; }
+
+.pk-css-page .sid-heading {
+  margin: 2px 0 12px;
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.35;
+}
