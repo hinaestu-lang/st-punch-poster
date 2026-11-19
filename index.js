@@ -2680,7 +2680,11 @@ function syncSkinSelection() {
   st.ov.querySelectorAll('[data-skin]').forEach(el=>el.classList.toggle('on',el.dataset.skin===active));
 }
 // Helpers retained for imported CSS templates.
+// 所有模板头像都从这里取，结果统一换成原图地址（见 fullAvatarUrl）。
 function postypeAvatarSrc(p) {
+  return fullAvatarUrl(postypeAvatarSource(p));
+}
+function postypeAvatarSource(p) {
   const mode=p.postypeAvatarMode||'char';
   if(mode==='initial') return '';
   if(mode==='custom') return typeof p.postypeAvatarImg==='string'?p.postypeAvatarImg:'';
@@ -2752,6 +2756,17 @@ function postypeAvatarSrc(p) {
   return '';
 }
 
+// SillyTavern 消息里记的头像（force_avatar）和聊天页面上显示的头像都是缩略图，
+// 默认只有 96×144，放进海报会糊。换成同一张图的原图地址；其他地址原样返回。
+function fullAvatarUrl(url){
+  if(typeof url!=='string')return '';
+  const m=/^(?:https?:\/\/[^/?#]+)?\/thumbnail\?([^#]*)/i.exec(url.trim());
+  if(!m)return url;
+  const q=new URLSearchParams(m[1]), file=q.get('file'), type=(q.get('type')||'').toLowerCase();
+  const dir=type==='avatar'?'characters':type==='persona'?'User Avatars':'';
+  if(!file||!dir)return url;
+  return '/'+dir+'/'+file.split('/').map(encodeURIComponent).join('/');
+}
 // 头像地址里的卡片文件名：/characters/x.png 和 /thumbnail?type=avatar&file=x.png 都取出 x.png。
 // 内嵌图片（data:、blob:）没有文件名。
 function avatarFileName(url){
@@ -4616,18 +4631,19 @@ function snippetCharAvatar(raw,directory='characters'){
 function messageCharAvatar(id){
   const c=ctx(), msg=Number.isInteger(id)?c.chat?.[id]:null;
   if(!msg||msg.is_user)return '';
+  // original_avatar 是角色卡文件名（原图）；force_avatar 是缩略图地址，所以放在后面并换成原图。
+  if(typeof msg.original_avatar==='string'&&msg.original_avatar.trim())return snippetCharAvatar(msg.original_avatar);
   const forced=typeof msg.force_avatar==='string'?msg.force_avatar.trim():'';
   if(forced){
     const persona=/^\.?\/?User Avatars\//i;
-    return persona.test(forced)?snippetCharAvatar(forced.replace(persona,''),'User Avatars'):snippetCharAvatar(forced);
+    return fullAvatarUrl(persona.test(forced)?snippetCharAvatar(forced.replace(persona,''),'User Avatars'):snippetCharAvatar(forced));
   }
-  if(typeof msg.original_avatar==='string'&&msg.original_avatar.trim())return snippetCharAvatar(msg.original_avatar);
   const chars=Array.isArray(c.characters)?c.characters:[];
   const active=c.groupId?null:chars[c.characterId??c.characterIndex];
   if(active?.avatar&&active.name===msg.name)return snippetCharAvatar(active.avatar);
   const img=document.querySelector('#chat .mes[mesid="'+id+'"] .avatar img');
   const src=img?.currentSrc||img?.getAttribute('src')||'';
-  if(src&&!/default-avatar|unknown-avatar/i.test(src))return src;
+  if(src&&!/default-avatar|unknown-avatar/i.test(src))return fullAvatarUrl(src);
   const same=chars.filter(v=>v?.name&&v.name===msg.name);
   return same.length===1&&same[0].avatar?snippetCharAvatar(same[0].avatar):'';
 }
@@ -4637,10 +4653,10 @@ function messageUserAvatar(id){
   const c=ctx(), msg=Number.isInteger(id)?c.chat?.[id]:null;
   if(!msg?.is_user)return '';
   const forced=typeof msg.force_avatar==='string'?msg.force_avatar.trim():'';
-  if(forced)return snippetCharAvatar(forced.replace(/^\.?\/?User Avatars\//i,''),'User Avatars');
+  if(forced)return fullAvatarUrl(snippetCharAvatar(forced.replace(/^\.?\/?User Avatars\//i,''),'User Avatars'));
   const img=document.querySelector('#chat .mes[mesid="'+id+'"] .avatar img');
   const src=img?.currentSrc||img?.getAttribute('src')||'';
-  return src&&!/default-avatar|unknown-avatar/i.test(src)?src:'';
+  return src&&!/default-avatar|unknown-avatar/i.test(src)?fullAvatarUrl(src):'';
 }
 // ST also sets is_system on /hide messages. Only accept a hidden message
 // as a source when its *actual* speaker name can be verified in this chat.
