@@ -8,10 +8,11 @@
 @end-pk-template */
 
 /* 歌名读取 char/作者栏；歌手读取 u/标题栏；歌词读取正文。静态播放器样式。
-整页背景透明，导出为透明 PNG；四周留白给阴影。 */
+整页背景透明，导出为透明 PNG（不受纸张颜色影响）。
+不加外阴影：iOS 导出时外阴影会被画成偏移的灰色方块。 */
 .pk-css-page{box-sizing:border-box!important;margin:0!important;padding:19px!important;min-height:0!important;background:transparent!important;color:#eee!important}
 .pk-css-page *{box-sizing:border-box}
-.pk-css-page .mp-player{padding:27px 23px 0;border:2px solid #171717;border-radius:29px;background:linear-gradient(115deg,#1c1c1d,#070708 18%,#101011 83%,#242425);box-shadow:inset 2px 2px 3px #343435,inset -2px -2px 4px #000,0 9px 15px rgba(0,0,0,.2)}
+.pk-css-page .mp-player{padding:27px 23px 0;border:2px solid #171717;border-radius:29px;background:linear-gradient(115deg,#1c1c1d,#070708 18%,#101011 83%,#242425);box-shadow:inset 2px 2px 3px #343435,inset -2px -2px 4px #000}
 .pk-css-page .mp-screen{padding:10px 10px 12px;border:4px solid #171718;border-radius:2px;background:#2c2d2e;color:#eee;font-family:"Microsoft YaHei","PingFang SC",sans-serif}
 .pk-css-page .mp-status{display:flex;align-items:center;gap:13px;height:18px;color:#ddd;font:700 11px/1 monospace;letter-spacing:.5px}
 .pk-css-page .mp-status>span{margin-left:auto}

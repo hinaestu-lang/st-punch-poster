@@ -9,10 +9,11 @@
 
 /* 封面读取头像，点击可上传。蓝牙名称=副标题；顶部歌名=char/作者，歌手=user/标题；下方=正文。
 面板使用固定半透明底色和高光，不依赖导出时不稳定的背景模糊。
-整页背景透明，导出为透明 PNG。 */
+整页背景透明，导出为透明 PNG（不受纸张颜色影响）。
+不加外阴影：iOS 导出时外阴影会被画成偏移的灰色方块。 */
 .pk-css-page{box-sizing:border-box!important;margin:0!important;padding:12px!important;min-height:0!important;background:transparent!important;color:#111!important;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif!important}
 .pk-css-page *{box-sizing:border-box}
-.pk-css-page .bt-panel{padding:19px 15px 23px;border-radius:36px;border:1px solid rgba(255,255,255,.85);background:linear-gradient(130deg,rgba(255,255,255,.85),rgba(245,244,246,.89) 48%,rgba(232,231,235,.92));box-shadow:inset 0 1px 2px #fff,0 8px 24px rgba(0,0,0,.1)}
+.pk-css-page .bt-panel{padding:19px 15px 23px;border-radius:36px;border:1px solid rgba(255,255,255,.85);background:linear-gradient(130deg,rgba(255,255,255,.85),rgba(245,244,246,.89) 48%,rgba(232,231,235,.92));box-shadow:inset 0 1px 2px #fff}
 .pk-css-page .bt-now{display:flex;align-items:center;gap:12px;margin:0 3px 21px}
 .pk-css-page .bt-cover{position:relative;display:flex;align-items:center;justify-content:center;flex:0 0 64px;width:64px!important;height:64px!important;overflow:hidden;border-radius:10px!important;background:#fff;font-size:23px;color:#888;box-shadow:0 4px 8px rgba(0,0,0,.18);cursor:pointer}
 .pk-css-page .bt-cover>img.pk-avatar-photo{display:block;width:100%!important;height:100%!important;object-fit:cover!important;border-radius:10px!important}
