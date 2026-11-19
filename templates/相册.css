@@ -1,0 +1,113 @@
+/* @pk-template
+{
+  "id": "showcase_photo",
+  "name": "相册",
+  "width": 390,
+  "html": "<article class=\"sc-card\"><header class=\"sc-header\"><div class=\"sc-thumb\" data-pk=\"avatar\"></div><div class=\"sc-label\"><div class=\"sc-heading\">已选择<span data-pk=\"author\"></span></div><div class=\"sc-pill\"><span data-pk=\"title\"></span><i aria-hidden=\"true\"></i></div></div><span class=\"sc-close\" aria-hidden=\"true\"></span></header><div class=\"sc-hero\"><div class=\"sc-photo\" data-pk=\"avatar\"></div><span class=\"sc-check\" aria-label=\"已选择\"></span></div><main class=\"sc-body\" data-pk=\"body\"></main></article>"
+}
+@end-pk-template */
+
+.pk-css-page {
+  box-sizing:border-box!important;
+  margin:0!important;
+  padding:18px 24px 10px!important;
+  min-height:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.pk-css-page .sc-card {
+  color:#111;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;
+}
+.pk-css-page .sc-header {
+  display:grid;
+  grid-template-columns:68px minmax(0,1fr) 44px;
+  gap:14px;
+  align-items:start;
+  margin:0 0 15px;
+}
+.pk-css-page .sc-thumb,
+.pk-css-page .sc-photo {
+  display:block;
+  overflow:hidden;
+  cursor:pointer;
+  text-align:center;
+}
+.pk-css-page .sc-thumb {width:68px;height:68px;border-radius:17px;}
+.pk-css-page .sc-hero {position:relative;margin:0 6px;}
+.pk-css-page .sc-photo {aspect-ratio:1;border-radius:22px;}
+.pk-css-page .sc-card .pk-avatar-photo {
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  margin:0!important;
+  border:0!important;
+  box-shadow:none!important;
+  object-fit:cover!important;
+  border-radius:inherit!important;
+}
+.pk-css-page .sc-heading {
+  font-size:14px!important;
+  font-weight:750!important;
+  line-height:1.35;
+  overflow-wrap:anywhere;
+}
+.pk-css-page .sc-pill {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-top:9px;
+  padding:4px 12px;
+  border-radius:999px;
+  background:#fff;
+  font:700 16px/1.4 system-ui,sans-serif;
+}
+.pk-css-page .sc-pill i {
+  width:6px;height:6px;
+  border-top:2px solid #666;
+  border-right:2px solid #666;
+  transform:rotate(45deg);
+}
+.pk-css-page .sc-close {
+  display:block;
+  position:relative;
+  width:44px;height:44px;
+  border-radius:50%;
+  background:#fff;
+}
+.pk-css-page .sc-close::before,
+.pk-css-page .sc-close::after {
+  content:"";
+  position:absolute;
+  top:20px;left:11px;
+  width:22px;height:4px;
+  border-radius:4px;
+  background:#111;
+  transform:rotate(45deg);
+}
+.pk-css-page .sc-close::after {transform:rotate(-45deg);}
+.pk-css-page .sc-check {
+  position:absolute;
+  right:10px;bottom:10px;
+  width:22px;height:22px;
+  border-radius:50%;
+  background:#0787ff;
+  pointer-events:none;
+}
+.pk-css-page .sc-check::after {
+  content:"";
+  position:absolute;
+  top:4px;left:8px;
+  width:4px;height:9px;
+  border:solid white;
+  border-width:0 2px 2px 0;
+  transform:rotate(38deg);
+}
+.pk-css-page .sc-body {
+  display:block;
+  margin:18px 6px 6px;
+  overflow-wrap:anywhere;
+}
+.pk-css-page .sc-pill span {min-width:0;overflow-wrap:anywhere;}
+.pk-css-page .sc-pill i {flex-shrink:0;}

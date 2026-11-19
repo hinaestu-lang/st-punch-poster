@@ -1,0 +1,85 @@
+/* @pk-template
+{
+  "id": "receipt_printer",
+  "name": "小票机",
+  "width": 390,
+  "html": "<article class=\"rp\"><header class=\"rp-machine\"><div class=\"rp-avatar\" data-pk=\"avatar\"></div><h1 data-pk=\"author\"></h1><p data-pk=\"subtitle\"></p><span class=\"rp-status\">PRINTED</span><div class=\"rp-slot\"></div></header><section class=\"rp-paper\"><main data-pk=\"body\"></main><footer><span data-pk=\"title\"></span><span data-pk=\"date\"></span></footer></section></article>"
+}
+@end-pk-template */
+
+/* 正文印在票纸上，标题与日期放在撕票线下。 */
+.pk-css-page {
+  box-sizing:border-box!important;
+  padding:16px 24px!important;
+  min-height:0!important;
+  background:transparent!important;
+}
+.pk-css-page .rp {
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;
+}
+.pk-css-page .rp-machine {
+  position:relative;
+  text-align:center;
+  padding:35px 18px 112px;
+  border-radius:28px;
+  background:radial-gradient(ellipse at 50% 53%,#414244 0%,#303133 68%,#272829 100%);
+  color:#fff;
+  box-shadow:inset 0 1px 3px #ffffff55,inset 0 -5px 14px #0004;
+}
+.pk-css-page .rp-avatar {
+  display:block;position:relative;
+  box-sizing:border-box;width:56px;height:56px;margin:0 auto 10px;
+  border:4px solid #4f5253;border-radius:50%;overflow:hidden;
+  background:#515456;color:#fff;cursor:pointer;
+  box-shadow:none;
+}
+.pk-css-page .rp-avatar img,
+.pk-css-page .rp-avatar .pk-avatar-photo {
+  display:block!important;box-sizing:border-box!important;
+  width:100%!important;height:100%!important;
+  min-width:0!important;min-height:0!important;
+  margin:0!important;padding:0!important;border:0!important;
+  box-shadow:none!important;filter:none!important;
+  object-fit:cover!important;border-radius:50%!important;
+}
+.pk-css-page .rp-machine h1 {
+  font-size:19px!important;font-weight:700!important;line-height:1.25;
+  margin:0;overflow-wrap:anywhere;filter:brightness(0) invert(1);
+}
+.pk-css-page .rp-machine p {
+  font-size:13px!important;margin:5px 0 0;overflow-wrap:anywhere;
+  filter:brightness(0) invert(1);opacity:.65;
+}
+.pk-css-page .rp-status {
+  display:inline-block;margin-top:11px;padding:4px 7px;border-radius:4px;
+  background:#344944;color:#91d8bf;font:600 10px/1.1 monospace;
+  letter-spacing:.075em;
+}
+.pk-css-page .rp-slot {
+  position:absolute;bottom:64px;left:9%;right:9%;height:8px;
+  border-radius:8px;background:#171819;
+  box-shadow:0 1px 1px #ffffff40,inset 0 1px 2px #0009;
+}
+.pk-css-page .rp-paper {
+  position:relative;box-sizing:border-box;width:74%;margin:-72px auto 0;
+  background:transparent;color:#252525;
+}
+.pk-css-page .rp-paper main {
+  padding:20px 17px 19px;min-height:88px;overflow-wrap:anywhere;
+  background:
+    linear-gradient(#0003,transparent 14px),
+    radial-gradient(circle at 0 100%,transparent 10px,#fff 10.6px) left/51% 100% no-repeat,
+    radial-gradient(circle at 100% 100%,transparent 10px,#fff 10.6px) right/51% 100% no-repeat;
+}
+.pk-css-page .rp-paper footer {
+  position:relative;display:flex;flex-wrap:wrap;justify-content:space-between;
+  gap:5px 12px;min-height:44px;padding:12px 17px 14px;
+  border-radius:0 0 17px 17px;font:600 11px/1.4 monospace;overflow-wrap:anywhere;
+  background:
+    radial-gradient(circle at 0 0,transparent 10px,#fff 10.6px) left/51% 100% no-repeat,
+    radial-gradient(circle at 100% 0,transparent 10px,#fff 10.6px) right/51% 100% no-repeat;
+}
+.pk-css-page .rp-paper footer::before {
+  content:"";position:absolute;top:0;left:12px;right:12px;
+  border-top:1px dashed #d2d2d2;
+}
