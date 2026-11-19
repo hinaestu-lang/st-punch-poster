@@ -412,6 +412,7 @@ const FRESH_POST_FIELDS = [
 function beginMessageDraft(messageId) {
   const chat = ctx().chat;
   if(st.lastOpenedChat===chat && st.lastOpenedMessageId===messageId)return;
+  saveMessageDraft();
   const p=store().cur;
   for(const key of FRESH_POST_FIELDS){
     const value=BASE[key];
@@ -420,9 +421,55 @@ function beginMessageDraft(messageId) {
   for(const key of ['postypeAvatarMode','threadsReplyAvatarMode','imessageAvatarMode']){
     if(p[key]==='custom')p[key]=BASE[key];
   }
+  // 这条消息以前填过的文字，重新打开时恢复。
+  const saved=messageDraftHost(messageId,chat)?.[MESSAGE_DRAFT_KEY];
+  if(saved&&typeof saved==='object'&&!Array.isArray(saved)){
+    for(const key of MESSAGE_TEXT_FIELDS)if(typeof saved[key]==='string')p[key]=saved[key];
+  }
   st.lastOpenedChat=chat;
   st.lastOpenedMessageId=messageId;
   persist();
+}
+// 和消息绑定的文字栏：作品名、副标题、作者、备注、日期和各模板自己的文字栏。
+// 图片不绑定（上传的图是很大的 base64，会撑大聊天文件）。
+const MESSAGE_TEXT_FIELDS=FRESH_POST_FIELDS.filter(key=>!/Img$|Image$|^skinImg$|^pubImages$/.test(key));
+const MESSAGE_DRAFT_KEY='punchPoster';
+// 文字存放位置：聊天消息存在这条消息的 extra 里（随聊天文件保存、随消息删除）；
+// 收藏句子存在收藏条目上。
+function messageDraftHost(key,chat,create=false){
+  if(typeof key==='string'&&key.startsWith('saved:')){
+    const id=key.slice(6);
+    return snippetStore().find(item=>item&&String(item.id)===id)||null;
+  }
+  const message=Number.isInteger(key)?chat?.[key]:null;
+  if(!message||typeof message!=='object')return null;
+  if(!message.extra||typeof message.extra!=='object'){
+    if(!create)return null;
+    message.extra={};
+  }
+  return message.extra;
+}
+// 把当前填的文字记到正在编辑的消息上；没改动就不写。
+function saveMessageDraft(){
+  const key=st.lastOpenedMessageId,chat=st.lastOpenedChat;
+  if(key==null||!chat)return;
+  const isSaved=typeof key==='string';
+  // 已经切到别的聊天时，旧聊天文件不能再从这里保存。
+  if(!isSaved&&chat!==ctx().chat)return;
+  const p=store().cur,draft={};
+  for(const key of MESSAGE_TEXT_FIELDS){
+    const value=typeof p[key]==='string'?p[key]:'';
+    if(value!==(BASE[key]??''))draft[key]=value;
+  }
+  const empty=!Object.keys(draft).length;
+  const host=messageDraftHost(key,chat,!empty);
+  if(!host)return;
+  const before=host[MESSAGE_DRAFT_KEY];
+  if(empty?before===undefined:JSON.stringify(before)===JSON.stringify(draft))return;
+  if(empty)delete host[MESSAGE_DRAFT_KEY];else host[MESSAGE_DRAFT_KEY]=draft;
+  if(isSaved){persist();return;}
+  const c=ctx(),save=c.saveChatConditional||c.saveChat;
+  try{Promise.resolve(save?.call(c)).catch(()=>{});}catch(_){}
 }
 
 
@@ -1991,10 +2038,13 @@ function cssFillTemplate(root, spec){
     el.dataset.pkAvatarSrc=avatarSrc;
   });
   // Real images are optional; without an image the CSS slot is its own placeholder.
+  const hasAvatarSlot=!!root.querySelector('[data-pk="avatar"]');
   root.querySelectorAll('[data-pk="image"]').forEach(el=>{
      // The picture is cropped inside its own CSS slot. Never resize or move
      // the whole poster: the 3 sliders adjust this image only.
-     const src=String(p.skinImg||(templateId!=='bubble_chat'?avatarSrc:'')||'');
+     // 模板自带头像位时，插图只用自己上传的图，不借用头像，免得两处一起变；
+     // 只有插图位、没有头像位的模板（如晋江）没上传时才用头像顶上。
+     const src=String(p.skinImg||(hasAvatarSlot?'':avatarSrc)||'');
      el.dataset.pkUpload='skinImg';
      el.title='点击上传 / 替换图片';
      el.style.cursor='pointer';
@@ -4471,7 +4521,7 @@ function fillSigTpl() {
   st.ov.querySelector('.pk-sigchips').innerHTML = Object.keys(s.sigTpl || {}).map(chip).join('');
 }
 
-function close() { if (st.ov) { if(st.inlineEditing)finishInlineEdit(false); panel(null); flushField(); if (keyboardTarget(document.activeElement)) document.activeElement.blur(); keyboardDismiss(); st.editing = false; st.ov.classList.remove('show'); } }
+function close() { if (st.ov) { if(st.inlineEditing)finishInlineEdit(false); panel(null); flushField(); saveMessageDraft(); if (keyboardTarget(document.activeElement)) document.activeElement.blur(); keyboardDismiss(); st.editing = false; st.ov.classList.remove('show'); } }
 
 // Use the rendered message text when a known message is used as an editor host;
 // fall back to the stored message when the chat DOM has not been mounted.
