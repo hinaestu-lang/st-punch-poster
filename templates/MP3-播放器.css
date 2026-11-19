@@ -1,0 +1,76 @@
+/* @pk-template
+{
+  "id": "mp3_player",
+  "name": "MP3-播放器",
+  "width": 390,
+  "html": "<article class=\"mp-player\"><section class=\"mp-screen\"><header class=\"mp-status\"><i class=\"mp-back\"></i><span>0061/0105</span><i class=\"mp-card\"></i><i class=\"mp-battery\"></i></header><main class=\"mp-lyrics\" data-pk=\"body\"></main><section class=\"mp-track\"><i class=\"mp-heart\"></i><div><h1 data-pk=\"author\"></h1><p data-pk=\"title\"></p></div><span class=\"mp-ab\">AB</span></section><div class=\"mp-progress\"><span>00:02:41</span><i><b></b></i><span>00:03:44</span></div><footer class=\"mp-controls\"><i class=\"mp-shuffle\"></i><i class=\"mp-prev\"><b></b></i><i class=\"mp-pause\"><b></b></i><i class=\"mp-next\"><b></b></i><i class=\"mp-list\"><b></b></i></footer></section><div class=\"mp-chin\"></div></article>"
+}
+@end-pk-template */
+
+/* 歌名读取 char/作者栏；歌手读取 u/标题栏；歌词读取正文。静态播放器样式。
+整页背景透明，导出为透明 PNG；四周留白给阴影。 */
+.pk-css-page{box-sizing:border-box!important;margin:0!important;padding:19px!important;min-height:0!important;background:transparent!important;color:#eee!important}
+.pk-css-page *{box-sizing:border-box}
+.pk-css-page .mp-player{padding:27px 23px 0;border:2px solid #171717;border-radius:29px;background:linear-gradient(115deg,#1c1c1d,#070708 18%,#101011 83%,#242425);box-shadow:inset 2px 2px 3px #343435,inset -2px -2px 4px #000,0 9px 15px rgba(0,0,0,.2)}
+.pk-css-page .mp-screen{padding:10px 10px 12px;border:4px solid #171718;border-radius:2px;background:#2c2d2e;color:#eee;font-family:"Microsoft YaHei","PingFang SC",sans-serif}
+.pk-css-page .mp-status{display:flex;align-items:center;gap:13px;height:18px;color:#ddd;font:700 11px/1 monospace;letter-spacing:.5px}
+.pk-css-page .mp-status>span{margin-left:auto}
+
+
+.pk-css-page .mp-card{width:8px;height:10px;border:1px solid #ccc;border-radius:1px}
+.pk-css-page .mp-battery{position:relative;width:20px;height:10px;border:1px solid #ddd;border-radius:2px;padding:1px}
+.pk-css-page .mp-battery::before{content:"";display:block;width:80%;height:100%;background:#ddd}
+.pk-css-page .mp-battery::after{content:"";position:absolute;right:-3px;top:2px;width:2px;height:4px;background:#ddd}
+.pk-css-page .mp-lyrics{min-height:240px;padding:30px 3px 25px;color:#ddd!important;-webkit-text-fill-color:#ddd!important;text-align:center!important;font-size:15px;line-height:2.2;overflow-wrap:anywhere;text-shadow:0 0 1px rgba(255,255,255,.25)}
+.pk-css-page .mp-lyrics>p.pk-css-paragraph{color:#c0c0c0!important;-webkit-text-fill-color:#c0c0c0!important;text-align:center!important;text-indent:0!important}
+.pk-css-page .mp-lyrics>p.pk-css-paragraph:first-child,.pk-css-page .mp-lyrics>p.pk-css-paragraph:last-child{color:#fff!important;-webkit-text-fill-color:#fff!important;font-weight:600!important}
+.pk-css-page .mp-track{display:flex;gap:12px;align-items:center;justify-content:space-between;min-height:37px}
+.pk-css-page .mp-track>div{flex:1;min-width:0;text-align:center}
+.pk-css-page .mp-track h1{margin:0;font-size:17px;line-height:1.4;font-weight:400;overflow-wrap:anywhere;color:#eee!important;-webkit-text-fill-color:#eee!important}
+.pk-css-page .mp-track p{margin:1px 0 0;font-size:10px;line-height:1.3;color:#aaa!important;-webkit-text-fill-color:#aaa!important;overflow-wrap:anywhere}
+
+
+
+
+.pk-css-page .mp-ab{font:700 12px/1 Arial;letter-spacing:-2px;flex:none}
+.pk-css-page .mp-progress{display:flex;gap:5px;align-items:center;margin-top:8px;color:#ddd;font:9px/1.4 monospace}
+.pk-css-page .mp-progress>i{position:relative;flex:1;height:2px;background:#888}
+.pk-css-page .mp-progress b{display:block;width:70%;height:2px;background:#ddd;position:relative}
+.pk-css-page .mp-progress b::after{content:"";position:absolute;right:0;top:-2px;width:3px;height:6px;background:#ddd}
+.pk-css-page .mp-controls{display:flex;justify-content:space-between;align-items:center;margin-top:13px;height:32px;padding:0 2px}
+.pk-css-page .mp-controls>i{display:block;position:relative;width:23px;height:23px;font-style:normal}
+.pk-css-page .mp-controls>.mp-pause{width:32px;height:32px;border:2px solid #ddd;border-radius:50%}
+
+
+
+
+
+
+
+
+
+
+
+.pk-css-page .mp-chin{height:53px}
+
+/* Vector icons: stable line weight, no system glyph substitutions. */
+.pk-css-page .mp-heart{display:block;flex:none;width:23px;height:23px;margin:0;border:0!important;border-radius:0!important;transform:none!important;position:relative;background:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTRlNGU0IiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjAuOCA0LjZhNS41IDUuNSAwIDAgMC03LjggMEwxMiA1LjdsLTEuMS0xLjFhNS41IDUuNSAwIDAgMC03LjggNy44TDEyIDIxbDguOC04LjZhNS41IDUuNSAwIDAgMCAwLTcuOFoiLz48L3N2Zz4=") center/contain no-repeat!important}
+.pk-css-page .mp-heart::before,.pk-css-page .mp-heart::after,.pk-css-page .mp-heart>b{display:none!important}
+.pk-css-page .mp-shuffle{display:block;flex:none;width:23px;height:23px;margin:0;border:0!important;border-radius:0!important;transform:none!important;position:relative;background:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTRlNGU0IiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMyA1aDNjNCAwIDggMTQgMTIgMTRoM00xNyAxNWw0IDQtNCA0TTMgMTloM2MxLjcgMCAzLjQtMi41IDUtNU0xMyA5YzEuNy0yLjUgMy4zLTQgNS00aDNNMTcgMWw0IDQtNCA0Ii8+PC9zdmc+") center/contain no-repeat!important}
+.pk-css-page .mp-shuffle::before,.pk-css-page .mp-shuffle::after,.pk-css-page .mp-shuffle>b{display:none!important}
+.pk-css-page .mp-prev{display:block;flex:none;width:23px;height:23px;margin:0;border:0!important;border-radius:0!important;transform:none!important;position:relative;background:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTRlNGU0IiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIvPjxwYXRoIGQ9Ik04IDh2OE0xNiA4bC03IDQgNyA0WiIvPjwvc3ZnPg==") center/contain no-repeat!important}
+.pk-css-page .mp-prev::before,.pk-css-page .mp-prev::after,.pk-css-page .mp-prev>b{display:none!important}
+.pk-css-page .mp-next{display:block;flex:none;width:23px;height:23px;margin:0;border:0!important;border-radius:0!important;transform:none!important;position:relative;background:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTRlNGU0IiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIvPjxwYXRoIGQ9Ik0xNiA4djhNOCA4bDcgNC03IDRaIi8+PC9zdmc+") center/contain no-repeat!important}
+.pk-css-page .mp-next::before,.pk-css-page .mp-next::after,.pk-css-page .mp-next>b{display:none!important}
+.pk-css-page .mp-pause{display:block;flex:none;width:23px;height:23px;margin:0;border:0!important;border-radius:0!important;transform:none!important;position:relative;background:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTRlNGU0IiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIvPjxwYXRoIGQ9Ik05IDh2OE0xNSA4djgiLz48L3N2Zz4=") center/contain no-repeat!important}
+.pk-css-page .mp-pause::before,.pk-css-page .mp-pause::after,.pk-css-page .mp-pause>b{display:none!important}
+.pk-css-page .mp-list{display:block;flex:none;width:23px;height:23px;margin:0;border:0!important;border-radius:0!important;transform:none!important;position:relative;background:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTRlNGU0IiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNOCA2aDEzTTggMTJoMTNNOCAxOGgxMyIvPjxjaXJjbGUgY3g9IjMiIGN5PSI2IiByPSIuNiIvPjxjaXJjbGUgY3g9IjMiIGN5PSIxMiIgcj0iLjYiLz48Y2lyY2xlIGN4PSIzIiBjeT0iMTgiIHI9Ii42Ii8+PC9zdmc+") center/contain no-repeat!important}
+.pk-css-page .mp-list::before,.pk-css-page .mp-list::after,.pk-css-page .mp-list>b{display:none!important}
+.pk-css-page .mp-back{display:block;flex:none;width:23px;height:23px;margin:0;border:0!important;border-radius:0!important;transform:none!important;position:relative;background:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTRlNGU0IiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJtMTAgNC03IDcgNyA3TTMgMTFoMTBjNSAwIDggMyA4IDgiLz48L3N2Zz4=") center/contain no-repeat!important}
+.pk-css-page .mp-back::before,.pk-css-page .mp-back::after,.pk-css-page .mp-back>b{display:none!important}
+ .pk-css-page .mp-controls>.mp-pause{width:34px;height:34px;border:0!important;background-size:contain!important}
+.pk-css-page .mp-track>.mp-heart{width:21px;height:21px}
+.pk-css-page .mp-status>.mp-back{width:18px;height:18px;margin-right:auto;opacity:.7}
+
+/* Solid dark screen lets shared contrast detection keep both metadata fields visible. */
+.pk-css-page .mp-track p{opacity:.72}

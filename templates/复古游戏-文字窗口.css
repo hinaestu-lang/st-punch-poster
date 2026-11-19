@@ -1,0 +1,37 @@
+/* @pk-template
+{
+  "id": "retro_game_window",
+  "name": "复古游戏-文字窗口",
+  "width": 390,
+  "html": "<article class=\"vn-window\"><header class=\"vn-titlebar\"><i class=\"vn-app-icon\"></i><div class=\"vn-title\" data-pk=\"author\"></div><div class=\"vn-controls\"><i class=\"vn-min\"></i><i class=\"vn-max\"></i><i class=\"vn-close\"></i></div></header><nav class=\"vn-menu\"><span>画面尺寸(D)</span><span>环境设定(C)</span><span>快进至下一选项(S)</span><span>版本情报(V)</span><span>结束游戏(Q)</span></nav><section class=\"vn-stage\"><div class=\"vn-background\" data-pk=\"avatar\"></div><div class=\"vn-shade\"></div><div class=\"vn-text\" data-pk=\"body\"></div></section></article>"
+}
+@end-pk-template */
+
+/* 背景读取插件头像栏：可选角色头像，也可选自定义上传。
+窗口标题读取 char 姓名栏，正文读取选中文字。长文会自动撑高画面。
+--vn-dim：遮罩不透明度，0 为无遮罩，1 为全黑；默认 0.42。
+--vn-tint：轻微暖色滤镜；改成 transparent 可取消暖色。
+图片裁切默认居中，--vn-position 可改成 50% 20% 等位置。
+*/
+.pk-css-page{--vn-dim:.42;--vn-tint:rgba(104,65,0,.12);--vn-position:50% 50%;box-sizing:border-box!important;margin:0!important;padding:0!important;min-height:0!important;background:#c4d4df!important;color:#161616!important;font-family:"Microsoft YaHei","PingFang SC",sans-serif!important}
+.pk-css-page *{box-sizing:border-box}
+.pk-css-page .vn-window{padding:2px;border:1px solid #76878e;border-radius:5px 5px 0 0;background:#c4d4df;overflow:hidden;box-shadow:inset 1px 1px 0 #edf8ff,inset -1px -1px 0 #718b96}
+.pk-css-page .vn-titlebar{display:flex;align-items:center;gap:4px;height:22px;padding:0 1px 2px;background:linear-gradient(#9eb8d0,#c8d9e8);color:#17212a;font:11px/1.2 Arial,"Microsoft YaHei",sans-serif}
+.pk-css-page .vn-app-icon{width:12px;height:14px;flex:none;background:linear-gradient(135deg,#4a1178 10%,#a5194f 45%,#4e235d 75%);border:1px solid #a1b9d3;box-shadow:inset 0 0 0 1px #592651;position:relative}
+.pk-css-page .vn-app-icon::before{content:"";position:absolute;left:4px;top:2px;width:2px;height:8px;background:#ec6094;transform:rotate(-15deg)}
+.pk-css-page .vn-title{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;line-height:1.2;color:#17212a;-webkit-text-fill-color:#17212a}
+.pk-css-page .vn-controls{display:flex;gap:2px;flex:none;height:17px}
+.pk-css-page .vn-controls>i{position:relative;width:21px;border:1px solid #8198ad;border-radius:2px;background:linear-gradient(#e1ecf4,#adbed0 48%,#9aadc2 52%,#c8d9ea);box-shadow:inset 0 0 0 1px #d7e5f2}
+.pk-css-page .vn-min::before{content:"";position:absolute;left:6px;bottom:4px;width:8px;height:2px;background:#5a6878;box-shadow:0 1px #eef4fa}
+.pk-css-page .vn-max::before{content:"";position:absolute;left:6px;top:4px;width:8px;height:7px;border:1px solid #5a6878;border-top-width:2px;box-shadow:0 1px #eef4fa}
+.pk-css-page .vn-controls>.vn-close{width:24px;border-color:#9c6e65;background:linear-gradient(#dfb4a8,#c46c59 48%,#ae4937 52%,#c67f68);box-shadow:inset 0 0 0 1px #e3b4a5}
+.pk-css-page .vn-close::before,.pk-css-page .vn-close::after{content:"";position:absolute;left:10px;top:3px;width:2px;height:10px;background:#fff;transform:rotate(45deg)}
+.pk-css-page .vn-close::after{transform:rotate(-45deg)}
+.pk-css-page .vn-menu{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;min-height:18px;padding:2px 4px 3px;background:#f6f5f0;color:#202020;font:9px/1.25 Arial,"Microsoft YaHei",sans-serif;border-bottom:1px solid #8c9aa4}
+.pk-css-page .vn-menu>span{white-space:nowrap}
+.pk-css-page .vn-stage{position:relative;isolation:isolate;min-height:245px;overflow:hidden;background:#35302b;border:1px solid #758689}
+.pk-css-page .vn-background{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border:0!important;border-radius:0!important;overflow:hidden!important;z-index:0;display:block!important;font-size:0!important;color:transparent!important;-webkit-text-fill-color:transparent!important;background:#35302b!important}
+.pk-css-page .vn-background>img.pk-avatar-photo{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;max-width:none!important;object-fit:cover!important;object-position:var(--vn-position)!important;border-radius:0!important}
+.pk-css-page .vn-shade{position:absolute;inset:0;z-index:1;background:linear-gradient(var(--vn-tint),var(--vn-tint)),rgba(0,0,0,var(--vn-dim));pointer-events:none}
+.pk-css-page .vn-text{position:relative;z-index:2;margin:0;padding:8px 12px 26px;min-height:245px;background:transparent!important;color:#fff!important;-webkit-text-fill-color:#fff!important;text-shadow:1px 1px 1px #000,0 0 2px rgba(0,0,0,.6);font-family:"Songti SC","Noto Serif CJK SC","STSong",serif;font-size:16px;font-weight:600;line-height:1.45;overflow-wrap:anywhere;word-break:normal}
+.pk-css-page .vn-text>p{color:#fff!important;-webkit-text-fill-color:#fff!important;text-shadow:inherit;font-weight:600!important}

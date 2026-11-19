@@ -23,7 +23,8 @@
 .pk-css-page .hp-chevron{flex:none;display:inline-block;width:9px;height:9px;border-top:1.5px solid;border-right:1.5px solid;transform:rotate(45deg)}
 .pk-css-page .hp-tag{display:inline-block;max-width:100%;background:#f1eff5;color:#645478;border-radius:1px;padding:1px 4px;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
 .pk-css-page .hp-tag:empty{display:none}
-.pk-css-page .hp-kda{font-size:12px;line-height:1.4;margin:10px 0 0;color:#959599;white-space:pre-line;overflow-wrap:anywhere}
+/* 插件会把备注栏统一成正文字色，用透明度调浅：数值越小越浅（0–1）。 */
+.pk-css-page .hp-kda{font-size:12px;line-height:1.4;margin:10px 0 0;color:#959599;opacity:.5;white-space:pre-line;overflow-wrap:anywhere}
 .pk-css-page .hp-kda:empty{display:none}
 .pk-css-page .hp-rating{margin:11px 16px 16px;padding:10px 16px 13px;background:#f6fcfd}
 .pk-css-page .hp-rating-grid{display:grid;grid-template-columns:65px minmax(0,1fr);gap:8px;align-items:center}

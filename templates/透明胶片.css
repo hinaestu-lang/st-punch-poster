@@ -1,0 +1,27 @@
+/* @pk-template
+{
+  "id": "transparent_film",
+  "name": "透明胶片",
+  "width": 390,
+  "html": "<article class=\"film\"><header class=\"film-top\"><span>STAX　15<br>ISO 800</span><span>▸</span><span>F5.6 1/1000</span></header><section class=\"film-frame\"><div class=\"film-copy\" data-pk=\"body\"></div><footer class=\"film-source\" data-pk=\"author\"></footer></section><footer class=\"film-bottom\"><span data-pk=\"title\"></span><small>FRAME 15　／　35 mm</small></footer></article>"
+}
+@end-pk-template */
+
+/* 透明胶片。中间及齿孔透底；透明 PNG 是否保留透明度取决于插件导出设置。 */
+.pk-css-page{box-sizing:border-box!important;margin:0!important;padding:12px!important;min-height:0!important;background:transparent!important;color:var(--pk-shared-ink,#243879)!important}
+.pk-css-page .film{position:relative;padding:0 21px;color:inherit;background:transparent}
+.pk-css-page .film::before,.pk-css-page .film::after{content:"";position:absolute;top:0;bottom:0;width:21px;background:linear-gradient(#171719,#171719) left/5px 100% no-repeat,linear-gradient(#171719,#171719) right/5px 100% no-repeat,repeating-linear-gradient(to bottom,#171719 0 7px,transparent 7px 20px,#171719 20px 26px);pointer-events:none}
+.pk-css-page .film::before{left:0}
+.pk-css-page .film::after{right:0}
+.pk-css-page .film-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:43px;margin:0 -1px;padding:5px 6px;background:#171719;color:#d8d7cf;font:10px/1.4 Arial,sans-serif;letter-spacing:.4px}
+.pk-css-page .film-top>span:nth-child(2){color:#777;font-size:17px}
+.pk-css-page .film-top>span:last-child{font-size:9px;white-space:nowrap}
+.pk-css-page .film-frame{position:relative;min-height:280px;padding:27px 20px 25px;border:1px solid rgba(230,231,245,.3);background:linear-gradient(110deg,rgba(220,224,250,.13),rgba(240,242,255,.03) 40%,rgba(255,255,255,.09));box-shadow:inset 1px 0 rgba(255,255,255,.22),inset -1px 0 rgba(255,255,255,.12)}
+.pk-css-page .film-copy{position:relative;min-height:185px;color:inherit;font-family:var(--pk-shared-font,"Songti SC",serif);font-size:16px;line-height:1.7;overflow-wrap:anywhere}
+.pk-css-page .film-copy p{color:inherit;font:inherit}
+.pk-css-page .film-source{margin-top:20px;text-align:right;color:inherit;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.pk-css-page .film-source::before{content:"—"}
+.pk-css-page .film-source:empty{display:none}
+.pk-css-page .film-bottom{min-height:47px;margin:0 -1px;padding:9px 6px;background:#171719;color:#aaa;font:9px/1.4 Arial,sans-serif;overflow-wrap:anywhere}
+.pk-css-page .film-bottom [data-pk="title"]{color:#aaa!important;-webkit-text-fill-color:#aaa!important;font-size:10px}
+.pk-css-page .film-bottom small{display:block;margin-top:5px;font-size:8px;letter-spacing:1px;color:#777}
