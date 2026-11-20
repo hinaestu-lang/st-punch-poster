@@ -37,9 +37,12 @@
 #pk-overlay .pk-grp header{display:flex;align-items:center;cursor:pointer;color:var(--pk-fg);font-weight:650;letter-spacing:0}
 #pk-overlay .pk-grp header span{flex:1}
 #pk-overlay .pk-arrow{font-size:10px;color:var(--pk-mute);transition:transform .15s}
-#pk-overlay .pk-grp.open .pk-arrow{transform:rotate(180deg)}
+#pk-overlay .pk-grp.open>header .pk-arrow{transform:rotate(180deg)}
 #pk-overlay .pk-grp-b{display:none;padding:0 0 16px}
-#pk-overlay .pk-grp.open .pk-grp-b{display:block}
+#pk-overlay .pk-grp.open>.pk-grp-b{display:block}
+/* 分组里的小分组（如文字排版里的字体）：矮一点、上下加细线 */
+#pk-overlay .pk-grp .pk-grp{border-top:1px solid var(--pk-line);border-bottom:1px solid var(--pk-line);margin:0 0 10px}
+#pk-overlay .pk-grp .pk-grp header{height:38px!important;min-height:38px!important;font-weight:550}
 #pk-overlay .pk-row{display:flex;align-items:center}
 #pk-overlay .pk-row.pk-btns{min-height:0;flex-wrap:wrap;gap:8px}
 #pk-overlay .pk-tgrow{justify-content:space-between}
@@ -210,7 +213,7 @@
 #pk-overlay .pk-skin-list-flat .pk-css-item{display:flex;align-items:center;min-width:0}
 #pk-overlay .pk-skin-list-flat .pk-css-item [data-skin]{min-width:0}
 #pk-overlay .pk-skin-list-flat .pk-css-item .pk-skin-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#pk-overlay.panel .pk-pane .pk-grp.open .pk-grp-b{padding-bottom:12px}
+#pk-overlay.panel .pk-pane .pk-grp.open>.pk-grp-b{padding-bottom:12px}
 
 /* v20: illustrated single-page composition and stable selection action. */
 
