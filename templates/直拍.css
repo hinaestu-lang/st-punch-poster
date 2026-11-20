@@ -3,7 +3,7 @@
   "id": "music_core_fancam",
   "name": "直拍",
   "width": 390,
-  "html": "<article class=\"fc-poster\">\n  <div class=\"fc-cover\">\n    <div class=\"fc-photo\" data-pk=\"avatar\"></div>\n    <div class=\"fc-wash\" aria-hidden=\"true\"></div>\n    <div class=\"fc-copy\">\n      <div class=\"fc-brand\" aria-label=\"MBC K-POP\"><span class=\"fc-mbc\">MBC</span><span class=\"fc-kpop\">K-POP</span></div>\n      <div class=\"fc-credit\">\n        <div class=\"fc-group\" data-pk=\"subtitle\"></div>\n        <div class=\"fc-name\" data-pk=\"author\"></div>\n        <div class=\"fc-song\" data-pk=\"note\"></div>\n      </div>\n      <div class=\"fc-show\"><strong>Fancam</strong><span>Show! Music Core</span></div>\n    </div>\n  </div>\n  <div class=\"fc-caption\">\n    <div class=\"fc-title\" data-pk=\"title\"></div>\n    <div class=\"fc-meta\"><span>No views</span><span data-pk=\"date\"></span><span class=\"fc-tag\"><span data-pk=\"author\"></span></span><span class=\"fc-more\">…more</span></div>\n    <div class=\"fc-body\" data-pk=\"body\"></div>\n  </div>\n</article>"
+  "html": "<article class=\"fc-poster\">\n  <div class=\"fc-cover\">\n    <div class=\"fc-bg\" data-pk=\"avatar\" aria-hidden=\"true\"></div>\n    <div class=\"fc-photo\" data-pk=\"avatar\"></div>\n    <div class=\"fc-photo fc-melt\" data-pk=\"avatar\" aria-hidden=\"true\"></div>\n    <div class=\"fc-wash\" aria-hidden=\"true\"></div>\n    <div class=\"fc-copy\">\n      <div class=\"fc-brand\" role=\"img\" aria-label=\"MBC K-POP\"></div>\n      <div class=\"fc-credit\">\n        <div class=\"fc-group\" data-pk=\"subtitle\"></div>\n        <div class=\"fc-name\" data-pk=\"author\"></div>\n        <div class=\"fc-song\" data-pk=\"note\"></div>\n      </div>\n      <div class=\"fc-show\"><strong>Fancam</strong><span>Show! Music Core</span></div>\n    </div>\n  </div>\n  <div class=\"fc-caption\">\n    <div class=\"fc-title\" data-pk=\"title\"></div>\n    <div class=\"fc-meta\"><span>No views</span><span data-pk=\"date\"></span><span class=\"fc-tag\"><span data-pk=\"author\"></span></span><span class=\"fc-more\">…more</span></div>\n    <div class=\"fc-body\" data-pk=\"body\"></div>\n  </div>\n</article>"
 }
 @end-pk-template */
 
@@ -30,11 +30,8 @@
   overflow: hidden;
   display: grid;
   min-height: 190px;
-  aspect-ratio: 5 / 3;
-  border-top: 4px solid #a9b2ef;
-  border-right: 4px solid #a9b2ef;
-  border-bottom: 4px solid #a9b2ef;
-  box-shadow: 0 4px #353da1, 0 8px #a9b2ef;
+  aspect-ratio: 16 / 9;
+  border: 4px solid #aeb2e5;
   background: #181f63;
   color: #fff;
 }
@@ -42,26 +39,40 @@
 .pk-css-page .fc-wash {
   position: absolute;
   inset: 0;
-  pointer-events: none;
 }
-.pk-css-page .fc-photo {
-  left: 40%;
+/* 底色：同一张头像放大、狠狠模糊，铺满整个封面，左边文字区就是头像的颜色 */
+.pk-css-page .fc-bg {
+  position: absolute;
+  /* 比封面大一圈，模糊后发虚的边缘被封面裁掉 */
+  inset: -50% -30%;
   overflow: hidden;
   color: transparent;
+  pointer-events: none;
 }
-.pk-css-page .fc-photo .pk-avatar-photo {
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  margin: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  object-fit: cover !important;
-  object-position: center 12% !important;
+.pk-css-page .fc-bg .pk-avatar-photo {
+  /* 底色的模糊程度，越大颜色越匀 */
+  filter: blur(36px);
+}
+/* 清晰照片：左边缘渐隐，融进底色 */
+.pk-css-page .fc-photo:not(.fc-melt) {
+  /* transparent 到 #000 之间是渐隐带，第二个百分比越大，融得越宽 */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 38%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 38%);
+}
+/* 融化：同一张照片的模糊版，夹在清晰照片和底色之间，越往左越糊 */
+.pk-css-page .fc-melt {
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 24%, transparent 58%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 24%, transparent 58%);
+}
+.pk-css-page .fc-melt .pk-avatar-photo {
+  /* 融化带的模糊程度 */
+  filter: blur(16px);
 }
 .pk-css-page .fc-wash {
-  background: linear-gradient(90deg, #1a216a, #2c3497 39%, #29338f66 50%, transparent 61%);
+  pointer-events: none;
+  /* 轻微压暗左侧，保证白字看得清；不想压暗就把 .28 改成 0 */
+  background: linear-gradient(90deg, rgba(0, 0, 0, .28), rgba(0, 0, 0, .12) 45%, transparent 70%);
 }
 .pk-css-page .fc-copy {
   position: relative;
@@ -72,39 +83,23 @@
   width: 47%;
   min-width: 0;
   padding: 17px 0 14px 10px;
-  text-shadow: 0 1px 3px #0e1238, 0 1px 5px #0e1238;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .35), 0 1px 6px rgba(0, 0, 0, .25);
 }
-.pk-css-page .fc-brand,
 .pk-css-page .fc-show {
   display: grid;
   justify-items: start;
   line-height: 1.14;
 }
 .pk-css-page .fc-brand {
-  width: max-content;
-  justify-items: center;
-  white-space: nowrap;
-  overflow-wrap: normal;
-  gap: 2px;
-  color: #fff;
-  text-shadow: 0 1px 2px #141948;
-}
-.pk-css-page .fc-mbc {
-  font: 950 10px/.83 system-ui, sans-serif;
-  letter-spacing: -.07em;
-  transform: scaleX(1.15);
-}
-.pk-css-page .fc-kpop {
-  display: block;
-  font: 850 13px/.95 system-ui, sans-serif;
-  letter-spacing: -.045em;
-  white-space: nowrap !important;
-  word-break: keep-all;
-  overflow-wrap: normal;
+  width: 35px;
+  height: 22px;
+  flex: 0 0 22px;
+  background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2089%2055%22%3E%0A%3Cg%20fill%3D%22%23fff%22%3E%0A%3Cg%20transform%3D%22translate(2.5%201)%20scale(.86%20.9)%22%3E%0A%3Cpath%20d%3D%22M16%2021V7a6%206%200%200%201%206-6h10a6%206%200%200%201%206%206v14h-5V7a1.2%201.2%200%200%200-1.2-1.2H30V21h-5V5.8h-1.8A2.2%202.2%200%200%200%2021%208v13z%22%2F%3E%0A%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M41%201h14c4.5%200%206.4%202%206.4%205%200%202-1.1%203.5-3%204.3%202.2.8%204%202.4%204%205%200%203.7-2.5%205.7-7%205.7H41zm5.5%205v10h8V6z%22%2F%3E%0A%3Cpath%20d%3D%22M83%201H70a6%206%200%200%200-6%206v8a6%206%200%200%200%206%206h13v-5H72a2.5%202.5%200%200%201-2.5-2.5v-5A2.5%202.5%200%200%201%2072%206h11z%22%2F%3E%0A%3C%2Fg%3E%0A%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M55.5%2029l4-1.8%204.1.4%204%202%203.1%203.9%201.3%204.8-1.3%204.9-3.1%203.9-4%202-4.1.4-4-1.8-3.6-3.1-2.2-4.1v-4.4l2.2-4.1zm5.7%203.4-3.3%201-2.5%202.3-1%202.6%201%202.7%202.5%202.3%203.3%201%202.9-1.4%202.1-2.6.7-2-.7-2-2.1-2.6z%22%2F%3E%0A%3C%2Fg%3E%0A%3Cg%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%224.8%22%3E%0A%3Cpath%20stroke-linecap%3D%22round%22%20d%3D%22M3.3%2030.5v7.5m0%205.3v8m7.3-13.6%206.7-7.2m-6.7%2013%206.7%207.8m2.4-10.8h3.4%22%2F%3E%0A%3Cpath%20d%3D%22M30%2053V38a8.6%208.6%200%201%201%208.6%208.6c-4.7%200-8.6-3.9-8.6-8.6M76%2053V38a8.6%208.6%200%201%201%208.6%208.6c-4.7%200-8.6-3.9-8.6-8.6%22%2F%3E%0A%3C%2Fg%3E%3C%2Fsvg%3E") center / contain no-repeat;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .35));
 }
 .pk-css-page .fc-credit {
   display: grid;
-  gap: 5px;
+  gap: 6px;
 }
 .pk-css-page .fc-credit > div {
   color: #fff !important;
@@ -119,31 +114,33 @@
 }
 .pk-css-page .fc-group,
 .pk-css-page .fc-song {
-  font-size: 17px !important;
+  font-size: 16px !important;
+  letter-spacing: .005em;
 }
 .pk-css-page .fc-name {
-  font-size: 41px !important;
-  letter-spacing: -.045em;
+  font-size: 42px !important;
+  letter-spacing: -.025em;
 }
 .pk-css-page .fc-show strong {
-  font-size: 13px !important;
+  font-size: 12px !important;
 }
 .pk-css-page .fc-show span {
   margin-top: 2px;
   font-size: 10px !important;
   font-weight: 750;
+  letter-spacing: .01em;
 }
 .pk-css-page .fc-caption {
-  margin-top: 8px;
   padding: 4px 10px 15px;
   background: var(--pk-shared-paper, #fff);
   color: var(--pk-shared-ink, #171717);
 }
 .pk-css-page .fc-title {
   font-family: system-ui, "PingFang SC", sans-serif !important;
-  font-size: 21px !important;
-  line-height: 1.25 !important;
-  font-weight: 900 !important;
+  font-size: 20px !important;
+  line-height: 1.28 !important;
+  font-weight: 850 !important;
+  letter-spacing: -.015em;
   -webkit-text-stroke: .24px currentColor;
 }
 .pk-css-page .fc-meta {
@@ -153,7 +150,7 @@
   gap: 2px 7px;
   margin-top: 7px;
   color: #606060;
-  font: 400 13px/1.3 system-ui, "PingFang SC", sans-serif;
+  font: 400 13px/1.35 system-ui, "PingFang SC", sans-serif;
 }
 .pk-css-page .fc-tag {
   color: #606060;
