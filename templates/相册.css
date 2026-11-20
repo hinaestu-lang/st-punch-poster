@@ -12,7 +12,8 @@
   margin:0!important;
   padding:18px 24px 10px!important;
   min-height:0!important;
-  background:transparent!important;
+  /* 整页白底（导出不再是透明图）；可在「文字排版」里改纸色 */
+  background:#fff!important;
   border:0!important;
   box-shadow:none!important;
 }
