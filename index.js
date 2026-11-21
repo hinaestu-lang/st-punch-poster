@@ -6191,6 +6191,9 @@ function initSnippetTapHandle(){
 // not change the user's native selection menu or save anything to the library.
 let repoSelectionButton=null, repoSelectionTimer=0, repoSelectionRecord=null, repoSelectionPending=null;
 let repoSelectionDismissed=null;
+// 选区取消后按钮自动收起的等待时间（毫秒）：选区一直是空的超过这个时间就收起
+const REPO_SELECTION_IDLE_HIDE=5000;
+let repoSelectionIdleTimer=0;
 let repoSelectionTextPress=null, repoSelectionLastTap=null;
 const repoSelectionMergeDrafts=[];
 function repoSelectionContextValid(saved){
@@ -6209,6 +6212,7 @@ function repoSelectionSameRange(a,b){
 }
 function hideRepoSelection(){
   clearTimeout(repoSelectionTimer);repoSelectionTimer=0;
+  clearTimeout(repoSelectionIdleTimer);repoSelectionIdleTimer=0;
   repoSelectionPending=null;repoSelectionRecord=null;
   repoSelectionButton?.classList.remove('show');
 }
@@ -6341,9 +6345,17 @@ function updateRepoSelection(){
     // Retain a previously captured Range until the delayed read completes.
     const sel=window.getSelection?.();
     if(sel && !sel.isCollapsed && sel.rangeCount){hideRepoSelection();return;}
-    if(repoSelectionRecord && !repoSelectionContextValid(repoSelectionRecord))hideRepoSelection();
+    if(repoSelectionRecord && !repoSelectionContextValid(repoSelectionRecord)){hideRepoSelection();return;}
+    // 选区一直空着（已经取消选择）就过一会儿收起按钮；期间重新选字会取消这次收起。
+    if(repoSelectionRecord&&!repoSelectionIdleTimer)repoSelectionIdleTimer=setTimeout(()=>{
+      repoSelectionIdleTimer=0;
+      if(repoSelectionQuickRecord())return;
+      if(repoSelectionRecord)repoSelectionDismissed=repoSelectionRecord;
+      hideRepoSelection();
+    },REPO_SELECTION_IDLE_HIDE);
     return;
   }
+  clearTimeout(repoSelectionIdleTimer);repoSelectionIdleTimer=0;
   // Keep only the latest drag position. No snippetNodeText here.
   repoSelectionPending=quick;
   clearTimeout(repoSelectionTimer);
@@ -6401,8 +6413,7 @@ function init() {
     if(body){
       // Long presses and dragging Safari selection handles cause pointerdown
       // inside message text. These are not outside-menu dismissals.
-      repoSelectionTextPress=repoSelectionDismissed
-        ?{started:Date.now(),body,x:e.clientX,y:e.clientY,pointerId:e.pointerId}:null;
+      repoSelectionTextPress={started:Date.now(),body,x:e.clientX,y:e.clientY,pointerId:e.pointerId};
       return;
     }
     const previous=repoSelectionPending||repoSelectionRecord;
@@ -6432,6 +6443,16 @@ function init() {
     // Same boundaries can be a NEW selection. A fresh long press or double
     // tap should re-arm it; an ordinary tap must not resurrect Safari's old
     // selection. Keep this path lightweight until updateRepoSelection's timer.
+    // 按钮显示时在正文上轻点一下 = 取消选择：等系统清掉选区后立刻收起按钮。
+    const moved=Math.hypot((e.clientX??press.x)-press.x,(e.clientY??press.y)-press.y);
+    if(duration<350&&moved<10&&!doubleTap&&repoSelectionButton?.classList.contains('show')){
+      setTimeout(()=>{
+        if(repoSelectionQuickRecord())return;
+        const previous=repoSelectionRecord||repoSelectionPending;
+        if(previous)repoSelectionDismissed=previous;
+        hideRepoSelection();
+      },350);
+    }
     if((duration>=450||doubleTap)&&repoSelectionDismissed){
       const selected=repoSelectionQuickRecord();
       if(selected&&repoSelectionContextValid(selected)){
