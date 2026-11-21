@@ -6184,9 +6184,6 @@ function initSnippetTapHandle(){
 // not change the user's native selection menu or save anything to the library.
 let repoSelectionButton=null, repoSelectionTimer=0, repoSelectionRecord=null, repoSelectionPending=null;
 let repoSelectionDismissed=null;
-// 选区取消后按钮自动收起的等待时间（毫秒）：选区一直是空的超过这个时间就收起
-const REPO_SELECTION_IDLE_HIDE=5000;
-let repoSelectionIdleTimer=0;
 let repoSelectionTextPress=null, repoSelectionLastTap=null;
 const repoSelectionMergeDrafts=[];
 function repoSelectionContextValid(saved){
@@ -6205,7 +6202,6 @@ function repoSelectionSameRange(a,b){
 }
 function hideRepoSelection(){
   clearTimeout(repoSelectionTimer);repoSelectionTimer=0;
-  clearTimeout(repoSelectionIdleTimer);repoSelectionIdleTimer=0;
   repoSelectionPending=null;repoSelectionRecord=null;
   repoSelectionButton?.classList.remove('show');
 }
@@ -6338,17 +6334,11 @@ function updateRepoSelection(){
     // Retain a previously captured Range until the delayed read completes.
     const sel=window.getSelection?.();
     if(sel && !sel.isCollapsed && sel.rangeCount){hideRepoSelection();return;}
-    if(repoSelectionRecord && !repoSelectionContextValid(repoSelectionRecord)){hideRepoSelection();return;}
-    // 选区一直空着（已经取消选择）就过一会儿收起按钮；期间重新选字会取消这次收起。
-    if(repoSelectionRecord&&!repoSelectionIdleTimer)repoSelectionIdleTimer=setTimeout(()=>{
-      repoSelectionIdleTimer=0;
-      if(repoSelectionQuickRecord())return;
-      if(repoSelectionRecord)repoSelectionDismissed=repoSelectionRecord;
-      hideRepoSelection();
-    },REPO_SELECTION_IDLE_HIDE);
+    // iPhone 选中状态下系统可能把选区报告成空的，所以这里不收起按钮；
+    // 收起只看「轻点正文取消选择」和「点聊天外面」。
+    if(repoSelectionRecord && !repoSelectionContextValid(repoSelectionRecord))hideRepoSelection();
     return;
   }
-  clearTimeout(repoSelectionIdleTimer);repoSelectionIdleTimer=0;
   // Keep only the latest drag position. No snippetNodeText here.
   repoSelectionPending=quick;
   clearTimeout(repoSelectionTimer);
