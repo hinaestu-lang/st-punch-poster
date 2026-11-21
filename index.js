@@ -412,7 +412,7 @@ const FRESH_POST_FIELDS = [
   'threadsReplyAvatarImg','postypeAvatarImg',
   'imessageImage','imessageAvatarImg','skinImg','pubImages',
 ];
-function beginMessageDraft(messageId,draftKey=messageId) {
+function beginMessageDraft(messageId,draftKey='chat') {
   const chat = ctx().chat;
   if(st.lastOpenedChat===chat && st.lastOpenedMessageId===messageId)return;
   saveMessageDraft();
@@ -425,7 +425,7 @@ function beginMessageDraft(messageId,draftKey=messageId) {
     if(p[key]==='custom')p[key]=BASE[key];
   }
   // 这个聊天（或这条收藏）以前填过的文字，打开时填回去。
-  const saved=messageDraftHost(draftKey,chat)?.[MESSAGE_DRAFT_KEY];
+  const saved=messageDraftHost(draftKey)?.[MESSAGE_DRAFT_KEY];
   if(saved&&typeof saved==='object'&&!Array.isArray(saved)){
     for(const key of MESSAGE_TEXT_FIELDS)if(typeof saved[key]==='string')p[key]=saved[key];
   }
@@ -445,8 +445,8 @@ function messageDraftKey(id,savedRecord){
 const MESSAGE_TEXT_FIELDS=FRESH_POST_FIELDS.filter(key=>!/Img$|Image$|^skinImg$|^pubImages$/.test(key));
 const MESSAGE_DRAFT_KEY='punchPoster';
 // 文字存放位置：聊天 → 聊天文件的元数据（chat_metadata，随聊天保存、换聊天自动切换）；
-// 收藏 → 收藏条目上；单条消息 → 消息的 extra 里。
-function messageDraftHost(key,chat,create=false){
+// 收藏 → 收藏条目上。
+function messageDraftHost(key){
   if(key==='chat'){
     const meta=ctx().chatMetadata;
     return meta&&typeof meta==='object'?meta:null;
@@ -455,18 +455,12 @@ function messageDraftHost(key,chat,create=false){
     const id=key.slice(6);
     return snippetStore().find(item=>item&&String(item.id)===id)||null;
   }
-  const message=Number.isInteger(key)?chat?.[key]:null;
-  if(!message||typeof message!=='object')return null;
-  if(!message.extra||typeof message.extra!=='object'){
-    if(!create)return null;
-    message.extra={};
-  }
-  return message.extra;
+  return null;
 }
 // 把当前填的文字记下来；没改动就不写。
 function saveMessageDraft(){
-  const key=st.draftKey??st.lastOpenedMessageId,chat=st.lastOpenedChat;
-  if(key==null||!chat)return;
+  const key=st.draftKey,chat=st.lastOpenedChat;
+  if(!key||!chat)return;
   const isSaved=typeof key==='string'&&key.startsWith('saved:');
   // 已经切到别的聊天时，旧聊天不能再从这里保存。
   if(!isSaved&&chat!==ctx().chat)return;
@@ -476,14 +470,13 @@ function saveMessageDraft(){
     if(value!==(BASE[key]??''))draft[key]=value;
   }
   const empty=!Object.keys(draft).length;
-  const host=messageDraftHost(key,chat,!empty);
+  const host=messageDraftHost(key);
   if(!host)return;
   const before=host[MESSAGE_DRAFT_KEY];
   if(empty?before===undefined:JSON.stringify(before)===JSON.stringify(draft))return;
   if(empty)delete host[MESSAGE_DRAFT_KEY];else host[MESSAGE_DRAFT_KEY]=draft;
   if(isSaved){persist();return;}
-  const c=ctx();
-  const save=key==='chat'?(c.saveMetadataDebounced||c.saveMetadata):(c.saveChatConditional||c.saveChat);
+  const c=ctx(),save=c.saveMetadataDebounced||c.saveMetadata;
   try{Promise.resolve(save?.call(c)).catch(()=>{});}catch(_){}
 }
 
