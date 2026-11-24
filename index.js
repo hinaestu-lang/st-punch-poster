@@ -857,6 +857,63 @@ function loadUploadFont() {
   idb('readonly', s => s.get('font')).then(buf => buf && useFontBuffer(buf)).then(() => { if (isOpen()) schedule(); })
     .catch(() => { }).finally(() => { fontUp.loading = false; });
 }
+// 导出 CSS 模板时，把用到的网络字体 / 上传字体直接内嵌进图片。
+// 海报是先转成 SVG 再画成图片的，SVG 里拿不到页面已加载的网络字体，会换成系统字体；
+// 字宽字高一变，文字就和头像、插图对不上（头像看起来往下错位）。
+const EXPORT_FONT_LIMIT=12e6; // 内嵌字体总大小上限（字节），超过就不再继续内嵌
+const exportFontCache=new Map();
+function blobToDataUrl(blob){
+  return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(blob);});
+}
+function exportFontFetch(url,kind){
+  const key=kind+'|'+url;
+  if(!exportFontCache.has(key)){
+    const ctl=typeof AbortController==='function'?new AbortController():null;
+    const timer=setTimeout(()=>ctl?.abort(),10000);
+    exportFontCache.set(key,fetch(url,{mode:'cors',credentials:'omit',signal:ctl?.signal})
+      .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return kind==='text'?r.text():r.blob().then(blobToDataUrl);})
+      .catch(()=>{exportFontCache.delete(key);return '';})
+      .finally(()=>clearTimeout(timer)));
+  }
+  return exportFontCache.get(key);
+}
+// 中文网络字体按字符切成很多小文件（unicode-range），只内嵌这张图里真正用到的那几份。
+function unicodeRangeHit(range,codes){
+  if(!range)return true;
+  return range.split(',').some(part=>{
+    const m=/U\+([0-9A-F?]+)(?:-([0-9A-F]+))?/i.exec(part.trim());
+    if(!m)return false;
+    const lo=parseInt(m[1].replace(/\?/g,'0'),16);
+    const hi=m[2]?parseInt(m[2],16):parseInt(m[1].replace(/\?/g,'F'),16);
+    for(const code of codes)if(code>=lo&&code<=hi)return true;
+    return false;
+  });
+}
+async function cssExportFontFaces(page,p){
+  const codes=new Set();
+  for(const ch of page.textContent||'')codes.add(ch.codePointAt(0));
+  try{
+    if(p.fontKey==='upload'){
+      if(!fontUp.ok)return '';
+      const buf=await idb('readonly',s=>s.get('font'));
+      return buf?'@font-face{font-family:"PKUploadFont";src:url("'+await blobToDataUrl(new Blob([buf]))+'");}':'';
+    }
+    const f=FONTS[p.fontKey];
+    if(!f?.css||!f.fam)return '';
+    const sheet=await exportFontFetch(f.css,'text');
+    if(!sheet)return '';
+    const blocks=(sheet.match(/@font-face\s*\{[^}]*\}/gi)||[]).filter(block=>
+      unicodeRangeHit((/unicode-range\s*:\s*([^;}]+)/i.exec(block)||[])[1],codes));
+    const faces=await Promise.all(blocks.map(async block=>{
+      const url=(/url\(\s*(['"]?)([^'")]+)\1\s*\)/i.exec(block)||[])[2];
+      if(!url)return '';
+      const data=await exportFontFetch(new URL(url,f.css).href,'blob');
+      return data?block.replace(/src\s*:[^;}]+;?/i,'src:url("'+data+'");'):'';
+    }));
+    let total=0;
+    return faces.filter(face=>face&&(total+=face.length)<=EXPORT_FONT_LIMIT).join('\n');
+  }catch(_){return '';}
+}
 function fontStack(p) {
   const base = FONTS.songti.stack;
   if (p.fontKey === 'upload') {
@@ -2548,6 +2605,7 @@ async function cssTemplateExport(){
     try{await Promise.race([document.fonts.ready,new Promise(done=>setTimeout(done,1200))]);}catch(_){ }
   }
   ensureCurrent();
+  const exportFontCss=await cssExportFontFaces(page,cur());
   const h=cssContentHeight(page);
   if(h>7000)throw new Error('内容超过单张图片支持的高度，请减少段落后分批导出');
   const pageBox=page.getBoundingClientRect();
@@ -2685,7 +2743,7 @@ async function cssTemplateExport(){
     const wrapper=document.createElement('div');wrapper.setAttribute('xmlns','http://www.w3.org/1999/xhtml');
     wrapper.style.cssText=`width:${w}px;height:${h}px;overflow:hidden;background:${background}`;
     const sty=document.createElement('style');
-    sty.textContent=cssFlattenViewportMedia(root.querySelector('style'));
+    sty.textContent=exportFontCss+'\n'+cssFlattenViewportMedia(root.querySelector('style'));
     wrapper.append(sty,node);
     const serialized=new XMLSerializer().serializeToString(wrapper);
     const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><foreignObject width="100%" height="100%">${serialized}</foreignObject></svg>`;
