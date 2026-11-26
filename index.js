@@ -1179,7 +1179,7 @@ function repsCharDiff(a, b) {
 }
 // 把「替换后显示的文字」上的编辑换算回原文。S 为原文（已规整），edited 为编辑结果。
 // 没改动过的字一律换回原文，替换开关因此一直有效；改过的被替换词才按你写的保存。
-// 返回新的原文；换算结果对不上编辑内容时返回 null，由调用方退回旧做法。
+// 返回新的原文；改动太多、只能粗略换算又对不上时返回 null，由调用方退回旧做法。
 function repsSourceEdit(S, edited, fold) {
   const m = applyRepsMapped(S), R0 = m.chars, R1 = Array.from(fold(edited));
   if (m.text === S) return R1.join(''); // 没有替换生效：编辑内容本身就是原文
@@ -1201,8 +1201,9 @@ function repsSourceEdit(S, edited, fold) {
       u0 = u1;
     }
     out += ins[R0.length];
-    const ok = check(out);
-    if (ok !== null) return ok;
+    // 对不上通常是因为你新打的字里正好有替换的原词（比如打了「她」又会被换掉），
+    // 这时也按原文保存：显示会照规则替换，但替换开关始终有效，不会把整段写死。
+    return out;
   }
   // 粗略算法：只比开头和结尾，中间整段按编辑内容保存。
   let a = 0;
@@ -3482,6 +3483,42 @@ function inlineBodyText(body){
   if(!body)return '';
   return String(body.innerText ?? body.textContent ?? '').replace(/\r/g,'').replace(/\n{3,}/g,'\n\n').replace(/\n$/,'');
 }
+// 把模板正文读成「一段一行」的文字：空段（只有占位空格）记成空行，段里的 <br> 记成换行。
+// 不能用 innerText：它在每两段之间多算一个空行，保存后段落越编越散，字也会对不上位置。
+function cssBodyLines(body){
+  const inline=node=>{
+    if(node.nodeType===3)return node.data;
+    if(node.nodeName==='BR')return '\n';
+    if(node.nodeType!==1)return '';
+    let text='';node.childNodes.forEach(child=>{text+=inline(child);});return text;
+  };
+  const lines=[];let line='',open=false;
+  for(const node of body?.childNodes||[]){
+    if(node.nodeType===1&&/^(?:P|DIV|LI|H[1-6]|BLOCKQUOTE)$/.test(node.nodeName)){
+      if(open){lines.push(line);line='';open=false;}
+      const text=inline(node).replace(/\n$/,'');
+      lines.push(/^[\s\u00a0]*$/.test(text)?'':text);
+    }else{line+=inline(node);open=true;}
+  }
+  if(open)lines.push(line);
+  return lines.join('\n');
+}
+// 把「编辑前显示的文字 D → 编辑后 E」的改动，套回替换后的原始排版文字 R 上。
+// D 和 R 只差在每段首尾被修掉的空格，这些空格原样保留。
+function inlineEditedRendered(R,D,E){
+  if(D===E)return R;
+  const Rc=Array.from(R),Dc=Array.from(D),Ec=Array.from(E);
+  const edit=repsCharDiff(Dc,Ec),align=repsCharDiff(Rc,Dc);
+  if(!edit||!align)return E;
+  let out='',d=0;
+  const take=ch=>{out+=edit.ins[d]+(edit.kept[d]?ch:'');d++;};
+  for(let i=0;i<=Rc.length;i++){
+    for(const ch of Array.from(align.ins[i]))take(ch);
+    if(i===Rc.length)break;
+    if(align.kept[i])take(Rc[i]);else out+=Rc[i];
+  }
+  return out+edit.ins[Dc.length];
+}
 function editableCssTargets(id,body){
   const root=body?.getRootNode();
   if(id==='page_margin_note'){
@@ -3527,6 +3564,8 @@ function beginInlineEdit(){
       body.style.setProperty('white-space','pre-wrap','important');
     }
     st.inlineBodies=editableCssTargets(templateId,body);
+    // 普通正文：记下编辑前显示的样子，完成时只把真正改过的地方换算回去。
+    st.inlineDisplayed=INLINE_OWN_TEXT.includes(templateId)?'':cssBodyLines(body);
     if(!st.inlineBodies.length){
       st.inlineBody=null;st.inlineEditing=false;st.editing=false;
       ov.classList.remove('pk-inline-editing');return;
@@ -3552,13 +3591,21 @@ function beginInlineEdit(){
     ta.focus({preventScroll:true});
   }
 }
+// 这几个模板编辑时有自己的读写方式（多条便签 / 气泡、整段纯文字），不走按段换算。
+const INLINE_OWN_TEXT=['page_margin_note','imessage_dark','essay_grid','bubble_chat'];
 function finishInlineEdit(save){
   if(!st.ov||!st.inlineEditing)return;
   const ov=st.ov, ta=ov.querySelector('.pk-edta');
   const wasCss=cssActive();
   const targets=wasCss?(st.inlineBodies||[st.inlineBody].filter(Boolean)):[];
   let result=st.inlineOriginal;
-  if(save) result=wasCss ? structuredCssResult(st.inlineKind,targets) : inlineBodyText(ta);
+  if(save&&wasCss&&!INLINE_OWN_TEXT.includes(st.inlineKind)){
+    // 普通正文：按段读取，改动套回原排版文字；一个字没改就不保存。
+    const edited=cssBodyLines(targets[0]);
+    if(edited===st.inlineDisplayed)save=false;
+    else result=inlineEditedRendered(st.paraText,st.inlineDisplayed,edited);
+  }else if(save) result=wasCss ? structuredCssResult(st.inlineKind,targets) : inlineBodyText(ta);
+  st.inlineDisplayed='';
   // Restore every contenteditable target, not just the first paragraph.
   (wasCss?document.activeElement:ta)?.blur?.();
   for(const target of targets){
@@ -3575,10 +3622,13 @@ function finishInlineEdit(save){
     if(st.customIsRendered){
       // 旧版本保存的文字已经是替换后的结果，保持原来的处理方式。
       if(result!==st.inlineOriginal){st.custom=result;buildText();historyPush('inline-edit');}
+    }else if(!wasCss){
+      // 打孔海报的编辑框里显示的就是原文（没替换过），改完直接存成原文，替换开关照常有效。
+      if(normalize(result)!==normalize(st.inlineOriginal)){st.custom=result;buildText();historyPush('inline-edit');}
     }else{
-      // 编辑框里显示的是替换后的文字，st.inlineOriginal 是替换前的原文。
+      // 模板正文里显示的是替换后的文字，st.inlineOriginal 是替换前的原文。
       // 把编辑换算回原文再保存，替换开关之后仍可随时开关；换算失败才退回旧做法。
-      const fold=wasCss?normalizeParagraphs:normalize;
+      const fold=normalizeParagraphs;
       const S=fold(st.inlineOriginal);
       const back=repsSourceEdit(S,result,fold);
       if(back!==null){
