@@ -3483,6 +3483,20 @@ function inlineBodyText(body){
   if(!body)return '';
   return String(body.innerText ?? body.textContent ?? '').replace(/\r/g,'').replace(/\n{3,}/g,'\n\n').replace(/\n$/,'');
 }
+// 一个元素里的文字：<br> 和编辑时按回车生成的新行（div / p）都记成换行。
+function cssInlineText(node,nested=false){
+  if(!node)return '';
+  if(node.nodeType===3)return node.data;
+  if(node.nodeName==='BR')return '\n';
+  if(node.nodeType!==1)return '';
+  let text='';node.childNodes.forEach(child=>{text+=cssInlineText(child,true);});
+  return nested&&/^(?:DIV|P)$/.test(node.nodeName)?'\n'+text.replace(/\n$/,''):text;
+}
+// 编辑时读正文：Bubble 每个气泡一行，其他模板按段落读。
+function inlineTargetsText(kind,targets){
+  if(kind==='bubble_chat')return targets.map(t=>cssInlineText(t).replace(/^\n+|\n+$/g,'')).join('\n');
+  return cssBodyLines(targets[0]);
+}
 // 把模板正文读成「一段一行」的文字：空段（只有占位空格）记成空行，段里的 <br> 记成换行。
 // 不能用 innerText：它在每两段之间多算一个空行，保存后段落越编越散，字也会对不上位置。
 function cssBodyLines(body){
@@ -3519,8 +3533,12 @@ function inlineEditedRendered(R,D,E){
   }
   return out+edit.ins[Dc.length];
 }
+function bubbleMessageNodes(body){
+  return Array.from(body?.querySelectorAll(':scope > p.pk-css-paragraph:not(.pk-css-blank)')||[]);
+}
 function editableCssTargets(id,body){
   const root=body?.getRootNode();
+  if(id==='bubble_chat')return bubbleMessageNodes(body);
   if(id==='page_margin_note'){
     return Array.from(root?.querySelectorAll('.pa-notes .pa-note .pa-body')||[]);
   }
@@ -3559,13 +3577,17 @@ function beginInlineEdit(){
       body.textContent=st.paraText;
     }
     if(templateId==='bubble_chat'){
-      // Edit the canonical bilingual source, not presentation spans with stripped brackets.
-      body.textContent=st.paraText;
-      body.style.setProperty('white-space','pre-wrap','important');
+      // Bubble 的正文容器本身不占位置（display:contents），没法直接编辑；改成每个气泡单独编辑。
+      // 双语气泡先换回「原文（译文）」的写法，改完再按原样拆开显示。
+      const parts=sourceParagraphParts(st.paraText).filter(part=>!part.blank);
+      bubbleMessageNodes(body).forEach((node,i)=>{
+        if(parts[i])node.textContent=parts[i].text;
+        node.style.setProperty('white-space','pre-wrap','important');
+      });
     }
     st.inlineBodies=editableCssTargets(templateId,body);
     // 普通正文：记下编辑前显示的样子，完成时只把真正改过的地方换算回去。
-    st.inlineDisplayed=INLINE_OWN_TEXT.includes(templateId)?'':cssBodyLines(body);
+    st.inlineDisplayed=INLINE_OWN_TEXT.includes(templateId)?'':inlineTargetsText(templateId,st.inlineBodies);
     if(!st.inlineBodies.length){
       st.inlineBody=null;st.inlineEditing=false;st.editing=false;
       ov.classList.remove('pk-inline-editing');return;
@@ -3577,12 +3599,20 @@ function beginInlineEdit(){
       target.style.setProperty('user-select','text','important');
       target.style.setProperty('-webkit-touch-callout','default','important');
       target.style.setProperty('outline','1px dashed #8d98a6','important');
-      target.style.setProperty('outline-offset','3px','important');
+      // 虚线框画在内侧，免得被模板的外框裁掉看不见
+      target.style.setProperty('outline-offset','-1px','important');
       target.style.setProperty('cursor','text','important');
       target.style.setProperty('min-height','1.4em','important');
     }
     // The first field is focused, but ALL notes / received bubbles are editable.
-    st.inlineBodies[0].focus({preventScroll:true});
+    const first=st.inlineBodies[0];
+    first.focus({preventScroll:true});
+    // 光标放到第一段末尾，iPhone 上才会马上出现光标和键盘。
+    try{
+      const root=first.getRootNode(),sel=root.getSelection?.()||document.getSelection();
+      const range=document.createRange();range.selectNodeContents(first);range.collapse(false);
+      sel.removeAllRanges();sel.addRange(range);
+    }catch(_){}
   }else{
     ta.innerText=st.inlineOriginal;
     // Draw once. No Canvas regeneration while typing (avoids iOS keyboard freezes).
@@ -3591,8 +3621,8 @@ function beginInlineEdit(){
     ta.focus({preventScroll:true});
   }
 }
-// 这几个模板编辑时有自己的读写方式（多条便签 / 气泡、整段纯文字），不走按段换算。
-const INLINE_OWN_TEXT=['page_margin_note','imessage_dark','essay_grid','bubble_chat'];
+// 这几个模板编辑时有自己的读写方式（多条便签、iMessage 气泡、作文格整段纯文字），不走按段换算。
+const INLINE_OWN_TEXT=['page_margin_note','imessage_dark','essay_grid'];
 function finishInlineEdit(save){
   if(!st.ov||!st.inlineEditing)return;
   const ov=st.ov, ta=ov.querySelector('.pk-edta');
@@ -3601,7 +3631,7 @@ function finishInlineEdit(save){
   let result=st.inlineOriginal;
   if(save&&wasCss&&!INLINE_OWN_TEXT.includes(st.inlineKind)){
     // 普通正文：按段读取，改动套回原排版文字；一个字没改就不保存。
-    const edited=cssBodyLines(targets[0]);
+    const edited=inlineTargetsText(st.inlineKind,targets);
     if(edited===st.inlineDisplayed)save=false;
     else result=inlineEditedRendered(st.paraText,st.inlineDisplayed,edited);
   }else if(save) result=wasCss ? structuredCssResult(st.inlineKind,targets) : inlineBodyText(ta);
@@ -3613,7 +3643,7 @@ function finishInlineEdit(save){
     ['-webkit-user-select','user-select','-webkit-touch-callout','outline','outline-offset','cursor','min-height'].forEach(key=>target.style.removeProperty(key));
   }
   if(st.inlineKind==='essay_grid')st.inlineBody?.classList.remove('ep-editing');
-  if(st.inlineKind==='bubble_chat')st.inlineBody?.style.removeProperty('white-space');
+  if(st.inlineKind==='bubble_chat')targets.forEach(t=>t.style.removeProperty('white-space'));
   st.inlineBody=null;st.inlineBodies=[];st.inlineKind='';
   st.inlineEditing=false;st.editing=false;
   ov.classList.remove('pk-inline-editing');
